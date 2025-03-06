@@ -1,0 +1,13 @@
+diff --git a/ext/re/Makefile.PL b/ext/re/Makefile.PL
+--- a/ext/re/Makefile.PL
++++ b/ext/re/Makefile.PL
+@@ -27,8 +27,9 @@
+     }
+ }
+ 
+ my $defines = '-DPERL_EXT_RE_BUILD -DPERL_EXT_RE_DEBUG -DPERL_EXT';
++$defines .= ' -DPERL_EXT_RE_STATIC';
+ my %args;
+ for my $arg (@ARGV) {
+     $args{$1} = $2 if $arg =~ /^(\w+)=(.*)$/;
+ }

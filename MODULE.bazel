@@ -93,6 +93,7 @@ bazel_dep(name = "rules_cc", version = "0.1.2")
 bazel_dep(name = "rules_proto", version = "7.1.0")
 bazel_dep(name = "rules_proto_grpc_doc", version = "5.1.0")
 bazel_dep(name = "rules_proto_grpc_buf", version = "5.1.0")
+bazel_dep(name = "rules_foreign_cc", version = "0.14.0")
 
 # Currently supported version are listed here:
 # https://protobuf.dev/support/version-support/
@@ -124,7 +125,10 @@ register_toolchains("@rules_rust_protobuf//:default_proto_toolchain")
 
 register_toolchains("//build/toolchain/rust-efi:prost_efi_toolchain")
 
+register_toolchains("//build/toolchain/toolchain-bundle:all")
+
 include("//build/bazel:rust.MODULE.bazel")
 include("//build/bazel:go.MODULE.bazel")
 include("//build/bazel:oci.MODULE.bazel")
 include("//build/bazel:third_party.MODULE.bazel")
+include("//build/bazel:toolchain.MODULE.bazel")

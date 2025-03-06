@@ -1,0 +1,11 @@
+load(":toolchain.bzl", "TOOLCHAINS", "toolchain_for")
+
+package(default_visibility = ["//visibility:public"])
+
+[
+    toolchain_for(
+        name = name,
+        config = config,
+    )
+    for name, config in TOOLCHAINS.items()
+]
