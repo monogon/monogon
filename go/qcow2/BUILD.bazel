@@ -10,5 +10,12 @@ go_library(
 go_test(
     name = "qcow2_test",
     srcs = ["qcow2_test.go"],
+    data = [
+        "//build/toolchain/toolchain-bundle:qemu-img",
+    ],
     embed = [":qcow2"],
+    x_defs = {
+        "xQEMUImgPath": "$(rlocationpath //build/toolchain/toolchain-bundle:qemu-img )",
+    },
+    deps = ["@io_bazel_rules_go//go/runfiles"],
 )
