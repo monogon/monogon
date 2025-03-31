@@ -13,10 +13,12 @@ import (
 	"net"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"syscall"
 
+	"github.com/bazelbuild/rules_go/go/runfiles"
 	"golang.org/x/sys/unix"
 
 	"source.monogon.dev/osbase/freeport"
@@ -136,6 +138,25 @@ func NewSocketPair() (*os.File, *os.File, error) {
 	return fd1, fd2, nil
 }
 
+var (
+	// These are filled by bazel at linking time with the canonical path of
+	// their corresponding file. Inside the init function we resolve it
+	// with the rules_go runfiles package to the real path.
+	xQEMUPath string
+)
+
+func init() {
+	var err error
+	for _, path := range []*string{
+		&xQEMUPath,
+	} {
+		*path, err = runfiles.Rlocation(*path)
+		if err != nil {
+			panic(err)
+		}
+	}
+}
+
 // MicroVMOptions contains all options to start a MicroVM
 type MicroVMOptions struct {
 	// Name is a human-readable identifier to be used in debug output.
@@ -240,7 +261,7 @@ func RunMicroVM(ctx context.Context, opts *MicroVMOptions) error {
 		"-m", "1G",
 		// Needed because QEMU does not boot without specifying the qboot bios
 		// even tho the documentation clearly states that this is the default.
-		"-bios", "/usr/share/qemu/qboot.rom",
+		"-bios", filepath.Join(filepath.Dir(xQEMUPath), "../share/qemu/qboot.rom"),
 		"-M", "microvm,x-option-roms=off,pic=off,pit=off,rtc=off,isa-serial=off",
 		"-kernel", opts.KernelPath,
 		// We force using a triple-fault reboot strategy since otherwise the kernel first
@@ -283,7 +304,7 @@ func RunMicroVM(ctx context.Context, opts *MicroVMOptions) error {
 	}
 
 	var stdErrBuf bytes.Buffer
-	cmd := exec.CommandContext(ctx, "/usr/bin/qemu-system-x86_64", append(baseArgs, extraArgs...)...)
+	cmd := exec.CommandContext(ctx, xQEMUPath, append(baseArgs, extraArgs...)...)
 	cmd.Stdout = opts.SerialPort
 	cmd.Stderr = &stdErrBuf
 

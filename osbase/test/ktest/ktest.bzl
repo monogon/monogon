@@ -46,11 +46,12 @@ def _ktest_impl(ctx):
         is_executable = True,
     )
 
+    runfiles = ctx.runfiles(files = [ctx.file._ktest, initramfs, ctx.file.kernel, ctx.file.tester])
+    runfiles = runfiles.merge(ctx.attr._ktest[DefaultInfo].default_runfiles)
+
     return [DefaultInfo(
         executable = script_file,
-        runfiles = ctx.runfiles(
-            files = [ctx.files._ktest[0], initramfs, ctx.file.kernel, ctx.file.tester],
-        ),
+        runfiles = runfiles,
     )]
 
 k_test = rule(
@@ -105,7 +106,7 @@ k_test = rule(
             default = Label("//osbase/test/ktest"),
             cfg = "target",
             executable = True,
-            allow_files = True,
+            allow_single_file = True,
         ),
         "_ktest_init": attr.label(
             default = Label("//osbase/test/ktest/init"),

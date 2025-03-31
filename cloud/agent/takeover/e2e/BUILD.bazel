@@ -9,12 +9,14 @@ go_test(
         "//third_party/edk2:OVMF_CODE.fd",
         "//third_party/edk2:OVMF_VARS.fd",
         "@debian_11_cloudimage//file",
+        "//build/toolchain/toolchain-bundle:qemu-kvm",
     ],
     x_defs = {
         "xCloudImagePath": "$(rlocationpath @debian_11_cloudimage//file )",
         "xOvmfVarsPath": "$(rlocationpath //third_party/edk2:OVMF_VARS.fd )",
         "xOvmfCodePath": "$(rlocationpath //third_party/edk2:OVMF_CODE.fd )",
         "xTakeoverPath": "$(rlocationpath //cloud/agent/takeover )",
+        "xQEMUPath": "$(rlocationpath //build/toolchain/toolchain-bundle:qemu-kvm )",
     },
     deps = [
         "//cloud/agent/api",

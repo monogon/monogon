@@ -22,12 +22,13 @@ var (
 	xSucceedKernelPath string
 	xPanicKernelPath   string
 	xErrorKernelPath   string
+	xQEMUPath          string
 )
 
 func init() {
 	var err error
 	for _, path := range []*string{
-		&xOvmfCodePath, &xOvmfVarsPath,
+		&xOvmfCodePath, &xOvmfVarsPath, &xQEMUPath,
 		&xSucceedKernelPath, &xPanicKernelPath, &xErrorKernelPath,
 	} {
 		*path, err = runfiles.Rlocation(*path)
@@ -56,7 +57,7 @@ func runQemu(ctx context.Context, args []string, expectedOutput string) (bool, e
 	}
 	qemuArgs := append(defaultArgs, args...)
 	pf := cmd.TerminateIfFound(expectedOutput, nil)
-	return cmd.RunCommand(ctx, "qemu-system-x86_64", qemuArgs, pf)
+	return cmd.RunCommand(ctx, xQEMUPath, qemuArgs, pf)
 }
 
 func TestBringupSuccess(t *testing.T) {

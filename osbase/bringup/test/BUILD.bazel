@@ -15,6 +15,7 @@ go_test(
         ":kernel_error",
         ":kernel_panic",
         ":kernel_succeeded",
+        "//build/toolchain/toolchain-bundle:qemu-kvm",
         "//third_party/edk2:OVMF_CODE.fd",
         "//third_party/edk2:OVMF_VARS.fd",
     ],
@@ -26,6 +27,7 @@ go_test(
         "xSucceedKernelPath": "$(rlocationpath :kernel_succeeded )",
         "xPanicKernelPath": "$(rlocationpath :kernel_panic )",
         "xErrorKernelPath": "$(rlocationpath :kernel_error )",
+        "xQEMUPath": "$(rlocationpath //build/toolchain/toolchain-bundle:qemu-kvm )",
     },
     deps = [
         "//osbase/cmd",

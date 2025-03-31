@@ -12,6 +12,7 @@ go_library(
         "swtpm.go",
     ],
     data = [
+        "//build/toolchain/toolchain-bundle:qemu-kvm",
         "//metropolis/cli/metroctl:metroctl_lite",
         "//metropolis/node:oci_image_uncompressed",
         "//metropolis/node/abloader",
@@ -40,6 +41,7 @@ go_library(
         "xInitramfsPath": "$(rlocationpath //metropolis/test/nanoswitch:initramfs )",
         "xNodeImagePath": "$(rlocationpath //metropolis/node:oci_image_uncompressed )",
         "xAbloaderPath": "$(rlocationpath //metropolis/node/abloader )",
+        "xQEMUPath": "$(rlocationpath //build/toolchain/toolchain-bundle:qemu-kvm )",
     },
     deps = [
         "//go/logging",

@@ -39,6 +39,7 @@ var (
 	xOvmfVarsPath  string
 	xInstallerPath string
 	xImagePath     string
+	xQEMUPath      string
 )
 
 func init() {
@@ -46,6 +47,7 @@ func init() {
 	for _, path := range []*string{
 		&xOvmfCodePath, &xOvmfVarsPath,
 		&xInstallerPath, &xImagePath,
+		&xQEMUPath,
 	} {
 		*path, err = runfiles.Rlocation(*path)
 		if err != nil {
@@ -82,7 +84,7 @@ func runQemu(ctx context.Context, args []string, expectedOutput string) (bool, e
 	}
 	qemuArgs := append(defaultArgs, args...)
 	pf := cmd.TerminateIfFound(expectedOutput, nil)
-	return cmd.RunCommand(ctx, "qemu-system-x86_64", qemuArgs, pf)
+	return cmd.RunCommand(ctx, xQEMUPath, qemuArgs, pf)
 }
 
 // runQemuWithInstaller runs the Metropolis Installer in a qemu, performing the

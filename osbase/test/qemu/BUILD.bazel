@@ -3,13 +3,20 @@ load("@io_bazel_rules_go//go:def.bzl", "go_library")
 go_library(
     name = "qemu",
     srcs = ["launch.go"],
+    data = [
+        "//build/toolchain/toolchain-bundle:qemu-kvm",
+    ],
     importpath = "source.monogon.dev/osbase/test/qemu",
     visibility = [
         "//metropolis:__subpackages__",
         "//osbase:__subpackages__",
     ],
+    x_defs = {
+        "xQEMUPath": "$(rlocationpath //build/toolchain/toolchain-bundle:qemu-kvm )",
+    },
     deps = [
         "//osbase/freeport",
+        "@io_bazel_rules_go//go/runfiles",
         "@org_golang_x_sys//unix",
     ],
 )

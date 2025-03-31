@@ -13,6 +13,7 @@ go_test(
         # For the two update tests
         "//metropolis/node/core/update/e2e/testos:testos_image_y",
         "//metropolis/node/core/update/e2e/testos:testos_image_z",
+        "//build/toolchain/toolchain-bundle:qemu-kvm",
     ],
     x_defs = {
         "xImageXPath": "$(rlocationpath //metropolis/node/core/update/e2e/testos:testos_image_x )",
@@ -21,6 +22,7 @@ go_test(
         "xOvmfVarsPath": "$(rlocationpath //third_party/edk2:OVMF_VARS.fd )",
         "xOvmfCodePath": "$(rlocationpath //third_party/edk2:OVMF_CODE.fd )",
         "xAbloaderPath": "$(rlocationpath //metropolis/node/abloader )",
+        "xQEMUPath": "$(rlocationpath //build/toolchain/toolchain-bundle:qemu-kvm )",
     },
     deps = [
         "//metropolis/installer/install",

@@ -422,7 +422,7 @@ func LaunchNode(ctx context.Context, ld, sd string, tpmFactory *TPMFactory, opti
 	}
 
 	// Start the main qemu binary
-	systemCmd := exec.CommandContext(options.Runtime.ctxT, "qemu-system-x86_64", qemuArgs...)
+	systemCmd := exec.CommandContext(options.Runtime.ctxT, xQEMUPath, qemuArgs...)
 	if options.ConnectToSocket != nil {
 		systemCmd.ExtraFiles = []*os.File{options.ConnectToSocket}
 	}

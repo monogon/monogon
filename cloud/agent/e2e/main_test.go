@@ -47,13 +47,14 @@ var (
 	xOvmfCodePath      string
 	xKernelPath        string
 	xInitramfsOrigPath string
+	xQEMUPath          string
 )
 
 func init() {
 	var err error
 	for _, path := range []*string{
 		&xImagePath, &xOvmfVarsPath, &xOvmfCodePath,
-		&xKernelPath, &xInitramfsOrigPath,
+		&xKernelPath, &xInitramfsOrigPath, &xQEMUPath,
 	} {
 		*path, err = runfiles.Rlocation(*path)
 		if err != nil {
@@ -277,11 +278,12 @@ func TestMetropolisInstallE2E(t *testing.T) {
 		"-kernel", xKernelPath,
 		"-initrd", initramfsFile.Name(),
 		"-append", "console=ttyS0 quiet")
-	qemuCmdAgent := exec.Command("qemu-system-x86_64", stage1Args...)
+	qemuCmdAgent := exec.Command(xQEMUPath, stage1Args...)
 	qemuCmdAgent.Stdout = os.Stdout
 	qemuCmdAgent.Stderr = os.Stderr
 	qemuCmdAgent.Run()
-	qemuCmdLaunch := exec.Command("qemu-system-x86_64", qemuArgs...)
+
+	qemuCmdLaunch := exec.Command(xQEMUPath, qemuArgs...)
 	stdoutPipe, err := qemuCmdLaunch.StdoutPipe()
 	if err != nil {
 		t.Fatal(err)

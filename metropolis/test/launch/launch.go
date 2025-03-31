@@ -23,6 +23,7 @@ var (
 	xInitramfsPath    string
 	xNodeImagePath    string
 	xAbloaderPath     string
+	xQEMUPath         string
 )
 
 func init() {
@@ -32,6 +33,7 @@ func init() {
 		&xSwtpmCertPath, &xCerttoolPath, &xMetroctlPath,
 		&xOvmfCodePath, &xOvmfVarsPath, &xKernelPath,
 		&xInitramfsPath, &xNodeImagePath, &xAbloaderPath,
+		&xQEMUPath,
 	} {
 		*path, err = runfiles.Rlocation(*path)
 		if err != nil {

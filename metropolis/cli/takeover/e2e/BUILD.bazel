@@ -4,6 +4,7 @@ go_test(
     name = "e2e_test",
     srcs = ["main_test.go"],
     data = [
+        "//build/toolchain/toolchain-bundle:qemu-kvm",
         "//metropolis/cli/metroctl:metroctl_lite",
         "//metropolis/cli/takeover",
         "//metropolis/installer/test/testos:testos_image",
@@ -18,6 +19,7 @@ go_test(
         "xCloudImagePath": "$(rlocationpath @debian_11_cloudimage//file )",
         "xTakeoverPath": "$(rlocationpath //metropolis/cli/takeover )",
         "xMetroctlPath": "$(rlocationpath //metropolis/cli/metroctl:metroctl_lite )",
+        "xQEMUPath": "$(rlocationpath //build/toolchain/toolchain-bundle:qemu-kvm )",
     },
     deps = [
         "//osbase/fat32",

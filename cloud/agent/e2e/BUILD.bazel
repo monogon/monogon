@@ -4,6 +4,7 @@ go_test(
     name = "e2e_test",
     srcs = ["main_test.go"],
     data = [
+        "//build/toolchain/toolchain-bundle:qemu-kvm",
         "//cloud/agent/takeover:initramfs",
         "//metropolis/installer/test/testos:testos_image",
         "//third_party/edk2:OVMF_CODE.fd",
@@ -16,6 +17,7 @@ go_test(
         "xOvmfCodePath": "$(rlocationpath //third_party/edk2:OVMF_CODE.fd )",
         "xKernelPath": "$(rlocationpath //third_party/linux )",
         "xInitramfsOrigPath": "$(rlocationpath //cloud/agent/takeover:initramfs )",
+        "xQEMUPath": "$(rlocationpath //build/toolchain/toolchain-bundle:qemu-kvm )",
     },
     deps = [
         "//cloud/agent/api",

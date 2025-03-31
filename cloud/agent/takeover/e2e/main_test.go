@@ -38,13 +38,14 @@ var (
 	xOvmfVarsPath   string
 	xOvmfCodePath   string
 	xTakeoverPath   string
+	xQEMUPath       string
 )
 
 func init() {
 	var err error
 	for _, path := range []*string{
 		&xCloudImagePath, &xOvmfVarsPath, &xOvmfCodePath,
-		&xTakeoverPath,
+		&xTakeoverPath, &xQEMUPath,
 	} {
 		*path, err = runfiles.Rlocation(*path)
 		if err != nil {
@@ -111,7 +112,7 @@ func TestE2E(t *testing.T) {
 		"-serial", "stdio",
 		"-no-reboot",
 	}
-	qemuCmd := exec.Command("qemu-system-x86_64", qemuArgs...)
+	qemuCmd := exec.Command(xQEMUPath, qemuArgs...)
 	stdoutPipe, err := qemuCmd.StdoutPipe()
 	if err != nil {
 		t.Fatal(err)

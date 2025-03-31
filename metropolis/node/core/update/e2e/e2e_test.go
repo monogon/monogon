@@ -38,6 +38,7 @@ var (
 	xOvmfVarsPath string
 	xOvmfCodePath string
 	xAbloaderPath string
+	xQEMUPath     string
 )
 
 func init() {
@@ -45,7 +46,7 @@ func init() {
 	for _, path := range []*string{
 		&xImageXPath, &xImageYPath, &xImageZPath,
 		&xOvmfVarsPath, &xOvmfCodePath,
-		&xAbloaderPath,
+		&xAbloaderPath, &xQEMUPath,
 	} {
 		*path, err = runfiles.Rlocation(*path)
 		if err != nil {
@@ -102,7 +103,7 @@ func runAndCheckVariant(t *testing.T, expectedVariant string, qemuArgs []string)
 	t.Helper()
 	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 	defer cancel()
-	qemuCmdLaunch := exec.CommandContext(ctx, "qemu-system-x86_64", qemuArgs...)
+	qemuCmdLaunch := exec.CommandContext(ctx, xQEMUPath, qemuArgs...)
 	testosStarted := make(chan string, 1)
 	stdoutHandler(t, qemuCmdLaunch, cancel, testosStarted)
 	stderrHandler(t, qemuCmdLaunch)
@@ -249,7 +250,7 @@ func TestABUpdateSequenceKexec(t *testing.T) {
 
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
-	qemuCmdLaunch := exec.CommandContext(ctx, "qemu-system-x86_64", qemuArgs...)
+	qemuCmdLaunch := exec.CommandContext(ctx, xQEMUPath, qemuArgs...)
 	testosStarted := make(chan string, 1)
 	stdoutHandler(t, qemuCmdLaunch, cancel, testosStarted)
 	stderrHandler(t, qemuCmdLaunch)
