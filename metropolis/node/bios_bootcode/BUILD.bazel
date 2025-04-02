@@ -12,6 +12,9 @@ genrule(
         ":logo.asm",
     ],
     outs = ["boot.bin"],
-    cmd = "nasm -d LOGO=$(location :logo.asm) $(location :boot.asm) -f bin -o $@",
+    cmd = "$(NASM) -d LOGO=$(location :logo.asm) $(location :boot.asm) -f bin -o $@",
+    toolchains = [
+        "//build/toolchain/toolchain-bundle:nasm",
+    ],
     visibility = ["//visibility:public"],
 )
