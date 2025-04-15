@@ -1,32 +1,20 @@
-#  Copyright 2020 The Monogon Project Authors.
-#
-#  SPDX-License-Identifier: Apache-2.0
-#
-#  Licensed under the Apache License, Version 2.0 (the "License");
-#  you may not use this file except in compliance with the License.
-#  You may obtain a copy of the License at
-#
-#      http://www.apache.org/licenses/LICENSE-2.0
-#
-#  Unless required by applicable law or agreed to in writing, software
-#  distributed under the License is distributed on an "AS IS" BASIS,
-#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-#  See the License for the specific language governing permissions and
-#  limitations under the License.
+# Copyright The Monogon Project Authors.
+# SPDX-License-Identifier: Apache-2.0
 
 """
 Rules for building Linux kernel images.
 
-This currently performs the build in a fully unhermetic manner, using
-make/gcc/... from the sandbox sysroot, and is only slightly better than a genrule. This
-should be replaced by a hermetic build that at least uses rules_cc toolchain
-information, or even better, just uses cc_library targets.
+This currently performs the build in a fully hermetic manner, using
+make/gcc/... from the toolchain bundle, and is only slightly better than a genrule. This
+should be replaced by a hermetic build that just uses cc_library targets.
 """
 
-load("@rules_cc//cc:action_names.bzl", "C_COMPILE_ACTION_NAME")
 load("@rules_cc//cc:find_cc_toolchain.bzl", "CC_TOOLCHAIN_ATTRS", "find_cpp_toolchain", "use_cc_toolchain")
 load("@rules_cc//cc/common:cc_common.bzl", "cc_common")
-load("//build/utils:detect_root.bzl", "detect_root")
+load("@rules_cc//cc/common:cc_info.bzl", "CcInfo")
+load("//build/utils:detect_root.bzl", "detect_root", "detect_roots")
+load("//build/utils:foreign_build.bzl", "generate_foreign_build_env", "merge_env")
+load("//build/utils:target_info.bzl", "TargetInfo")
 load("//osbase/build:def.bzl", "ignore_unused_configuration")
 
 def _linux_image_impl_resources(_os, _ninputs):
@@ -48,50 +36,19 @@ def _linux_image_impl_resources(_os, _ninputs):
         "local_test": 0,
     }
 
-DISABLED_FEATURES = []
-
-# NOTE: Multicall tool is called as path/to/llvm clang to workaround bug in out-of-process execution where tool name is repeated and parsing breaks.
+TOOLCHAINS = [
+    "//build/toolchain/toolchain-bundle:make_toolchain",
+    "//build/toolchain/toolchain-bundle:flex_toolchain",
+    "//build/toolchain/toolchain-bundle:bison_toolchain",
+    "//build/toolchain/toolchain-bundle:m4_toolchain",
+    "//build/toolchain/toolchain-bundle:busybox_toolchain",
+    "//build/toolchain/toolchain-bundle:bc_toolchain",
+    "//build/toolchain/toolchain-bundle:diff_toolchain",
+    "//build/toolchain/toolchain-bundle:perl_toolchain",
+    "//build/toolchain/toolchain-bundle:lz4_toolchain",
+]
 
 def _linux_image_impl(ctx):
-    kernel_config = ctx.file.kernel_config
-    kernel_src = ctx.files.kernel_src
-    image_format = ctx.attr.image_format
-
-    # Root of the given Linux sources.
-    root = detect_root(ctx.attr.kernel_src.files.to_list())
-
-    # Figure out target CC toolchain
-    cc_toolchain = find_cpp_toolchain(ctx)
-    feature_configuration = cc_common.configure_features(
-        ctx = ctx,
-        cc_toolchain = cc_toolchain,
-        requested_features = ctx.features,
-        unsupported_features = DISABLED_FEATURES + ctx.disabled_features,
-    )
-    c_compiler_path = cc_common.get_tool_for_action(
-        feature_configuration = feature_configuration,
-        action_name = C_COMPILE_ACTION_NAME,
-    )
-
-    # Figure out Kbuild ARCH option
-    target_arch = None
-    compressed_image_name = None
-
-    if ctx.target_platform_has_constraint(ctx.attr._constraint_x86_64[platform_common.ConstraintValueInfo]):
-        target_arch = "x86"
-        compressed_image_name = "bzImage"
-
-    if ctx.target_platform_has_constraint(ctx.attr._constraint_aarch64[platform_common.ConstraintValueInfo]):
-        target_arch = "arm64"
-        compressed_image_name = "Image"
-
-    if ctx.target_platform_has_constraint(ctx.attr._constraint_riscv64[platform_common.ConstraintValueInfo]):
-        target_arch = "riscv"
-        compressed_image_name = "Image"
-
-    if not target_arch:
-        fail("Target platform does not match expected constraints: @platforms//cpu:x86_64, @platforms//cpu:aarch64, or @platforms//cpu:riscv64.")
-
     # Tuple containing information about how to build and access the resulting
     # image.
     # The first element (target) is the make target to build, the second
@@ -100,51 +57,106 @@ def _linux_image_impl(ctx):
     # rule.
     (target, image_source, image_name) = {
         "vmlinux": ("vmlinux modules", "vmlinux", "vmlinux"),
-        "Image": ("all modules", "arch/" + target_arch + "/boot/" + compressed_image_name, "Image"),
-    }[image_format]
+        "Image": ("all modules", "arch/" + ctx.attr._target_arch[TargetInfo].value + "/boot/" + ctx.attr._image_name[TargetInfo].value, "Image"),
+    }[ctx.attr.image_format]
+
+    ssl_src, ssl_gen = detect_roots(ctx.attr._ssl[CcInfo].compilation_context.direct_public_headers)
+    crypto_src, crypto_gen = detect_roots(ctx.attr._crypto[CcInfo].compilation_context.direct_public_headers)
+    extra_env = {
+        "HOSTLDFLAGS": " -L ".join(
+            [
+                "",  # First element empty, for force a the join prefix
+                detect_root(ctx.attr._zstd.files.to_list()).rsplit("/", 1)[0],
+                detect_root(ctx.attr._zlib.files.to_list()).rsplit("/", 1)[0],
+                detect_root(ctx.attr._libelf.files.to_list()).rsplit("/", 1)[0],
+                detect_root(ctx.attr._ssl.files.to_list()).rsplit("/", 1)[0],
+                detect_root(ctx.attr._crypto.files.to_list()).rsplit("/", 1)[0],
+            ],
+        ),
+        "HOSTCFLAGS": " -I ".join(
+            [
+                "",  # First element empty, for force a the join prefix
+                detect_root(ctx.attr._libelf[CcInfo].compilation_context.direct_public_headers),
+                ssl_src + "/../",
+                ssl_gen + "/../include/",
+                crypto_src + "/../",
+                crypto_gen + "/../include/",
+            ],
+        ),
+    }
+
+    inputs = depset(
+        ctx.files.kernel_config +
+        ctx.files.kernel_src +
+        ctx.files._libelf +
+        ctx.attr._libelf[CcInfo].compilation_context.direct_public_headers +
+        ctx.files._zlib +
+        ctx.files._ssl +
+        ctx.attr._ssl[CcInfo].compilation_context.direct_public_headers +
+        ctx.files._crypto +
+        ctx.attr._crypto[CcInfo].compilation_context.direct_public_headers,
+    )
+
+    # Setup the environment for the foreign build.
+    toolchain_env, toolchain_inputs, toolchain_cmd = generate_foreign_build_env(
+        ctx = ctx,
+        target_toolchain = find_cpp_toolchain(ctx),
+        exec_toolchain = ctx.attr._exec_toolchain[cc_common.CcToolchainInfo],
+        toolchain_bundle_tools = TOOLCHAINS,
+    )
 
     image = ctx.actions.declare_file(image_name)
     modinfo = ctx.actions.declare_file("modules.builtin.modinfo")
     modules = ctx.actions.declare_directory("modules")
     ctx.actions.run_shell(
         outputs = [image, modinfo, modules],
-        inputs = depset([kernel_config] + kernel_src, transitive = [cc_toolchain.all_files]),
+        inputs = depset(transitive = [inputs, toolchain_inputs]),
         resource_set = _linux_image_impl_resources,
-        command = '''
-            kconfig=$1
-            target=$2
-            image_source=$3
-            image=$4
-            root=$5
-            modinfo=$6
-            modules=$7
-            arch=$8
-            cc=$PWD/$9
-
+        env = merge_env(toolchain_env, extra_env),
+        progress_message = "Building Linux Kernel: {}".format(ctx.label.name),
+        mnemonic = "BuildLinux",
+        command = toolchain_cmd + """
+            export BISON_PKGDATADIR=$(realpath $(dirname $BISON))/../share/bison
             builddir=$(mktemp -d)
 
-            mkdir ${root}/.bin
-            cp ${kconfig} ${builddir}/.config
-            (cd ${root} && make -j 16 KBUILD_OUTPUT="${builddir}" ARCH="${arch}" CC="${cc//clang/llvm} clang" LD="${cc//clang/ld.lld}" OBJCOPY="${cc//clang/llvm-objcopy}" OBJDUMP="${cc//clang/llvm-objdump}" AR="${cc//clang/llvm-ar}" NM="${cc//clang/llvm-nm}" STRIP="${cc//clang/llvm-strip}" READELF="${cc//clang/llvm-readelf}" olddefconfig ${target} >/dev/null)
-            cp "${builddir}"/${image_source} ${image}
-            cp "${builddir}"/modules.builtin.modinfo ${modinfo}
+            mkdir {kernel_src}/.bin
+            cp {kconfig} $builddir/.config
+            (
+                cd {kernel_src} &&
+                make -j 16 \
+                \
+                CC="$CC" CXX="$CXX" LD="$LD" AR="$AR" NM="$NM" STRIP="$STRIP" \
+                OBJCOPY="$OBJCOPY" OBJDUMP="$OBJDUMP" READELF="$READELF" \
+                CFLAGS="$CFLAGS" LDFLAGS="$LDFLAGS" \
+                \
+                HOSTCC="$HOSTCC" HOSTCXX="$HOSTCXX" HOSTLD="$HOSTLD" \
+                HOSTAR="$HOSTAR" HOSTNM="$HOSTNM" HOSTSTRIP="$HOSTSTRIP" \
+                HOSTOBJCOPY="$HOSTOBJCOPY" HOSTOBJDUMP="$HOSTOBJDUMP" \
+                HOSTREADELF="$HOSTREADELF" HOSTCFLAGS="$HOSTCFLAGS" \
+                HOSTLDFLAGS="$HOSTLDFLAGS" \
+                \
+                KBUILD_OUTPUT="$builddir" \
+                ARCH="{target_arch}" \
+                olddefconfig {target}
+            ) > /dev/null
+
+            cp "$builddir"/{image_source} {image}
+            cp "$builddir"/modules.builtin.modinfo {modinfo}
             # Not using modules_install as it tries to run depmod and friends
-            for f in $(find "${builddir}" -name '*.ko' -type f -printf "%P\n" ); do
-                install -D "${builddir}/$f" "${modules}/$f"
+            for f in $(find "$builddir" -name '*.ko' -type f -printf "%P\n" ); do
+                install -D "$builddir/$f" "{modules}/$f"
             done
             rm -Rf "$builddir"
-        ''',
-        arguments = [
-            kernel_config.path,
-            target,
-            image_source,
-            image.path,
-            root,
-            modinfo.path,
-            modules.path,
-            target_arch,
-            c_compiler_path,
-        ],
+            """.format(
+            kconfig = ctx.file.kernel_config.path,
+            target = target,
+            image_source = image_source,
+            kernel_src = detect_root(ctx.attr.kernel_src.files.to_list()),
+            image = image.path,
+            modinfo = modinfo.path,
+            modules = modules.path,
+            target_arch = ctx.attr._target_arch[TargetInfo].value,
+        ),
         use_default_shell_env = True,
     )
 
@@ -161,7 +173,7 @@ def _linux_image_impl(ctx):
 
 linux_image = rule(
     doc = """
-        Build Linux kernel image unhermetically in a given format.
+        Build Linux kernel image hermetically in a given format.
     """,
     implementation = _linux_image_impl,
     cfg = ignore_unused_configuration,
@@ -176,7 +188,6 @@ linux_image = rule(
             doc = """
                 Filegroup containing Linux kernel sources.
             """,
-            default = "@linux//:all",
         ),
         "image_format": attr.string(
             doc = """
@@ -188,20 +199,40 @@ linux_image = rule(
             ],
             default = "Image",
         ),
+        "_libelf": attr.label(
+            default = "//third_party:libelf_elf",
+            cfg = "exec",
+        ),
+        "_zstd": attr.label(
+            default = "//third_party:zstd_zstd",
+            cfg = "exec",
+        ),
+        "_zlib": attr.label(
+            default = "//third_party:zlib_z",
+            cfg = "exec",
+        ),
+        "_ssl": attr.label(
+            default = "//third_party:openssl_ssl",
+            cfg = "exec",
+        ),
+        "_crypto": attr.label(
+            default = "//third_party:openssl_crypto",
+            cfg = "exec",
+        ),
         "_allowlist_function_transition": attr.label(
             default = "@bazel_tools//tools/allowlists/function_transition_allowlist",
         ),
-        # Bazel doesn't let you access the target platform directly, use these
-        "_constraint_x86_64": attr.label(
-            default = "@platforms//cpu:x86_64",
+        "_exec_toolchain": attr.label(
+            default = "@rules_cc//cc:current_cc_toolchain",
+            cfg = "exec",
         ),
-        "_constraint_aarch64": attr.label(
-            default = "@platforms//cpu:aarch64",
+        "_image_name": attr.label(
+            default = "//third_party/linux:image_name",
         ),
-        "_constraint_riscv64": attr.label(
-            default = "@platforms//cpu:riscv64",
+        "_target_arch": attr.label(
+            default = "//third_party/linux:target_arch",
         ),
     } | CC_TOOLCHAIN_ATTRS,
-    toolchains = use_cc_toolchain(),
     fragments = ["cpp"],
+    toolchains = TOOLCHAINS + use_cc_toolchain(),
 )

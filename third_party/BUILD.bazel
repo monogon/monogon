@@ -20,6 +20,21 @@ cpio_ucode(
 )
 
 cc_static_library_with_headers(
+    name = "libelf_elf",
+    dep = "@libelf//:elf",
+)
+
+cc_static_library_with_headers(
+    name = "zstd_zstd",
+    dep = "@zstd",
+)
+
+cc_static_library_with_headers(
+    name = "zlib_z",
+    dep = "@zlib//:z",
+)
+
+cc_static_library_with_headers(
     name = "openssl_ssl",
     dep = "@openssl//:ssl",
 )

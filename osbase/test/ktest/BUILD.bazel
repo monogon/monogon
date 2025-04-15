@@ -41,6 +41,7 @@ linux_image(
     name = "linux-testing",
     image_format = "vmlinux",
     kernel_config = ":testing-config",
+    kernel_src = "@linux//:all",
     # This image is directly used by the ktest macro, thus it needs a pretty
     # wide visibility.
     visibility = [
