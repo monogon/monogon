@@ -11,6 +11,8 @@ github_repository(
     patches = [
         "//third_party/edk2/patches:disable-werror.patch",
         "//third_party/edk2/patches:remove-brotli-build.patch",
+        "//third_party/edk2/patches:fix-uuid-flag.patch",
+        "//third_party/edk2/patches:fix-build.patch",
     ],
     ref = "fbe0805b2091393406952e84724188f8c1941837",  # stable202502
     repo = "edk2",

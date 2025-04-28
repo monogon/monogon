@@ -1,0 +1,62 @@
+EDK2 doens't respect HOSTCFLAGS and HOSTLDFLAGS which we need to pass the sysroot
+and target flags to the compiler and linker.
+ 
+diff --git a/BaseTools/Source/C/VfrCompile/Pccts/dlg/makefile b/BaseTools/Source/C/VfrCompile/Pccts/dlg/makefile
+--- a/BaseTools/Source/C/VfrCompile/Pccts/dlg/makefile
++++ b/BaseTools/Source/C/VfrCompile/Pccts/dlg/makefile
+@@ -131,16 +131,17 @@
+ COPT=-O
+ ANTLR=${BIN_DIR}/antlr
+ DLG=${BIN_DIR}/dlg
+ CFLAGS= $(COPT) -I. -I$(SET) -I$(PCCTS_H) -DUSER_ZZSYN -DZZLEXBUFSIZE=65536 -std=gnu11
++CFLAGS += $(HOSTCFLAGS)
+ CPPFLAGS=
+ OBJ_EXT=o
+ OUT_OBJ = -o
+ OBJ = dlg_p.o dlg_a.o main.o err.o set.o support.o output.o \
+         relabel.o automata.o
+ 
+ $(BIN_DIR)/dlg : $(OBJ) $(SRC)
+-		$(CC) $(CFLAGS) -o $(BIN_DIR)/dlg $(OBJ)
++		$(CC) $(HOSTLDFLAGS) -o $(BIN_DIR)/dlg $(OBJ)
+ 
+ SRC = dlg_p.c dlg_a.c main.c err.c $(SET)/set.c support.c output.c \
+         relabel.c automata.c
+ 
+diff --git a/BaseTools/Source/C/VfrCompile/Pccts/antlr/makefile b/BaseTools/Source/C/VfrCompile/Pccts/antlr/makefile
+--- a/BaseTools/Source/C/VfrCompile/Pccts/antlr/makefile
++++ b/BaseTools/Source/C/VfrCompile/Pccts/antlr/makefile
+@@ -176,8 +176,9 @@
+ DLG=${BIN_DIR}/dlg
+ OBJ_EXT=o
+ OUT_OBJ = -o
+ CFLAGS= $(COPT) -I. -I$(SET) -I$(PCCTS_H) -DUSER_ZZSYN $(COTHER) -DZZLEXBUFSIZE=65536 -std=gnu11
++CFLAGS += $(HOSTCFLAGS)
+ CPPFLAGS=
+ #
+ # SGI Users, use this CFLAGS
+ #
+@@ -185,9 +186,9 @@
+ OBJ=antlr.o scan.o err.o bits.o build.o fset2.o fset.o gen.o  \
+         globals.o hash.o lex.o main.o misc.o set.o pred.o egman.o mrhoist.o fcache.o
+ 
+ $(BIN_DIR)/antlr : $(OBJ) $(SRC)
+-		$(CC) $(CFLAGS) -o $(BIN_DIR)/antlr $(OBJ)
++		$(CC) $(HOSTLDFLAGS) -o $(BIN_DIR)/antlr $(OBJ)
+ 
+ # what files does PCCTS generate (both ANTLR and DLG)
+ PCCTS_GEN=antlr.c scan.c err.c tokens.h mode.h parser.dlg stdpccts.h remap.h
+ 
+diff --git a/BaseTools/Source/C/GNUmakefile b/BaseTools/Source/C/GNUmakefile
+--- a/BaseTools/Source/C/GNUmakefile
++++ b/BaseTools/Source/C/GNUmakefile
+@@ -50,9 +50,8 @@
+ 
+ LIBRARIES = Common
+ VFRAUTOGEN = VfrCompile/VfrLexer.h
+ APPLICATIONS = \
+-  BrotliCompress \
+   VfrCompile \
+   EfiRom \
+   GenFfs \
+   GenFv \

@@ -6,15 +6,15 @@ go_test(
     data = [
         # We use the layer instead of the binary to not add a transition target
         "//cloud/agent/takeover",
-        "//third_party/edk2:OVMF_CODE.fd",
-        "//third_party/edk2:OVMF_VARS.fd",
+        "//third_party/edk2:CODE.fd",
+        "//third_party/edk2:VARS.fd",
         "@debian_11_cloudimage//file",
         "//build/toolchain/toolchain-bundle:qemu-kvm",
     ],
     x_defs = {
         "xCloudImagePath": "$(rlocationpath @debian_11_cloudimage//file )",
-        "xOvmfVarsPath": "$(rlocationpath //third_party/edk2:OVMF_VARS.fd )",
-        "xOvmfCodePath": "$(rlocationpath //third_party/edk2:OVMF_CODE.fd )",
+        "xOvmfVarsPath": "$(rlocationpath //third_party/edk2:VARS.fd )",
+        "xOvmfCodePath": "$(rlocationpath //third_party/edk2:CODE.fd )",
         "xTakeoverPath": "$(rlocationpath //cloud/agent/takeover )",
         "xQEMUPath": "$(rlocationpath //build/toolchain/toolchain-bundle:qemu-kvm )",
     },

@@ -5,8 +5,8 @@ go_test(
     srcs = ["e2e_test.go"],
     data = [
         # For emulation
-        "//third_party/edk2:OVMF_CODE.fd",
-        "//third_party/edk2:OVMF_VARS.fd",
+        "//third_party/edk2:CODE.fd",
+        "//third_party/edk2:VARS.fd",
         # For the initial image creation
         "//metropolis/node/core/update/e2e/testos:testos_image_x",
         "//metropolis/node/abloader",
@@ -19,8 +19,8 @@ go_test(
         "xImageXPath": "$(rlocationpath //metropolis/node/core/update/e2e/testos:testos_image_x )",
         "xImageYPath": "$(rlocationpath //metropolis/node/core/update/e2e/testos:testos_image_y )",
         "xImageZPath": "$(rlocationpath //metropolis/node/core/update/e2e/testos:testos_image_z )",
-        "xOvmfVarsPath": "$(rlocationpath //third_party/edk2:OVMF_VARS.fd )",
-        "xOvmfCodePath": "$(rlocationpath //third_party/edk2:OVMF_CODE.fd )",
+        "xOvmfVarsPath": "$(rlocationpath //third_party/edk2:VARS.fd )",
+        "xOvmfCodePath": "$(rlocationpath //third_party/edk2:CODE.fd )",
         "xAbloaderPath": "$(rlocationpath //metropolis/node/abloader )",
         "xQEMUPath": "$(rlocationpath //build/toolchain/toolchain-bundle:qemu-kvm )",
     },

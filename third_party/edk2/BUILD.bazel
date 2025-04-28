@@ -1,17 +1,50 @@
-alias(
+load("@bazel_skylib//rules:select_file.bzl", "select_file")
+load("//build/utils:target_info.bzl", "target_info")
+load("//third_party/edk2:def.bzl", "edk2")
+
+edk2(
     name = "firmware",
-    actual = "@edk2//:firmware",
+    src = "@edk2//:all",
     visibility = ["//visibility:public"],
 )
 
-alias(
-    name = "OVMF_CODE.fd",
-    actual = "@edk2//:OVMF_CODE.fd",
+select_file(
+    name = "CODE.fd",
+    srcs = ":firmware",
+    subpath = "CODE.fd",
     visibility = ["//visibility:public"],
 )
 
-alias(
-    name = "OVMF_VARS.fd",
-    actual = "@edk2//:OVMF_VARS.fd",
+select_file(
+    name = "VARS.fd",
+    srcs = ":firmware",
+    subpath = "VARS.fd",
     visibility = ["//visibility:public"],
+)
+
+target_info(
+    name = "target_arch",
+    value = select({
+        "@platforms//cpu:x86_64": "X64",
+        "@platforms//cpu:aarch64": "AARCH64",
+        "@platforms//cpu:riscv64": "RISCV64",
+    }),
+    visibility = ["//visibility:private"],
+)
+
+target_info(
+    name = "compilation_mode",
+    value = select({
+        ":is_compilation_mode_dbg": "DEBUG",
+        "//conditions:default": "RELEASE",
+    }),
+    visibility = ["//visibility:private"],
+)
+
+config_setting(
+    name = "is_compilation_mode_dbg",
+    values = {
+        "compilation_mode": "dbg",
+    },
+    visibility = ["//visibility:private"],
 )

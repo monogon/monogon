@@ -322,7 +322,7 @@ func LaunchNode(ctx context.Context, ld, sd string, tpmFactory *TPMFactory, opti
 	}
 
 	tpmSocketPath := filepath.Join(r.sd, "tpm-socket")
-	fwVarPath := filepath.Join(r.ld, "OVMF_VARS.fd")
+	fwVarPath := filepath.Join(r.ld, "VARS.fd")
 	storagePath := filepath.Join(r.ld, "image.img")
 	qemuArgs := []string{
 		"-machine", "q35",
