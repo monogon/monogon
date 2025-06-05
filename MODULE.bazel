@@ -55,6 +55,16 @@ single_version_override(
     version = RULES_RUST_VERSION,
 )
 
+bazel_dep(name = "openssl")
+single_version_override(
+    module_name = "openssl",
+    patch_strip = 1,
+    patches = [
+        "//third_party/openssl/patches:force-gnuas.patch",
+    ],
+    version = "3.3.1.bcr.1",
+)
+
 bazel_dep(name = "rules_rust_protobuf", version = RULES_RUST_VERSION)
 bazel_dep(name = "rules_rust_mdbook", version = RULES_RUST_VERSION)
 bazel_dep(name = "libuuid")

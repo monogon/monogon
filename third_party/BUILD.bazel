@@ -1,12 +1,14 @@
+load("//build/cc_static_library_with_headers:def.bzl", "cc_static_library_with_headers")
 load("//osbase/build/fwprune:def.bzl", "fsspec_linux_firmware")
 load("//osbase/build/mkucode:def.bzl", "cpio_ucode")
+
+package(default_visibility = ["//visibility:public"])
 
 fsspec_linux_firmware(
     name = "firmware",
     firmware_files = ["@linux-firmware//:all_files"],
     kernel = "//third_party/linux",
     metadata = "@linux-firmware//:metadata",
-    visibility = ["//visibility:public"],
 )
 
 cpio_ucode(
@@ -15,5 +17,14 @@ cpio_ucode(
         "@linux-firmware//:amd_ucode": "AuthenticAMD",
         "@intel_ucode//:fam6h": "GenuineIntel",
     },
-    visibility = ["//visibility:public"],
+)
+
+cc_static_library_with_headers(
+    name = "openssl_ssl",
+    dep = "@openssl//:ssl",
+)
+
+cc_static_library_with_headers(
+    name = "openssl_crypto",
+    dep = "@openssl//:crypto",
 )
