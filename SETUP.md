@@ -1,7 +1,9 @@
 # How to set up a build environment
 
 We strongly recommend a Linux workstation - it offers the
-best developer experience by a fair margin. Fedora or Ubuntu are good choices.
+best developer experience. NixOS, Fedora or Ubuntu are good choices.
+
+On Windows, use WSL2. Building on ARM64 - including on Apple Silicon Macs (M1, M2, etc.) - will be supported soon.
 
 The more CPU cores, the merrier - our build is fully parallelized, but the monorepo builds
 a LOT of stuff, including all of EDK2, QEMU, the Linux kernel, Kubernetes... Bazel is smart about
@@ -28,19 +30,19 @@ so we only require minimal host dependencies:
 
 The following distributions are known to work:
 
-- Fedora >= 36
-- Ubuntu >= 20.04
+- NixOS (see below)
+- Fedora
+- Ubuntu
 - Debian >= 11
 - RHEL / Alma / Rocky >= 8.4
-- NixOS >= 23.05 (see below)
 
 You can use this snippet to install the official Bazelisk release binary to `/usr/local/bin`:
 
 ```bash
 TMPFILE=$(mktemp) && \
   curl -L -o $TMPFILE \
-    https://github.com/bazelbuild/bazelisk/releases/download/v1.15.0/bazelisk-linux-amd64 && \
-  sha256sum -c - <<< "19fd84262d5ef0cb958bcf01ad79b528566d8fef07ca56906c5c516630a0220b  $TMPFILE" && \
+    https://github.com/bazelbuild/bazelisk/releases/download/v1.26.0/bazelisk-linux-amd64 && \
+  sha256sum -c - <<< "6539c12842ad76966f3d493e8f80d67caa84ec4a000e220d5459833c967c12bc  $TMPFILE" && \
   sudo install -m 0755 $TMPFILE /usr/local/bin/bazel && \
   rm $TMPFILE
 ```
@@ -49,7 +51,7 @@ Alternatively, if you have a Go >= 1.16 toolchain, you can compile it yourself:
 
 ```bash
 # This uses Go's transparency log for pinning to ensure the release hasn't been tampered with.
-go install github.com/bazelbuild/bazelisk@v1.15.0 
+go install github.com/bazelbuild/bazelisk@v1.26.0 
 sudo mv ~/go/bin/bazelisk /usr/local/bin/bazel
 ```
 
@@ -79,7 +81,19 @@ be built and tested without root privileges or other dangerous capabilities.
 We fully support building on NixOS, and we provide a `shell.nix` file to make it easy. Just run `nix-shell` in the
 project root! This will drop you into a shell with all dependencies installed, and you can run `bazel ...` as usual.
 
-You can also execute tools/bazel directly on a system with Nix installed, as our bazel wrapper automatically switches into the environment created by our `shell.nix`.
+You can also execute tools/bazel directly on a system with Nix installed. The wrapper automatically uses the nix-shell.
+
+## VSCode / gopls
+
+The monorepo is compatible with gopls via GOPACKAGESDRIVER, which uses a Bazel backend to resolve generated code.
+
+The [included VSCode workspace config](.vscode/settings.json) should work out of the box.
+
+The following extensions are recommended:
+- [Go](https://marketplace.visualstudio.com/items?itemName=golang.go)
+- [proto3](https://marketplace.visualstudio.com/items?itemName=zxh404.vscode-proto3)
+- [Bazel](https://marketplace.visualstudio.com/items?itemName=BazelBuild.vscode-bazel)
+
 
 ## IntelliJ
 
