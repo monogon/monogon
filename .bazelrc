@@ -36,6 +36,9 @@ build:remote --noremote_upload_local_results
 # Set the execution platform which adds constraints for the scheduler.
 build:remote --extra_execution_platforms=//build/platforms:remote_x86_64
 
+# We have some large uploads and actions, the default 60s is not enough.
+build:remote --remote_timeout=360s
+
 # Enable pure by default. Specific go_binary targets which need cgo should set
 # `pure = "off"`.
 build --@io_bazel_rules_go//go/config:pure
