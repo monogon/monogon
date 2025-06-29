@@ -94,8 +94,9 @@ func newAuthenticatedNodeHTTPTransport(ctx context.Context, id string) (*http.Tr
 			return nil, fmt.Errorf("failed to create proxy dialer: %w", err)
 		}
 		transport.DialContext = func(ctx context.Context, network, addr string) (net.Conn, error) {
-			// TODO(q3k): handle context
-			return dialer.Dial(network, addr)
+			// proxy.SOCKS5 returns a Dialer that implements the DialContext
+			// function, just doesn't exposes it.
+			return dialer.(proxy.ContextDialer).DialContext(ctx, network, addr)
 		}
 	}
 	return transport, nil
