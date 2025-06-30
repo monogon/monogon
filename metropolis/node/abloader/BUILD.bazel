@@ -21,7 +21,6 @@ rust_binary(
         "//metropolis/node/abloader/spec:abloader_proto_rs",
         "@crate_index_efi//:prost",
         "@crate_index_efi//:uefi",
-        "@crate_index_efi//:uefi-services",
     ],
 )
 

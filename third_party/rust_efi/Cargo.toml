@@ -7,8 +7,7 @@ version = "0.0.0"
 path = "fake_lib.rs"
 
 [dependencies]
-uefi =  { version = "0.24.0", features = ["alloc"] }
-uefi-services = "0.21.0"
-prost = { version = "0.12", default-features = false, features = ["prost-derive"] }
-prost-types = { version = "0.12", default-features = false }
-
+uefi =  { version = "0.35.0", features = ["alloc", "global_allocator", "panic_handler"], default-features = false  }
+prost = { version = "0.14.1", default-features = false }
+prost-derive = { version = "0.14.1", default-features = false }
+prost-types = { version = "0.14.1", default-features = false }

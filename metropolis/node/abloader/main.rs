@@ -9,16 +9,17 @@
 extern crate alloc;
 
 use alloc::vec::Vec;
-use core::result::Result;
 use core::fmt;
+use core::result::Result;
 use prost::Message;
+use uefi::boot::{self, ScopedProtocol};
 use uefi::fs::FileSystem;
 use uefi::proto::device_path::build::media::FilePath;
 use uefi::proto::device_path::build::DevicePathBuilder;
 use uefi::proto::device_path::{DeviceSubType, DeviceType, LoadedImageDevicePath};
-use uefi::table::boot;
+use uefi::proto::media::fs::SimpleFileSystem;
 use uefi::{prelude::*, CStr16};
-use uefi_services::println;
+use uefi::println;
 
 use abloader_proto::metropolis::node::abloader::spec::*;
 
@@ -57,8 +58,8 @@ enum ReadLoaderStateError {
 impl fmt::Display for ReadLoaderStateError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
-           ReadLoaderStateError::FSReadError(e) => write!(f, "while reading state file: {}", e),
-           ReadLoaderStateError::DecodeError(e) => write!(f, "while decoding state file contents: {}", e),
+            ReadLoaderStateError::FSReadError(e) => write!(f, "while reading state file: {}", e),
+            ReadLoaderStateError::DecodeError(e) => write!(f, "while decoding state file contents: {}", e),
         }
     }
 }
@@ -68,15 +69,15 @@ fn read_loader_state(fs: &mut FileSystem) -> Result<AbLoaderData, ReadLoaderStat
     AbLoaderData::decode(state_raw.as_slice()).map_err(|e| ReadLoaderStateError::DecodeError(e))
 }
 
-fn load_slot_image(slot: &ValidSlot, boot_services: &BootServices) -> uefi::Result<Handle> {
+fn load_slot_image(slot: &ValidSlot) -> uefi::Result<Handle> {
     let mut storage = Vec::new();
 
     // Build the path to the slot payload. This takes the path to the loader
     // itself, strips off the file path and following element(s) and appends
     // the path to the correct slot payload.
     let new_image_path = {
-        let loaded_image_device_path = boot_services
-            .open_protocol_exclusive::<LoadedImageDevicePath>(boot_services.image_handle())?;
+        let loaded_image_device_path =
+            boot::open_protocol_exclusive::<LoadedImageDevicePath>(boot::image_handle())?;
 
         let mut builder = DevicePathBuilder::with_vec(&mut storage);
 
@@ -97,26 +98,22 @@ fn load_slot_image(slot: &ValidSlot, boot_services: &BootServices) -> uefi::Resu
         builder.finalize().unwrap()
     };
 
-    boot_services
-        .load_image(
-            boot_services.image_handle(),
-            boot::LoadImageSource::FromDevicePath {
-                device_path: new_image_path,
-                from_boot_manager: false,
-            },
-        )
+    boot::load_image(
+        boot::image_handle(),
+        boot::LoadImageSource::FromDevicePath {
+            device_path: new_image_path,
+            boot_policy: uefi::proto::BootPolicy::ExactMatch,
+        },
+    )
 }
 
 #[entry]
-fn main(_handle: Handle, mut system_table: SystemTable<Boot>) -> Status {
-    uefi_services::init(&mut system_table).unwrap();
-
-    let boot_services = system_table.boot_services();
-
+fn main() -> Status {
     let boot_slot_raw = {
-        let mut esp_fs = boot_services
-            .get_image_file_system(boot_services.image_handle())
-            .expect("image filesystem not available");
+        let esp_fs: ScopedProtocol<SimpleFileSystem> =
+            boot::get_image_file_system(boot::image_handle())
+                .expect("image filesystem not available");
+        let mut esp_fs = FileSystem::new(esp_fs);
 
         let mut loader_data = match read_loader_state(&mut esp_fs) {
             Ok(d) => d,
@@ -154,11 +151,11 @@ fn main(_handle: Handle, mut system_table: SystemTable<Boot>) -> Status {
         }
     };
 
-    let payload_image = match load_slot_image(&boot_slot, boot_services) {
+    let payload_image = match load_slot_image(&boot_slot) {
         Ok(img) => img,
         Err(e) => {
             println!("Error loading intended slot, falling back to other slot: {}", e);
-            match load_slot_image(&boot_slot.other(), boot_services) {
+            match load_slot_image(&boot_slot.other()) {
                 Ok(img) => img,
                 Err(e) => {
                     panic!("Loading from both slots failed, second slot error: {}", e);
@@ -168,8 +165,6 @@ fn main(_handle: Handle, mut system_table: SystemTable<Boot>) -> Status {
     };
 
     // Boot the payload.
-    boot_services
-        .start_image(payload_image)
-        .expect("failed to start payload");
+    boot::start_image(payload_image).expect("failed to start payload");
     Status::SUCCESS
 }
