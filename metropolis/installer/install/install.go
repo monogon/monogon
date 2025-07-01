@@ -6,6 +6,7 @@
 package install
 
 import (
+	_ "embed"
 	"fmt"
 	"io"
 
@@ -53,6 +54,9 @@ func EFIBootPath(architecture string) (string, error) {
 	return "EFI/BOOT/" + bootName, nil
 }
 
+//go:embed metropolis/node/bios_bootcode/boot.bin
+var BootcodeX86 []byte
+
 // PartitionSizeInfo contains parameters used during partition table
 // initialization and, in case of image files, space allocation.
 type PartitionSizeInfo struct {
@@ -93,9 +97,6 @@ type Params struct {
 	// PartitionSize specifies a size for the ESP, Metropolis System and
 	// Metropolis data partition.
 	PartitionSize PartitionSizeInfo
-	// BIOSBootCode provides the optional contents for the protective MBR
-	// block which gets executed by legacy BIOS boot.
-	BIOSBootCode []byte
 }
 
 type plan struct {
@@ -179,7 +180,10 @@ func Plan(p *Params) (*plan, error) {
 	}
 
 	params.tbl.ID = params.DiskGUID
-	params.tbl.BootCode = p.BIOSBootCode
+	architecture := p.OSImage.Config.ProductInfo.Architecture()
+	if architecture == "x86_64" {
+		params.tbl.BootCode = BootcodeX86
+	}
 	params.efiPartition = &gpt.Partition{
 		Type: gpt.PartitionTypeEFISystem,
 		Name: ESPLabel,
@@ -193,7 +197,7 @@ func Plan(p *Params) (*plan, error) {
 		return nil, err
 	}
 	// Place the A/B loader at the EFI bootloader autodiscovery path.
-	params.efiBootPath, err = EFIBootPath(p.OSImage.Config.ProductInfo.Architecture())
+	params.efiBootPath, err = EFIBootPath(architecture)
 	if err != nil {
 		return nil, err
 	}

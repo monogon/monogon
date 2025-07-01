@@ -47,7 +47,8 @@ func MakeInstallerImage(args MakeInstallerImageArgs) error {
 	if err != nil {
 		return fmt.Errorf("failed to read OS image: %w", err)
 	}
-	bootPath, err := install.EFIBootPath(osImage.Config.ProductInfo.Architecture())
+	architecture := osImage.Config.ProductInfo.Architecture()
+	bootPath, err := install.EFIBootPath(architecture)
 	if err != nil {
 		return err
 	}
@@ -87,6 +88,9 @@ func MakeInstallerImage(args MakeInstallerImageArgs) error {
 	partTable, err := gpt.New(targetDev)
 	if err != nil {
 		return fmt.Errorf("target device has invalid geometry: %w", err)
+	}
+	if architecture == "x86_64" {
+		partTable.BootCode = install.BootcodeX86
 	}
 	esp := gpt.Partition{
 		Type: gpt.PartitionTypeEFISystem,
