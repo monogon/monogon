@@ -45,20 +45,12 @@ in
   name = "monogon-nix";
   targetPkgs = targetPkgs: with targetPkgs; [
     bazel-unwrapped # Our custom bazel package based on upstream
-    git
-    buildifier
-    zlib
-    curl
-    gcc
-    binutils
-    openjdk21
-    patch
-    python3
-    busybox
-    niv
-    google-cloud-sdk
-    swtpm
-    nix
+    zlib # Bazel dependency
+    python3 # Workspace status script
+    git # Bazel expects git to be available
+    gnupg # our gopass integration requires gpg in the PATH
+    niv # For updating third_party/nix
+    google-cloud-sdk # Pushing containers to GCR
   ];
   runScript = wrapper;
 }).env

@@ -134,7 +134,7 @@ build:nostamp --workspace_status_command="./build/print-workspace-status.py --no
 # Assume a 10k IOPS device (average NVMe) and 64GiB of RAM for test scheduling.
 test --local_resources=iops=10000 --local_resources=ram=64000
 
-common --experimental_downloader_config=build/bazel/bazel_downloader.cfg
+common --downloader_config=build/bazel/bazel_downloader.cfg
 
 # Load custom per-user settings.
 try-import %workspace%/.bazelrc.user

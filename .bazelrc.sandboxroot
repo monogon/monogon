@@ -10,7 +10,7 @@ common --enable_workspace
 # No host CC platform - we only want pure Go for the sandboxroot
 build --host_platform=@io_bazel_rules_go//go/toolchain:linux_amd64
 
-common --experimental_downloader_config=build/bazel/bazel_downloader.cfg
+common --downloader_config=build/bazel/bazel_downloader.cfg
 
 # Shared with main .bazelrc
 try-import %workspace%/.bazelrc.user

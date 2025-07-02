@@ -2,8 +2,8 @@
 stdenv.mkDerivation {
   name = "bazel";
   src = builtins.fetchurl {
-    url = "https://github.com/bazelbuild/bazel/releases/download/8.1.0/bazel-8.1.0-linux-x86_64";
-    sha256 = "19dwgh631d6c1m4ds1b1b3pbz18zm5i0x8bggjgsc04fyljfbfml";
+    url = "https://github.com/bazelbuild/bazel/releases/download/8.3.1/bazel-8.3.1-linux-x86_64";
+    sha256 = "0k3067d06b8160day48afskr42c41bz0qgb3pk9mjpr4hj57w90p";
   };
   unpackPhase = ''
     true
