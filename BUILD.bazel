@@ -1,4 +1,3 @@
-load("@bazeldnf//:def.bzl", "bazeldnf")
 load("@buildifier_prebuilt//:rules.bzl", "buildifier", "buildifier_test")
 load("@gazelle//:def.bzl", "gazelle", "gazelle_test")
 load("@rules_multirun//:defs.bzl", "command", "multirun")
@@ -55,9 +54,6 @@ alias(
     actual = "@io_bazel_rules_go//go",
     visibility = ["//visibility:public"],
 )
-
-# bazeldnf binary
-bazeldnf(name = "bazeldnf")
 
 # Shortcuts for top-level binaries/tools
 

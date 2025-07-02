@@ -64,7 +64,6 @@ use_repo(
     "com_github_prometheus_client_golang",
     "com_github_prometheus_node_exporter",
     "com_github_rivo_uniseg",
-    "com_github_rmohr_bazeldnf",
     "com_github_sbezverk_nfproxy",
     "com_github_schollz_progressbar_v3",
     "com_github_spf13_cobra",

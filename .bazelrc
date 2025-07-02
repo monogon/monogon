@@ -4,9 +4,6 @@ import %workspace%/third_party/bazelrc/aspect/convenience.bazelrc
 import %workspace%/third_party/bazelrc/aspect/correctness.bazelrc
 import %workspace%/third_party/bazelrc/aspect/performance.bazelrc
 
-# We still require WORKSPACE support as bazeldnf isn't bzlmod compatible yet.
-common --enable_workspace
-
 # rules_proto_grpc isn't fully compatible with Bazel 8 yet.
 common --noincompatible_disallow_ctx_resolve_tools
 
@@ -46,13 +43,6 @@ build --@io_bazel_rules_go//go/config:pure
 # Force netgo and osusergo
 build --@io_bazel_rules_go//go/config:tags=osusergo,netgo
 
-# Run all spawns in our own hermetic sandbox sysroot.
-build --experimental_use_hermetic_linux_sandbox
-build --sandbox_fake_hostname
-build --sandbox_fake_username
-build --action_env=MONOGON_SANDBOX_DIGEST
-import %workspace%/.bazelrc.sandbox
-
 # Include platform in output directory name. For each platform we use, a short
 # name should be assigned here, otherwise Bazel uses a hash.
 build --experimental_platform_in_output_dir
@@ -80,18 +70,6 @@ build --experimental_exclude_starlark_flags_from_exec_config
 # once the fix for https://github.com/bazelbuild/bazel/issues/25208 is released.
 build --experimental_propagate_custom_flag=@@rules_go+//go/private:request_nogo
 build --experimental_propagate_custom_flag=@@rules_go+//go/private:bootstrap_nogo
-
-# Hardwire all action envs to just use /usr/bin from the above sandbox. This is
-# necessary on NixOS Bazel builds, as they really like to inject /nix/store/*
-# paths otherwise. We also explicitly set it to /usr/bin only (no /bin) as
-# otherwise calling gcc from /bin/gcc breaks its own resolution of subordinate
-# commands (like cc1, as, etc.).
-build --action_env=PATH=/usr/bin
-build --host_action_env=PATH=/usr/bin
-
-# Make all shell run actions use /bin/bash instead of whatever the host might
-# have set. Again, looking at you, Bazel-on-NixOS.
-build --shell_executable=/bin/bash
 
 # No local CPP toolchain resolution. In our sandbox root, it doesn't make sense -
 # anything auto-detected during analysis stage is on the host instead of the sandbox.

@@ -39,13 +39,6 @@ replace (
 // Override version for Bazel support
 replace github.com/mwitkow/go-proto-validators => github.com/mwitkow/go-proto-validators v0.3.2
 
-// bazeldnf currently comes with a go-rpmutils patch
-replace github.com/sassoftware/go-rpmutils v0.1.1 => github.com/rmohr/go-rpmutils v0.1.2-0.20201215123907-5acf7436c00d
-
-// Pin buildtools version to an up to date version, as the bazeldnf version
-// is outdated and gazelle needs it.
-replace github.com/bazelbuild/buildtools => github.com/bazelbuild/buildtools v0.0.0-20231103205921-433ea8554e82
-
 // https://github.com/mattn/go-sqlite3/issues/1164
 replace github.com/mattn/go-sqlite3 => github.com/mattn/go-sqlite3 v1.14.24
 
@@ -98,7 +91,6 @@ require (
 	github.com/prometheus/client_golang v1.21.0
 	github.com/prometheus/node_exporter v1.9.0
 	github.com/rivo/uniseg v0.4.7
-	github.com/rmohr/bazeldnf v0.5.4
 	github.com/sbezverk/nfproxy v0.0.0-20210112155058-0d98b4a69f0c
 	github.com/schollz/progressbar/v3 v3.14.6
 	github.com/spf13/cobra v1.9.1
@@ -168,7 +160,6 @@ require (
 	github.com/antlr4-go/antlr/v4 v4.13.0 // indirect
 	github.com/armon/circbuf v0.0.0-20190214190532-5111143e8da2 // indirect
 	github.com/asaskevich/govalidator v0.0.0-20190424111038-f61b66f89f4a // indirect
-	github.com/bazelbuild/buildtools v0.0.0-20201023142455-8a8e1e724705 // indirect
 	github.com/beevik/ntp v1.4.3 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/blang/semver/v4 v4.0.0 // indirect
@@ -207,7 +198,6 @@ require (
 	github.com/cosiner/argv v0.1.0 // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.6 // indirect
 	github.com/creack/pty v1.1.20 // indirect
-	github.com/crillab/gophersat v1.3.1 // indirect
 	github.com/cubicdaiya/gonp v1.0.4 // indirect
 	github.com/cyphar/filepath-securejoin v0.3.4 // indirect
 	github.com/cznic/mathutil v0.0.0-20181122101859-297441e03548 // indirect
@@ -356,7 +346,6 @@ require (
 	github.com/rogpeppe/go-internal v1.13.1 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/safchain/ethtool v0.5.10 // indirect
-	github.com/sassoftware/go-rpmutils v0.1.1 // indirect
 	github.com/sbezverk/nftableslib v0.0.0-20221012061059-e05e022cec75 // indirect
 	github.com/seccomp/libseccomp-golang v0.10.0 // indirect
 	github.com/sirupsen/logrus v1.9.3 // indirect
@@ -374,7 +363,6 @@ require (
 	github.com/vishvananda/netns v0.0.4 // indirect
 	github.com/x448/float16 v0.8.4 // indirect
 	github.com/xhit/go-str2duration/v2 v2.1.0 // indirect
-	github.com/xi2/xz v0.0.0-20171230120015-48954b6210f8 // indirect
 	github.com/xiang90/probing v0.0.0-20221125231312-a49e3df8f510 // indirect
 	github.com/xlab/treeprint v1.2.0 // indirect
 	github.com/xrash/smetrics v0.0.0-20240521201337-686a1a2994c1 // indirect

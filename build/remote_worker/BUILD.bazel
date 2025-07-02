@@ -1,34 +1,13 @@
 load("@aspect_bazel_lib//lib:expand_template.bzl", "expand_template")
 load("@bazel_skylib//rules:write_file.bzl", "write_file")
 load("@rules_oci//oci:defs.bzl", "oci_image", "oci_push")
-load("@rules_pkg//pkg:mappings.bzl", "pkg_mklink")
-load("@rules_pkg//pkg:tar.bzl", "pkg_tar")
-
-# Because bazeldnf writes multiple files when using their symlink feature,
-# we have to do them manually with a second layer.
-# https://github.com/rmohr/bazeldnf/issues/88
-pkg_mklink(
-    name = "ld-link",
-    link_name = "usr/bin/ld",
-    target = "/usr/bin/ld.bfd",
-)
-
-pkg_tar(
-    name = "links",
-    srcs = [
-        ":ld-link",
-    ],
-)
 
 oci_image(
     name = "remote_worker_image",
     base = "@distroless_base",
     entrypoint = [],
     tags = ["no-remote"],
-    tars = [
-        "//third_party/sandboxroot:sandbox",
-        ":links",
-    ],
+    tars = [],
     visibility = ["//visibility:private"],
     workdir = "/root",
 )
