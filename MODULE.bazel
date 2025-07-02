@@ -112,7 +112,7 @@ bazel_dep(name = "protobuf", version = "31.1")
 bazel_dep(name = "toolchain_cc_mngn")
 git_override(
     module_name = "toolchain_cc_mngn",
-    commit = "6e241ef6ebcbdc630d332fa789a1b53b52c27771",
+    commit = "80acaa3e95473ad76c34c6f409b82f3802de9bd2",
     remote = "https://review.monogon.dev/toolchain_cc",
 )
 
