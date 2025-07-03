@@ -42,6 +42,7 @@ single_version_override(
     patches = [
         "//third_party/rules_rust:rust-prost-nostd.patch",
         "//third_party/rules_rust:rust-reproducibility.patch",
+        "//third_party/rules_rust:musl.patch",
     ],
     version = RULES_RUST_VERSION,
 )

@@ -1431,7 +1431,7 @@
     },
     "@@rules_rust+//crate_universe:extension.bzl%crate": {
       "general": {
-        "bzlTransitiveDigest": "8V+EjcJ6yZ+quaNMoFSCDIH+XDhCkjgCsiium78SdCY=",
+        "bzlTransitiveDigest": "PuAP2g4Ru+pBugsbmCEnQMOa3RC4MAiUwq3IARY4syY=",
         "usagesDigest": "Mw24CZ9hpdGUPbu/RcrRZS5Y/Az10OU968XzrSx9rUI=",
         "recordedFileInputs": {
           "@@//third_party/rust/Cargo.lock": "fa9d7f659ffbfb7f5554de4a7e653d3bd900f0a75b22ef4c0853b98c6ede5548",
@@ -2694,7 +2694,7 @@
     },
     "@@rules_rust+//crate_universe/private:internal_extensions.bzl%cu_nr": {
       "general": {
-        "bzlTransitiveDigest": "/lCPEYwxLjcUUzuJlryJJyzteuW5rxwGQ86cPPkUL9M=",
+        "bzlTransitiveDigest": "c2lNdp995IIrl9Z4g/h/k41gXEU73T2zNYqAIatm4/o=",
         "usagesDigest": "Pr9/2PR9/ujuo94SXikpx+fg31V4bDKobC10YJu+z5I=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},

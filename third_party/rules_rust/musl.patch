@@ -1,0 +1,177 @@
+commit e48fd8490d497fdfa6d5a7f8a3af63cc8c6db538
+Author: Jan Schär <jan@monogon.tech>
+Date:   Thu Jul 3 16:03:25 2025 +0000
+
+    Use musl toolchain and add loader_wrapper
+    
+    This patches rules_rust to use the Rust toolchain built for musl instead
+    of glibc, and adds a wrapper to locate the dynamic loader. What we
+    achieve with this is that we no longer need a specific loader installed
+    at an absolute path, which makes the build less dependent on the host
+    OS.
+    
+    The tools are linked dynamically and need libc.so and libgcc_s.so.1. At
+    least rustc cannot be linked statically, because proc macros are loaded
+    with dlopen. When building proc macros, we need to add library paths
+    containing the two .so files such that lld can find them.
+    
+    Usually, musl would be installed at /lib/ld-musl-x86_64.so.1, but we
+    can't do that. Instead, the binaries are renamed to {name}_real and a
+    wrapper script is placed there instead. The wrapper runs musl as a
+    dynamic loader, passing it the path to the real binary.
+
+diff --git a/rust/platform/triple.bzl b/rust/platform/triple.bzl
+index 87cd6242..766bc08e 100644
+--- a/rust/platform/triple.bzl
++++ b/rust/platform/triple.bzl
+@@ -138,7 +138,7 @@ def get_host_triple(repository_ctx, abi = {}):
+         prefix = "{}-unknown-linux".format(arch)
+         return triple("{}-{}".format(
+             prefix,
+-            abi.get(prefix, "gnu"),
++            abi.get(prefix, "musl"),
+         ))
+ 
+     if "mac" in repository_ctx.os.name:
+diff --git a/rust/private/loader_wrapper.sh b/rust/private/loader_wrapper.sh
+new file mode 100755
+index 00000000..29805d8d
+--- /dev/null
++++ b/rust/private/loader_wrapper.sh
+@@ -0,0 +1,18 @@
++#!/bin/sh
++
++# Running rustc and other tools directly doesn't work, because that would
++# require musl to be installed at /lib/ld-musl-x86_64.so.1, but we can't install
++# things at absolute paths. Instead, this script calls musl as a dynamic loader,
++# giving it the path to the real binary which has been renamed to {name}_real.
++
++set -eu
++
++selfDir="$(dirname "$0")"
++rootPath="$(dirname "$selfDir")"
++
++exec "${rootPath}/sysroot/usr/lib/libc.so" \
++    "--library-path=${rootPath}/sysroot/usr/lib" \
++    "--argv0" "$0" \
++    "--" \
++    "${0}_real" \
++    "$@"
+diff --git a/rust/private/repository_utils.bzl b/rust/private/repository_utils.bzl
+index 27c08e78..0761c34c 100644
+--- a/rust/private/repository_utils.bzl
++++ b/rust/private/repository_utils.bzl
+@@ -41,12 +41,16 @@ filegroup(
+     name = "rustc_lib",
+     srcs = glob(
+         [
++            "bin/*_real",
+             "bin/*{dylib_ext}",
+             "lib/*{dylib_ext}*",
+             "lib/rustlib/{target_triple}/codegen-backends/*{dylib_ext}",
+             "lib/rustlib/{target_triple}/bin/rust-lld{binary_ext}",
+             "lib/rustlib/{target_triple}/lib/*{dylib_ext}*",
+             "lib/rustlib/{target_triple}/lib/*.rmeta",
++            "sysroot/usr/lib/libc.so",
++            "sysroot/usr/lib/libgcc_s.so*",
++            "sysroot/usr/lib/libunwind.so*",
+         ],
+         allow_empty = True,
+     ),
+diff --git a/rust/private/rustc.bzl b/rust/private/rustc.bzl
+index d78c2890..fbc00591 100644
+--- a/rust/private/rustc.bzl
++++ b/rust/private/rustc.bzl
+@@ -1012,6 +1012,12 @@ def construct_arguments(
+     if linker_script:
+         rustc_flags.add(linker_script, format = "--codegen=link-arg=-T%s")
+ 
++    if is_exec_configuration(ctx):
++        # This is needed when building proc macros, for lld to find libgcc_s.so
++        # and libc.so. This must be before the Rust standard library paths so
++        # lld uses libc.so instead of the libc.a shipped by Rust.
++        rustc_flags.add("-L", "native={}/sysroot/usr/lib".format(tool_path.rsplit("/", 2)[0]))
++
+     # Tell Rustc where to find the standard library (or libcore)
+     rustc_flags.add_all(toolchain.rust_std_paths, before_each = "-L", format_each = "%s")
+     rustc_flags.add_all(rust_flags, map_each = map_flag)
+diff --git a/rust/repositories.bzl b/rust/repositories.bzl
+index a5df3842..323a26ae 100644
+--- a/rust/repositories.bzl
++++ b/rust/repositories.bzl
+@@ -42,13 +42,13 @@ load_arbitrary_tool = _load_arbitrary_tool
+ DEFAULT_TOOLCHAIN_TRIPLES = {
+     "aarch64-apple-darwin": "rust_macos_aarch64",
+     "aarch64-pc-windows-msvc": "rust_windows_aarch64",
+-    "aarch64-unknown-linux-gnu": "rust_linux_aarch64",
++    "aarch64-unknown-linux-musl": "rust_linux_aarch64",
+     "powerpc64le-unknown-linux-gnu": "rust_linux_powerpc64le",
+     "s390x-unknown-linux-gnu": "rust_linux_s390x",
+     "x86_64-apple-darwin": "rust_macos_x86_64",
+     "x86_64-pc-windows-msvc": "rust_windows_x86_64",
+     "x86_64-unknown-freebsd": "rust_freebsd_x86_64",
+-    "x86_64-unknown-linux-gnu": "rust_linux_x86_64",
++    "x86_64-unknown-linux-musl": "rust_linux_x86_64",
+ }
+ 
+ _COMPACT_WINDOWS_NAMES = True
+@@ -349,6 +349,33 @@ def rust_repositories(**kwargs):
+ 
+     rust_register_toolchains(**kwargs)
+ 
++def load_sysroot(ctx, target_triple):
++    # Download the sysroot. We only need libc.so and libunwind.so from this;
++    # they are runtime dependencies of rustc, cargo, etc.
++    ARTIFACTS_VERSION = "20250603"
++    if target_triple.arch == "x86_64":
++        ctx.download_and_extract(
++            ["https://monogon-llvm-toolchain.storage.googleapis.com/%s/sysroot-x86_64-unknown-linux-musl.tar.zst" % ARTIFACTS_VERSION],
++            sha256 = "ba0fce4438de6d4dbc1678d2e672f377d30327d24e10b0de09f090032d34c1ba",
++            output = "sysroot",
++        )
++    elif target_triple.arch == "aarch64":
++        ctx.download_and_extract(
++            ["https://monogon-llvm-toolchain.storage.googleapis.com/%s/sysroot-aarch64-unknown-linux-musl.tar.zst" % ARTIFACTS_VERSION],
++            sha256 = "0cee4d5c1d24a9e9e2d1d12fd5e05ea1afcf69ea0b5d43979290988143ce1a0f",
++            output = "sysroot",
++        )
++    else:
++        fail("missing sysroot for architecture {}".format(target_triple.arch))
++    # Rust uses either libgcc_s.so or libunwind.so for unwinding. Both have the
++    # same interface for unwinding, so we can make libgcc_s.so a symlink to
++    # libunwind.so and it will work. This could potentially break in unknown
++    # ways, but it didn't break so far. Unwinding was tested by inserting a
++    # panic in a proc macro, which worked as expected. This avoids us needing to
++    # either build libgcc_s.so or build Rust configured to use libunwind.so.
++    ctx.symlink("sysroot/usr/lib/libunwind.so.1.0", "sysroot/usr/lib/libgcc_s.so.1")
++    ctx.symlink("sysroot/usr/lib/libunwind.so.1.0", "sysroot/usr/lib/libgcc_s.so")
++
+ _RUST_TOOLCHAIN_REPOSITORY_ATTRS = {
+     "allocator_library": attr.string(
+         doc = "Target that provides allocator functions when rust_library targets are embedded in a cc_binary.",
+@@ -539,6 +566,13 @@ def _rust_toolchain_tools_repository_impl(ctx):
+         repro[key] = getattr(ctx.attr, key)
+     repro["sha256s"] = sha256s
+ 
++    load_sysroot(ctx = ctx, target_triple = exec_triple)
++    loader_wrapper = ctx.read(Label("//rust/private:loader_wrapper.sh"))
++    ctx.rename("bin/cargo", "bin/cargo_real")
++    ctx.file("bin/cargo", loader_wrapper)
++    ctx.rename("bin/rustc", "bin/rustc_real")
++    ctx.file("bin/rustc", loader_wrapper)
++
+     return repro
+ 
+ rust_toolchain_tools_repository = repository_rule(
+@@ -928,6 +962,11 @@ def _rustfmt_toolchain_tools_repository_impl(repository_ctx):
+         repro[key] = getattr(repository_ctx.attr, key)
+     repro["sha256s"] = sha256s
+ 
++    load_sysroot(ctx = repository_ctx, target_triple = exec_triple)
++    loader_wrapper = repository_ctx.read(Label("//rust/private:loader_wrapper.sh"))
++    repository_ctx.rename("bin/rustfmt", "bin/rustfmt_real")
++    repository_ctx.file("bin/rustfmt", loader_wrapper)
++
+     return repro
+ 
+ rustfmt_toolchain_tools_repository = repository_rule(
