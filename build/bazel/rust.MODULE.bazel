@@ -1,7 +1,18 @@
+RUSTC_EFI_FLAGS = [
+    # Disable generation of PDB file to make build reproducible. Otherwise,
+    # the PDB file contains a non-deterministic path like
+    # /tmp/rustc0VgeF3/symbols.o, and the binary contains a hash of the PDB
+    # file. See https://github.com/rust-lang/rust/issues/112587
+    "-Clink-arg=/DEBUG:none",
+]
+
 rust = use_extension("@rules_rust//rust:extensions.bzl", "rust")
 rust.toolchain(
     edition = "2021",
-    extra_rustc_flags = ["-Clinker=rust-lld"],
+    extra_rustc_flags_triples = {
+        "x86_64-unknown-uefi": RUSTC_EFI_FLAGS,
+        "aarch64-unknown-uefi": RUSTC_EFI_FLAGS,
+    },
     extra_target_triples = [
         "x86_64-unknown-uefi",
         "aarch64-unknown-uefi",
