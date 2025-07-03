@@ -1,9 +1,13 @@
 // Copyright The Monogon Project Authors.
 // SPDX-License-Identifier: Apache-2.0
 
-package bootparam
+package bootparam_test
 
-import "testing"
+import (
+	"testing"
+
+	"source.monogon.dev/osbase/bootparam"
+)
 
 func TestConsoles(t *testing.T) {
 	cases := []struct {
@@ -22,7 +26,7 @@ func TestConsoles(t *testing.T) {
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			p, _, err := Unmarshal(c.cmdline)
+			p, _, err := bootparam.Unmarshal(c.cmdline)
 			if err != nil {
 				t.Fatalf("Failed to parse cmdline %q: %v", c.cmdline, err)
 			}

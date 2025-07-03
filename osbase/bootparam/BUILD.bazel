@@ -16,10 +16,10 @@ go_test(
         "bootparam_test.go",
         "params_test.go",
     ],
-    embed = [":bootparam"],
     gc_goopts = ["-d=libfuzzer"],
     pure = "off",
     deps = [
+        ":bootparam",
         "//osbase/bootparam/ref",
         "@com_github_google_go_cmp//cmp",
     ],
