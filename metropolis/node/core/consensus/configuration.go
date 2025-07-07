@@ -110,6 +110,8 @@ func (c *Config) build(enablePeers bool) *embed.Config {
 	cfg.InitialClusterToken = "METROPOLIS"
 	cfg.Logger = "zap"
 	cfg.LogOutputs = []string{c.Ephemeral.ServerLogsFIFO.FullPath()}
+	cfg.EnableGRPCGateway = false
+	cfg.GRPCOnly = true
 	cfg.ListenMetricsUrls = []url.URL{
 		{Scheme: "http", Host: net.JoinHostPort("127.0.0.1", fmt.Sprintf("%d", etcdPort))},
 	}

@@ -11,7 +11,7 @@ import (
 	"time"
 
 	clientv3 "go.etcd.io/etcd/client/v3"
-	"go.etcd.io/etcd/tests/v3/integration"
+	"go.etcd.io/etcd/tests/v3/framework/integration"
 	"go.uber.org/zap"
 	"google.golang.org/grpc/grpclog"
 
@@ -25,7 +25,7 @@ import (
 
 var (
 	// cluster is a 3-member in-memory etcd cluster for testing.
-	cluster *integration.ClusterV3
+	cluster *integration.Cluster
 	// endpoints is a list of the three etcd members that make up the cluster above.
 	endpoints []string
 )
@@ -196,7 +196,7 @@ func TestLeaderElectionStatus(t *testing.T) {
 	}
 	integration.BeforeTestExternal(t)
 	grpclog.SetLoggerV2(logtree.GRPCify(lt.MustLeveledFor("grpc")))
-	cluster = integration.NewClusterV3(t, &cfg)
+	cluster = integration.NewCluster(t, &cfg)
 	t.Cleanup(func() {
 		ctxC()
 		cluster.Terminate(t)

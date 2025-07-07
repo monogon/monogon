@@ -277,7 +277,7 @@ func (s *Service) Run(ctx context.Context) error {
 
 		isMember := false
 		for _, member := range members.Members {
-			if member.ID != uint64(server.Server.ID()) {
+			if member.ID != uint64(server.Server.MemberID()) {
 				continue
 			}
 			if !member.IsLearner {
@@ -297,7 +297,7 @@ func (s *Service) Run(ctx context.Context) error {
 
 	st := &Status{
 		localPeerURL:  cfg.AdvertisePeerUrls[0].String(),
-		localMemberID: uint64(server.Server.ID()),
+		localMemberID: uint64(server.Server.MemberID()),
 		cl:            cl,
 		ca:            s.ca,
 	}

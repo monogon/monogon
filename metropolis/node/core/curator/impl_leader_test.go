@@ -21,7 +21,7 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 	clientv3 "go.etcd.io/etcd/client/v3"
-	"go.etcd.io/etcd/tests/v3/integration"
+	"go.etcd.io/etcd/tests/v3/framework/integration"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/test/bufconn"
@@ -75,7 +75,7 @@ func fakeLeader(t *testing.T, opts ...*fakeLeaderOption) fakeLeaderData {
 
 	// Start a single-node etcd cluster.
 	integration.BeforeTestExternal(t)
-	cluster := integration.NewClusterV3(t, &integration.ClusterConfig{
+	cluster := integration.NewCluster(t, &integration.ClusterConfig{
 		Size: 1,
 		LoggerBuilder: func(memberName string) *zap.Logger {
 			dn := logtree.DN("etcd." + memberName)
@@ -332,7 +332,7 @@ type etcdClusterWrap struct {
 	nameMap map[string]string
 }
 
-func (c etcdClusterWrap) MemberList(ctx context.Context) (*clientv3.MemberListResponse, error) {
+func (c etcdClusterWrap) MemberList(ctx context.Context, _ ...clientv3.OpOption) (*clientv3.MemberListResponse, error) {
 	list, err := c.Cluster.MemberList(ctx)
 	if list == nil {
 		return list, err

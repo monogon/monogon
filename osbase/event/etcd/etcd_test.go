@@ -18,7 +18,7 @@ import (
 	"go.etcd.io/etcd/api/v3/v3rpc/rpctypes"
 	"go.etcd.io/etcd/client/pkg/v3/testutil"
 	clientv3 "go.etcd.io/etcd/client/v3"
-	"go.etcd.io/etcd/tests/v3/integration"
+	"go.etcd.io/etcd/tests/v3/framework/integration"
 	"go.uber.org/zap"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/grpclog"
@@ -28,7 +28,7 @@ import (
 )
 
 var (
-	cluster   *integration.ClusterV3
+	cluster   *integration.Cluster
 	endpoints []string
 )
 
@@ -50,7 +50,7 @@ func TestMain(m *testing.M) {
 	flag.Parse()
 	integration.BeforeTestExternal(tb)
 	grpclog.SetLoggerV2(logtree.GRPCify(lt.MustLeveledFor("grpc")))
-	cluster = integration.NewClusterV3(tb, &cfg)
+	cluster = integration.NewCluster(tb, &cfg)
 	endpoints = make([]string, 3)
 	for i := range endpoints {
 		endpoints[i] = cluster.Client(i).Endpoints()[0]

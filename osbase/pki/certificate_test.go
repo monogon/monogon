@@ -12,7 +12,7 @@ import (
 	"testing"
 
 	"go.etcd.io/etcd/client/pkg/v3/testutil"
-	"go.etcd.io/etcd/tests/v3/integration"
+	"go.etcd.io/etcd/tests/v3/framework/integration"
 	"go.uber.org/zap"
 
 	"source.monogon.dev/osbase/logtree"
@@ -25,7 +25,7 @@ func TestManaged(t *testing.T) {
 	logtree.PipeAllToTest(t, lt)
 	tb, cancel := testutil.NewTestingTBProthesis("pki-managed")
 	defer cancel()
-	cluster := integration.NewClusterV3(tb, &integration.ClusterConfig{
+	cluster := integration.NewCluster(tb, &integration.ClusterConfig{
 		Size: 1,
 		LoggerBuilder: func(memberName string) *zap.Logger {
 			dn := logtree.DN("etcd." + memberName)
@@ -119,7 +119,7 @@ func TestExternal(t *testing.T) {
 	logtree.PipeAllToTest(t, lt)
 	tb, cancel := testutil.NewTestingTBProthesis("pki-managed")
 	defer cancel()
-	cluster := integration.NewClusterV3(tb, &integration.ClusterConfig{
+	cluster := integration.NewCluster(tb, &integration.ClusterConfig{
 		Size: 1,
 		LoggerBuilder: func(memberName string) *zap.Logger {
 			dn := logtree.DN("etcd." + memberName)

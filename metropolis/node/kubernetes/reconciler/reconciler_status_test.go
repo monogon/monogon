@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"go.etcd.io/etcd/tests/v3/integration"
+	"go.etcd.io/etcd/tests/v3/framework/integration"
 	"google.golang.org/protobuf/proto"
 	"k8s.io/client-go/kubernetes/fake"
 
@@ -47,7 +47,7 @@ func startEtcd(t *testing.T) client.Namespaced {
 	t.Helper()
 	// Start a single-node etcd cluster.
 	integration.BeforeTestExternal(t)
-	cluster := integration.NewClusterV3(t, &integration.ClusterConfig{Size: 1})
+	cluster := integration.NewCluster(t, &integration.ClusterConfig{Size: 1})
 	t.Cleanup(func() {
 		cluster.Terminate(t)
 	})

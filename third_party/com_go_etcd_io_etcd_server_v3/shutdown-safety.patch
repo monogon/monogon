@@ -1,0 +1,74 @@
+From 160f8951401655e8e90d98a1708b56f46df2a927 Mon Sep 17 00:00:00 2001
+From: Lorenz Brun <lorenz@monogon.tech>
+Date: Mon, 7 Jul 2025 19:49:31 +0200
+Subject: [PATCH] Ensure minimal shutdown safety
+
+There is a significant architectural issue in embedded (and possibly
+also in main etcd, but that's different code) where if the server stops
+for internal reasons (like being removed from a cluster or some internal
+error happening) resources set up outside of it (listeners, other
+serving code) do not get cleaned up before the server stops. Thus a
+non-operational server whose backend has been fully shut down can still
+receive requests.
+
+The embed code has no concept of these internal stops and has no methods
+of dealing with them. A full fix would probably require taking over
+embed into Monogon (also for better lifecycle/async handling), this is
+just a minimal fix closing the gRPC listener before tearing everything
+down.
+
+This also adds a GRPCOnly option as HTTP listeners cannot be cleanly
+torn down and we don' need them.
+---
+ embed/config.go |  3 +++
+ embed/etcd.go   | 13 ++++++++++++-
+ 2 files changed, 15 insertions(+), 1 deletion(-)
+
+diff --git a/embed/config.go b/embed/config.go
+index c60db3800..651ea2709 100644
+--- a/embed/config.go
++++ b/embed/config.go
+@@ -602,6 +602,9 @@ type Config struct {
+ 	ServerFeatureGate featuregate.FeatureGate
+ 	// FlagsExplicitlySet stores if a flag is explicitly set from the cmd line or config file.
+ 	FlagsExplicitlySet map[string]bool
++
++	// MNGN: Do not support HTTP API
++	GRPCOnly bool
+ }
+ 
+ // configYAML holds the config suitable for yaml parsing
+diff --git a/embed/etcd.go b/embed/etcd.go
+index 95c0d6d92..c2abb7666 100644
+--- a/embed/etcd.go
++++ b/embed/etcd.go
+@@ -793,7 +793,7 @@ func (e *Etcd) serveClients() {
+ 	}
+ 	gopts = append(gopts, e.cfg.GRPCAdditionalServerOptions...)
+ 
+-	splitHTTP := false
++	splitHTTP := e.cfg.GRPCOnly
+ 	for _, sctx := range e.sctxs {
+ 		if sctx.httpOnly {
+ 			splitHTTP = true
+@@ -807,6 +807,17 @@ func (e *Etcd) serveClients() {
+ 			return s.serve(e.Server, &e.cfg.ClientTLSInfo, mux, e.errHandler, e.grpcGatewayDial(splitHTTP), splitHTTP, gopts...)
+ 		})
+ 	}
++	e.Server.GoAttach(func() {
++		<-e.Server.StoppingNotify()
++
++		for _, sctx := range e.sctxs {
++			for ss := range sctx.serversC {
++				ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
++				stopServers(ctx, ss)
++				cancel()
++			}
++		}
++	})
+ }
+ 
+ func (e *Etcd) grpcGatewayDial(splitHTTP bool) (grpcDial func(ctx context.Context) (*grpc.ClientConn, error)) {
+-- 
+2.49.0
+

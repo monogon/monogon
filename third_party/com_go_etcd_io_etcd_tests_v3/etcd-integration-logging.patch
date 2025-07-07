@@ -1,44 +1,59 @@
+From 1d55653d6f2763e8dc6debdd176a371ab59f6a4c Mon Sep 17 00:00:00 2001
+From: Lorenz Brun <lorenz@monogon.tech>
+Date: Mon, 7 Jul 2025 12:09:28 +0200
+Subject: [PATCH] add LoggerBuilder override
+
 Implement LoggerBuilder override in etcd integration library. That library is
 generally not designed to be consumed by outside code, and we should migrate
 off of it instead. But that's a future Monogon problem.
 
-diff -ur io_etcd_go_etcd_tests_v3.orig/integration/cluster.go io_etcd_go_etcd_tests_v3/integration/cluster.go
---- io_etcd_go_etcd_tests_v3.orig/integration/cluster.go	2023-04-05 10:18:09.220532258 +0200
-+++ io_etcd_go_etcd_tests_v3/integration/cluster.go	2023-04-05 10:26:36.870901710 +0200
-@@ -171,6 +170,7 @@
- 
- 	WatchProgressNotifyInterval time.Duration
+Co-authored-by: Serge Bazanski <serge@monogon.tech>
+---
+ tests/framework/integration/cluster.go | 10 +++++++++-
+ 1 file changed, 9 insertions(+), 1 deletion(-)
+
+diff --git a/tests/framework/integration/cluster.go b/tests/framework/integration/cluster.go
+index 8b0f2b549..c3f62a8db 100644
+--- a/framework/integration/cluster.go
++++ b/framework/integration/cluster.go
+@@ -177,6 +177,8 @@ type ClusterConfig struct {
+ 	DisableStrictReconfigCheck  bool
  	CorruptCheckTime            time.Duration
+ 	Metrics                     string
++
 +	LoggerBuilder func(memberName string) *zap.Logger
  }
  
- type cluster struct {
-@@ -334,6 +335,7 @@
- 			leaseCheckpointInterval:     c.cfg.LeaseCheckpointInterval,
- 			WatchProgressNotifyInterval: c.cfg.WatchProgressNotifyInterval,
- 			CorruptCheckTime:            c.cfg.CorruptCheckTime,
-+			LoggerBuilder:               c.cfg.LoggerBuilder,
+ type Cluster struct {
+@@ -295,6 +297,7 @@ func (c *Cluster) MustNewMember(t testutil.TB) *Member {
+ 			DisableStrictReconfigCheck:  c.Cfg.DisableStrictReconfigCheck,
+ 			CorruptCheckTime:            c.Cfg.CorruptCheckTime,
+ 			Metrics:                     c.Cfg.Metrics,
++			LoggerBuilder:               c.Cfg.LoggerBuilder,
  		})
- 	m.DiscoveryURL = c.cfg.DiscoveryURL
- 	if c.cfg.UseGRPC {
-@@ -638,6 +640,7 @@
- 	leaseCheckpointPersist      bool
- 	WatchProgressNotifyInterval time.Duration
+ 	m.DiscoveryURL = c.Cfg.DiscoveryURL
+ 	return m
+@@ -621,6 +624,7 @@ type MemberConfig struct {
+ 	DisableStrictReconfigCheck  bool
  	CorruptCheckTime            time.Duration
+ 	Metrics                     string
 +	LoggerBuilder               func(memberName string) *zap.Logger
  }
  
- // mustNewMember return an inited member with the given name. If peerTLS is
-@@ -747,7 +750,11 @@
- 
+ // MustNewMember return an inited member with the given name. If peerTLS is
+@@ -737,7 +741,11 @@ func MustNewMember(t testutil.TB, mcfg MemberConfig) *Member {
  	m.V2Deprecation = config.V2_DEPR_DEFAULT
- 	m.grpcServerRecorder = &grpc_testing.GrpcRecorder{}
--	m.Logger = memberLogger(t, mcfg.name)
+ 	m.GRPCServerRecorder = &grpctesting.GRPCRecorder{}
+ 
+-	m.Logger, m.LogObserver = memberLogger(t, mcfg.Name)
 +	if mcfg.LoggerBuilder != nil {
-+		m.Logger = mcfg.LoggerBuilder(mcfg.name)
++		m.Logger = mcfg.LoggerBuilder(mcfg.Name)
 +	} else {
-+		m.Logger = memberLogger(t, mcfg.name)
++		m.Logger, m.LogObserver = memberLogger(t, mcfg.Name)
 +	}
- 	t.Cleanup(func() {
- 		// if we didn't cleanup the logger, the consecutive test
- 		// might reuse this (t).
+ 	m.ServerFeatureGate = features.NewDefaultServerFeatureGate(m.Name, m.Logger)
+ 	featureGates := fmt.Sprintf("LeaseCheckpoint=%v,LeaseCheckpointPersist=%v", mcfg.EnableLeaseCheckpoint, mcfg.LeaseCheckpointPersist)
+ 	if err := m.ServerFeatureGate.(featuregate.MutableFeatureGate).Set(featureGates); err != nil {
+-- 
+2.49.0
+

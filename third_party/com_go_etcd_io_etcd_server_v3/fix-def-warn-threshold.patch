@@ -1,0 +1,39 @@
+From 0e59493a5106ba16b82d26e2bc2d97ea7263db45 Mon Sep 17 00:00:00 2001
+From: Lorenz Brun <lorenz@monogon.tech>
+Date: Mon, 7 Jul 2025 11:32:22 +0200
+Subject: [PATCH] server/embed: default WarningUnaryRequestDuration
+
+No default is applied right now, either by NewConfig nor any subsequent
+code. This results in every single request being logged at warning level
+as the threshold duration is zero.
+
+Fixes: 2a26f7ae4c8 ("etcdserver: configure "expensive" requests duration")
+Signed-off-by: Lorenz Brun <lorenz@monogon.tech>
+PR: https://github.com/etcd-io/etcd/pull/20294
+---
+ server/embed/config.go | 9 +++++----
+ 1 file changed, 5 insertions(+), 4 deletions(-)
+
+diff --git a/server/embed/config.go b/server/embed/config.go
+index c60db3800..cf6472b44 100644
+--- a/embed/config.go
++++ b/embed/config.go
+@@ -656,10 +656,11 @@ func NewConfig() *Config {
+ 		ExperimentalSnapshotCatchUpEntries: etcdserver.DefaultSnapshotCatchUpEntries,
+ 		SnapshotCatchUpEntries:             etcdserver.DefaultSnapshotCatchUpEntries,
+ 
+-		MaxTxnOps:            DefaultMaxTxnOps,
+-		MaxRequestBytes:      DefaultMaxRequestBytes,
+-		MaxConcurrentStreams: DefaultMaxConcurrentStreams,
+-		WarningApplyDuration: DefaultWarningApplyDuration,
++		MaxTxnOps:                   DefaultMaxTxnOps,
++		MaxRequestBytes:             DefaultMaxRequestBytes,
++		MaxConcurrentStreams:        DefaultMaxConcurrentStreams,
++		WarningApplyDuration:        DefaultWarningApplyDuration,
++		WarningUnaryRequestDuration: DefaultWarningUnaryRequestDuration,
+ 
+ 		GRPCKeepAliveMinTime:  DefaultGRPCKeepAliveMinTime,
+ 		GRPCKeepAliveInterval: DefaultGRPCKeepAliveInterval,
+-- 
+2.49.0
+

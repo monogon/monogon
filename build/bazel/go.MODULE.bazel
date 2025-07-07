@@ -198,7 +198,7 @@ OVERRIDES = {
             "gazelle:proto disable",
         ],
     },
-    "go.etcd.io/etcd/raft/v3": {
+    "go.etcd.io/raft/v3": {
         "directives": [
             "gazelle:proto disable",
         ],
@@ -209,10 +209,12 @@ OVERRIDES = {
         ],
         "patches": [
             "//third_party/com_go_etcd_io_etcd_server_v3:etcd-fix-embed-close.patch",
+            "//third_party/com_go_etcd_io_etcd_server_v3:fix-def-warn-threshold.patch",
             "//third_party/com_go_etcd_io_etcd_server_v3:etcd-fix-islearner-panic.patch",
+            "//third_party/com_go_etcd_io_etcd_server_v3:shutdown-safety.patch",
         ],
     },
-    "github.com/grpc-ecosystem/grpc-gateway": {
+    "github.com/grpc-ecosystem/grpc-gateway/v2": {
         # Force generation of new build files for this package, required due to changes in how gazelle handles @go_googleapis.
         "build_file_generation": "on",
         "directives": [

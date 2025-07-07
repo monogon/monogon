@@ -9,7 +9,7 @@ import (
 	"testing"
 
 	"go.etcd.io/etcd/client/pkg/v3/testutil"
-	"go.etcd.io/etcd/tests/v3/integration"
+	"go.etcd.io/etcd/tests/v3/framework/integration"
 )
 
 // TestRevoke exercises the CRL revocation and watching functionality of a CA
@@ -17,7 +17,7 @@ import (
 func TestRevoke(t *testing.T) {
 	tb, cancel := testutil.NewTestingTBProthesis("pki-revoke")
 	defer cancel()
-	cluster := integration.NewClusterV3(tb, &integration.ClusterConfig{
+	cluster := integration.NewCluster(tb, &integration.ClusterConfig{
 		Size: 1,
 	})
 	cl := cluster.Client(0)

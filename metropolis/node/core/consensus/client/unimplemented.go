@@ -22,7 +22,7 @@ var (
 type unimplementedCluster struct {
 }
 
-func (c *unimplementedCluster) MemberList(_ context.Context) (*clientv3.MemberListResponse, error) {
+func (c *unimplementedCluster) MemberList(_ context.Context, _ ...clientv3.OpOption) (*clientv3.MemberListResponse, error) {
 	panic(ErrUnimplementedInNamespaced)
 }
 
@@ -146,10 +146,18 @@ func (c *unimplementedMaintenance) HashKV(ctx context.Context, endpoint string, 
 	panic(ErrUnimplementedInNamespaced)
 }
 
+func (c *unimplementedMaintenance) SnapshotWithVersion(ctx context.Context) (*clientv3.SnapshotResponse, error) {
+	panic(ErrUnimplementedInNamespaced)
+}
+
 func (c *unimplementedMaintenance) Snapshot(ctx context.Context) (io.ReadCloser, error) {
 	panic(ErrUnimplementedInNamespaced)
 }
 
 func (c *unimplementedMaintenance) MoveLeader(ctx context.Context, transfereeID uint64) (*clientv3.MoveLeaderResponse, error) {
+	panic(ErrUnimplementedInNamespaced)
+}
+
+func (c *unimplementedMaintenance) Downgrade(ctx context.Context, action clientv3.DowngradeAction, version string) (*clientv3.DowngradeResponse, error) {
 	panic(ErrUnimplementedInNamespaced)
 }
