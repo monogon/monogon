@@ -46,17 +46,17 @@ func makeNodeParams() (*api.NodeParameters, error) {
 		return nil, fmt.Errorf("failed to create config directory: %w", err)
 	}
 
-	var params *api.NodeParameters
+	var params api.NodeParameters
 	if *nodeParamPath != "" {
 		nodeParamsRaw, err := os.ReadFile(*nodeParamPath)
 		if err != nil {
 			return nil, fmt.Errorf("failed to read node-params file: %w", err)
 		}
-		if err := prototext.Unmarshal(nodeParamsRaw, params); err != nil {
+		if err := prototext.Unmarshal(nodeParamsRaw, &params); err != nil {
 			return nil, fmt.Errorf("failed to parse node-params: %w", err)
 		}
 	} else {
-		params = &api.NodeParameters{}
+		params = api.NodeParameters{}
 	}
 
 	if *bootstrap {
@@ -106,7 +106,7 @@ func makeNodeParams() (*api.NodeParameters, error) {
 			},
 		}
 	}
-	return params, nil
+	return &params, nil
 }
 
 func external(name, datafilePath string, flag *string) (string, error) {
