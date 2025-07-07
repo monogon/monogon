@@ -5,6 +5,10 @@ platform(
         "@platforms//os:linux",
         "@platforms//cpu:x86_64",
     ],
+    flags = [
+        "--@toolchain_cc_mngn//buildmode:static",
+        "--@io_bazel_rules_go//go/config:static",
+    ],
     visibility = ["//visibility:public"],
 )
 
@@ -13,6 +17,10 @@ platform(
     constraint_values = [
         "@platforms//os:linux",
         "@platforms//cpu:aarch64",
+    ],
+    flags = [
+        "--@toolchain_cc_mngn//buildmode:static",
+        "--@io_bazel_rules_go//go/config:static",
     ],
     visibility = ["//visibility:public"],
 )

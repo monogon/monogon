@@ -118,13 +118,9 @@ git_override(
     remote = "https://review.monogon.dev/toolchain_cc",
 )
 
-register_toolchains("//build/toolchain:host_cc_toolchain")
-
 register_toolchains("@toolchain_cc_mngn//linux_musl:linux_x86_64_linux_x86_64_musl_static")
 
 register_toolchains("@toolchain_cc_mngn//linux_musl:linux_x86_64_linux_aarch64_musl_static")
-
-register_toolchains("@toolchain_cc_mngn//linux_musl:linux_x86_64_linux_aarch64_musl")
 
 register_toolchains("@toolchain_cc_mngn//efi:linux_x86_64_efi_x86_64")
 
