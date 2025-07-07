@@ -1,9 +1,9 @@
 diff -ur io_etcd_go_etcd_server_v3.orig/embed/etcd.go io_etcd_go_etcd_server_v3/embed/etcd.go
 --- io_etcd_go_etcd_server_v3.orig/embed/etcd.go	2023-03-16 12:53:08.416697099 +0100
 +++ io_etcd_go_etcd_server_v3/embed/etcd.go	2023-03-16 12:54:27.376650809 +0100
-@@ -427,6 +426,7 @@
- 	}
+@@ -427,6 +427,7 @@
  	if e.errc != nil {
+ 		e.wg.Wait()
  		close(e.errc)
 +		e.errc = nil
  	}
