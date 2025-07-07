@@ -310,6 +310,20 @@ func deviceIfaceFromSpec(it *netpb.Interface_Device, hostDevices []deviceIfData,
 		}
 		matchedDevices = append(matchedDevices, d.dev)
 	}
+	if len(matchedDevices) == 0 {
+		var available []string
+		for _, d := range hostDevices {
+			hwAddr := d.dev.HardwareAddr
+			if len(d.dev.PermHWAddr) > 0 {
+				hwAddr = d.dev.PermHWAddr
+			}
+			available = append(available, fmt.Sprintf("(%v,%v)", d.driver, hwAddr))
+		}
+		if len(available) == 0 {
+			available = append(available, "none")
+		}
+		return nil, fmt.Errorf("no host devices match (driver=%v,hwaddr=%v), have %s", it.Device.Driver, it.Device.HardwareAddress, strings.Join(available, ", "))
+	}
 	if len(matchedDevices) <= int(it.Device.Index) || it.Device.Index < 0 {
 		return nil, fmt.Errorf("there are %d matching host devices but requested device index is %d", len(matchedDevices), it.Device.Index)
 	}
