@@ -55,4 +55,8 @@ platform(
         "container-image": "docker://gcr.io/monogon-infra/sandbox",
         "OSFamily": "linux",
     },
+    flags = [
+        "--@toolchain_cc_mngn//buildmode:static",
+        "--@io_bazel_rules_go//go/config:static",
+    ],
 )
