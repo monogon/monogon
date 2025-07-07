@@ -198,6 +198,13 @@ func TestE2E(t *testing.T) {
 		t.Fatal("Waiting for sshd start timed out")
 	}
 
+	// Create the config directory. We keep it in /tmp because of sandbox limitations.
+	configDir, err := os.MkdirTemp("/tmp", "test-configs-*")
+	if err != nil {
+		t.Fatalf("Failed to create config directory: %v", err)
+	}
+	defer os.RemoveAll(configDir)
+
 	installArgs := []string{
 		"install", "ssh",
 		fmt.Sprintf("root@localhost:%d", sshPort),
@@ -206,6 +213,7 @@ func TestE2E(t *testing.T) {
 		"--cluster", "cluster.internal",
 		"--takeover", xTakeoverPath,
 		"--image", xImagePath,
+		"--config", configDir,
 	}
 	installCmd := exec.Command(xMetroctlPath, installArgs...)
 	installCmd.Env = append(installCmd.Environ(), fmt.Sprintf("SSH_AUTH_SOCK=%s", sshAuthSock))
