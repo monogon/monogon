@@ -13,7 +13,9 @@ go_library(
     importpath = "source.monogon.dev/metropolis/installer",
     visibility = ["//visibility:private"],
     deps = [
+        "//go/logging",
         "//metropolis/installer/install",
+        "//metropolis/node/core/devmgr",
         "//osbase/blockdev",
         "//osbase/bringup",
         "//osbase/efivarfs",
@@ -39,6 +41,7 @@ node_initramfs(
     },
     fsspecs = [
         "//osbase/build:earlydev.fsspec",
+        "//third_party:firmware",
     ],
     visibility = ["//metropolis/installer/test:__pkg__"],
 )

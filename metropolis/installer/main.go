@@ -18,7 +18,9 @@ import (
 
 	"golang.org/x/sys/unix"
 
+	"source.monogon.dev/go/logging"
 	"source.monogon.dev/metropolis/installer/install"
+	"source.monogon.dev/metropolis/node/core/devmgr"
 	"source.monogon.dev/osbase/blockdev"
 	"source.monogon.dev/osbase/bringup"
 	"source.monogon.dev/osbase/efivarfs"
@@ -55,7 +57,7 @@ func mountInstallerESP(espPath string) error {
 // findInstallableBlockDevices returns names of all the block devices suitable
 // for hosting a Metropolis installation, limited by the size expressed in
 // bytes minSize. The install medium espDev will be excluded from the result.
-func findInstallableBlockDevices(espDev string, minSize uint64) ([]string, error) {
+func findInstallableBlockDevices(l logging.Leveled, espDev string, minSize uint64) ([]string, error) {
 	// Use the partition's name to find and return the name of its parent
 	// device. It will be excluded from the list of suitable target devices.
 	srcDev, err := sysfs.ParentBlockDevice(espDev)
@@ -92,9 +94,10 @@ probeLoop:
 
 		// Skip devices of insufficient size.
 		devPath := filepath.Join("/dev", devInfo.Name())
-		dev, err := blockdev.Open(devPath)
+		dev, err := blockdev.Open(devPath, blockdev.WithReadonly)
 		if err != nil {
-			return nil, fmt.Errorf("couldn't open a block device at %q: %w", devPath, err)
+			l.Warningf("couldn't open a block device at %q, ignoring: %v", devPath, err)
+			continue
 		}
 		devSize := uint64(dev.BlockCount() * dev.BlockSize())
 		dev.Close()
@@ -117,6 +120,9 @@ func installerRunnable(ctx context.Context) error {
 	l.Info("Metropolis Installer")
 	l.Info(copyrightLine)
 	l.Info("")
+
+	devmgrSvc := devmgr.New()
+	supervisor.Run(ctx, "devmgr", devmgrSvc.Run)
 
 	// Validate we are running via EFI.
 	if _, err := os.Stat("/sys/firmware/efi"); os.IsNotExist(err) {
@@ -187,7 +193,7 @@ func installerRunnable(ctx context.Context) error {
 		installParams.PartitionSize.Data + 1) * mib)
 
 	// Look for suitable block devices, given the minimum size.
-	blkDevs, err := findInstallableBlockDevices(espDev, minSize)
+	blkDevs, err := findInstallableBlockDevices(l, espDev, minSize)
 	if err != nil {
 		return err
 	}
