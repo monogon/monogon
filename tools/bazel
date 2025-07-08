@@ -17,7 +17,11 @@ fi
 # to automagically switch into the nix-shell. Otherwise complain and
 # exit.
 if [[ -z "${BAZEL_REAL:-}" ]]; then
-  if [[ -x $(command -v nix-shell) ]]; then
+  # If we are already in the nix shell, we just set BAZEL_REAL and continue
+  # regular execution. Bazel will be in PATH.
+  if [[ -n "${MONOGON_NIXOS:-}" ]]; then
+    BAZEL_REAL="$(command -v bazel)"
+  elif [[ -x $(command -v nix-shell) ]]; then
     echo "BAZEL_REAL is not set and nix-shell is available, overriding to nix-shell" >&2
     USE_NIX_SHELL=yes
   else
