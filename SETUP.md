@@ -104,7 +104,8 @@ The following steps are necessary:
 
 - Install the [Bazel](https://plugins.jetbrains.com/plugin/8609-bazel),
   Go and Protocol Buffer plugins in IntelliJ.
-- Make sure that Bazel "*Bazel Binary Location*" in Other Settings → Bazel Settings points to Bazelisk.
+- Make sure that Bazel "*Bazel Binary Location*" in Other Settings → Bazel Settings points to Bazelisk
+  (or tools/bazel, if you're on NixOS).
 - Use _File → Import Bazel project_... and select your monorepo checkout.
 
 After running the first sync (Alt-Y), everything should now resolve in the IDE, including generated code.

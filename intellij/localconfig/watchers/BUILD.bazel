@@ -1,8 +1,0 @@
-load("@io_bazel_rules_go//go:def.bzl", "go_library")
-
-go_library(
-    name = "watchers",
-    srcs = ["filewatchers.go"],
-    importpath = "source.monogon.dev/intellij/localconfig/watchers",
-    visibility = ["//visibility:public"],
-)

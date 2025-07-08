@@ -1,1 +1,0 @@
-<configuration default="false" name="Connect to dlv on :2345" type="GoRemoteDebugConfigurationType" factoryName="Go Remote"><method v="2" /></configuration>

@@ -20,17 +20,3 @@ additional_languages:
   # python
   # scala
   # typescript
-
-import_run_configurations:
-  intellij/run/Connect_to_dlv_on__2345.xml
-
-  intellij/run/e2e_test.xml
-  intellij/run/e2e_test_in_dbg_mode.xml
-  intellij/run/e2e_test_in_dbg_mode_with_dlv.xml
-
-  intellij/run/Run__gazelle.xml
-
-  intellij/run/Run_all_tests.xml
-
-  intellij/run/Run_single_node_cluster.xml
-  intellij/run/Run_single_node_cluster_in_dbg_mode.xml
