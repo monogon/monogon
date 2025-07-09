@@ -117,6 +117,8 @@ def _linux_image_impl(ctx):
         command = toolchain_cmd + """
             export BISON_PKGDATADIR=$(realpath $(dirname $BISON))/../share/bison
             builddir=$(mktemp -d)
+            # All source files have the same timestamp, take it from an arbitrary file.
+            build_timestamp=$(date -r {kernel_src}/README)
 
             mkdir {kernel_src}/.bin
             cp {kconfig} $builddir/.config
@@ -134,6 +136,9 @@ def _linux_image_impl(ctx):
                 HOSTREADELF="$HOSTREADELF" HOSTCFLAGS="$HOSTCFLAGS" \
                 HOSTLDFLAGS="$HOSTLDFLAGS" \
                 \
+                KBUILD_BUILD_USER=builder \
+                KBUILD_BUILD_HOST=monogon \
+                KBUILD_BUILD_TIMESTAMP="$build_timestamp" \
                 KBUILD_OUTPUT="$builddir" \
                 ARCH="{target_arch}" \
                 olddefconfig {target}
