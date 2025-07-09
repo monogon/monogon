@@ -30,6 +30,7 @@ symlinkJoin {
               qemu-minimal # custom pkg
               m4
               strace
+              python3Minimal
             ];
           };
         in
@@ -44,7 +45,7 @@ symlinkJoin {
 
           installPhase = ''
             mkdir $out
-            mv bundle.tar.zst $out/${name}-${platform.hostPlatform.config}-${lib.version}.tar.zst
+            mv bundle.tar.zst $out/${name}-${platform.hostPlatform.config}.tar.zst
           '';
         }
       ))
