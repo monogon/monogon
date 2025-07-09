@@ -1,4 +1,3 @@
-load("//osbase/build:def.bzl", "build_static_transition")
 load("//osbase/build/fsspec:def.bzl", "FSSpecInfo", "fsspec_core_impl")
 
 def _node_initramfs_impl(ctx):
@@ -10,8 +9,6 @@ def _node_initramfs_impl(ctx):
     return [DefaultInfo(runfiles = ctx.runfiles(files = [initramfs]), files = depset([initramfs]))]
 
 node_initramfs = rule(
-    # Attach static transition to ensure all binaries added to the initramfs are static binaries.
-    cfg = build_static_transition,
     implementation = _node_initramfs_impl,
     doc = """
         Build a node initramfs. The initramfs will contain a basic /dev directory and all the files specified by the

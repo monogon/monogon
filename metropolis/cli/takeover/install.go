@@ -18,7 +18,7 @@ import (
 	"source.monogon.dev/osbase/structfs"
 )
 
-//go:embed metropolis/node/abloader/abloader_bin.efi
+//go:embed metropolis/node/abloader/abloader.efi
 var abloader []byte
 
 // EnvInstallTarget environment variable which tells the takeover binary where

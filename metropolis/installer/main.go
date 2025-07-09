@@ -31,7 +31,7 @@ import (
 	"source.monogon.dev/osbase/sysfs"
 )
 
-//go:embed metropolis/node/abloader/abloader_bin.efi
+//go:embed metropolis/node/abloader/abloader.efi
 var abloader []byte
 
 //go:embed build/copyright_line.txt

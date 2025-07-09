@@ -14,15 +14,10 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-load("//osbase/build:def.bzl", "build_static_transition")
-
 def _static_binary_tarball_impl(ctx):
     layer_spec = ctx.actions.declare_file(ctx.label.name + ".prototxt")
-    if len(ctx.attr.executable) != 1:
-        fail("executable arg can only contain one file/label")
-    executable_label = ctx.attr.executable[0]
-    executable = executable_label[DefaultInfo].files_to_run.executable
-    runfiles = executable_label[DefaultInfo].default_runfiles
+    executable = ctx.attr.executable[DefaultInfo].files_to_run.executable
+    runfiles = ctx.attr.executable[DefaultInfo].default_runfiles
     files = []
     for file in runfiles.files.to_list():
         layer_path = file.short_path
@@ -60,7 +55,7 @@ static_binary_tarball = rule(
             mandatory = True,
             executable = True,
             allow_single_file = True,
-            cfg = build_static_transition,
+            cfg = "target",
         ),
         "_container_binary": attr.label(
             default = Label("//build/static_binary_tarball"),

@@ -1,5 +1,4 @@
 load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_library")
-load("//osbase/build:def.bzl", "build_static_target")
 load("//osbase/build/mkcpio:def.bzl", "node_initramfs")
 
 node_initramfs(
@@ -52,13 +51,7 @@ go_library(
 )
 
 go_binary(
-    name = "takeover_bin",
-    embed = [":takeover_lib"],
-    visibility = ["//visibility:public"],
-)
-
-build_static_target(
     name = "takeover",
-    dep = ":takeover_bin",
+    embed = [":takeover_lib"],
     visibility = ["//visibility:public"],
 )

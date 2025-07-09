@@ -1,8 +1,7 @@
 load("@rules_rust//rust:defs.bzl", "rust_binary")
-load("//osbase/build:def.bzl", "ignore_unused_configuration_target")
 
 rust_binary(
-    name = "abloader_bin",
+    name = "abloader",
     srcs = ["main.rs"],
     edition = "2021",
     platform = select({
@@ -16,16 +15,10 @@ rust_binary(
     target_compatible_with = [
         "@platforms//os:uefi",
     ],
-    visibility = ["//visibility:private"],
+    visibility = ["//visibility:public"],
     deps = [
         "//metropolis/node/abloader/spec:abloader_proto_rs",
         "@crate_index_efi//:prost",
         "@crate_index_efi//:uefi",
     ],
-)
-
-ignore_unused_configuration_target(
-    name = "abloader",
-    dep = ":abloader_bin",
-    visibility = ["//visibility:public"],
 )

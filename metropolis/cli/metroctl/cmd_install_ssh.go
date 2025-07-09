@@ -204,7 +204,7 @@ var sshCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
-		takeover, err := externalFile("takeover", "_main/metropolis/cli/takeover/takeover_bin_/takeover_bin", &takeoverPath)
+		takeover, err := externalFile("takeover", "_main/metropolis/cli/takeover/takeover_/takeover", &takeoverPath)
 		if err != nil {
 			return err
 		}

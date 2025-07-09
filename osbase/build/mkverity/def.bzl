@@ -1,5 +1,3 @@
-load("//osbase/build:def.bzl", "build_static_transition")
-
 # VerityInfo is emitted by verity_image, and contains a file enclosing a
 # singular dm-verity target table.
 VerityInfo = provider(
@@ -48,7 +46,6 @@ def _verity_image_impl(ctx):
     ]
 
 verity_image = rule(
-    cfg = build_static_transition,
     implementation = _verity_image_impl,
     doc = """
       Build a dm-verity target image by appending Verity metadata to the source

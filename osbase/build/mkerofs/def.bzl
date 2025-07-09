@@ -1,4 +1,3 @@
-load("//osbase/build:def.bzl", "build_static_transition")
 load("//osbase/build/fsspec:def.bzl", "FSSpecInfo", "fsspec_core_impl")
 
 def _erofs_image_impl(ctx):
@@ -10,8 +9,6 @@ def _erofs_image_impl(ctx):
     return [DefaultInfo(files = depset([fs_out]))]
 
 erofs_image = rule(
-    # Attach static transition to ensure all binaries added to the EROFS are static binaries.
-    cfg = build_static_transition,
     implementation = _erofs_image_impl,
     doc = """
         Build an EROFS. All files specified in files and all specified symlinks will be contained.

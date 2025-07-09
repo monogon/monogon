@@ -6,7 +6,6 @@ See https://systemd.io/BOOT_LOADER_SPECIFICATION/#type-2-efi-unified-kernel-imag
 load("@rules_cc//cc:action_names.bzl", "OBJ_COPY_ACTION_NAME")
 load("@rules_cc//cc:find_cc_toolchain.bzl", "CC_TOOLCHAIN_ATTRS", "find_cpp_toolchain", "use_cc_toolchain")
 load("@rules_cc//cc/common:cc_common.bzl", "cc_common")
-load("//osbase/build:def.bzl", "build_static_transition")
 load("//osbase/build/mkverity:def.bzl", "VerityInfo")
 
 def _efi_unified_kernel_image_impl(ctx):
@@ -80,7 +79,6 @@ def _efi_unified_kernel_image_impl(ctx):
     return [DefaultInfo(files = depset([image]), runfiles = ctx.runfiles(files = [image]))]
 
 efi_unified_kernel_image = rule(
-    cfg = build_static_transition,
     implementation = _efi_unified_kernel_image_impl,
     attrs = {
         "kernel": attr.label(

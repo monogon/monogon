@@ -15,7 +15,6 @@ load("@rules_cc//cc/common:cc_info.bzl", "CcInfo")
 load("//build/utils:detect_root.bzl", "detect_root", "detect_roots")
 load("//build/utils:foreign_build.bzl", "generate_foreign_build_env", "merge_env")
 load("//build/utils:target_info.bzl", "TargetInfo")
-load("//osbase/build:def.bzl", "ignore_unused_configuration")
 
 def _linux_image_impl_resources(_os, _ninputs):
     """
@@ -176,7 +175,6 @@ linux_image = rule(
         Build Linux kernel image hermetically in a given format.
     """,
     implementation = _linux_image_impl,
-    cfg = ignore_unused_configuration,
     attrs = {
         "kernel_config": attr.label(
             doc = """
@@ -218,9 +216,6 @@ linux_image = rule(
         "_crypto": attr.label(
             default = "//third_party:openssl_crypto",
             cfg = "exec",
-        ),
-        "_allowlist_function_transition": attr.label(
-            default = "@bazel_tools//tools/allowlists/function_transition_allowlist",
         ),
         "_exec_toolchain": attr.label(
             default = "@rules_cc//cc:current_cc_toolchain",

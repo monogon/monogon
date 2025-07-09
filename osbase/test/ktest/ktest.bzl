@@ -18,7 +18,6 @@
 Ktest provides a macro to run tests under a normal Metropolis node kernel
 """
 
-load("//osbase/build:def.bzl", "build_static_transition")
 load("//osbase/build/fsspec:def.bzl", "FSSpecInfo", "fsspec_core_impl")
 
 _KTEST_SCRIPT = """
@@ -31,7 +30,7 @@ def _ktest_impl(ctx):
     initramfs_name = ctx.label.name + ".cpio.zst"
     initramfs = ctx.actions.declare_file(initramfs_name)
 
-    fsspec_core_impl(ctx, ctx.executable._mkcpio, initramfs, [("/init", ctx.attr._ktest_init[0]), ("/tester", ctx.attr.tester[0])], [ctx.attr._earlydev])
+    fsspec_core_impl(ctx, ctx.executable._mkcpio, initramfs, [("/init", ctx.attr._ktest_init), ("/tester", ctx.attr.tester)], [ctx.attr._earlydev])
 
     script_file = ctx.actions.declare_file(ctx.label.name + ".sh")
 
@@ -46,7 +45,7 @@ def _ktest_impl(ctx):
         is_executable = True,
     )
 
-    runfiles = ctx.runfiles(files = [ctx.file._ktest, initramfs, ctx.file.kernel, ctx.file.tester])
+    runfiles = ctx.runfiles(files = [ctx.file._ktest, initramfs, ctx.file.kernel])
     runfiles = runfiles.merge(ctx.attr._ktest[DefaultInfo].default_runfiles)
 
     return [DefaultInfo(
@@ -64,8 +63,7 @@ k_test = rule(
             mandatory = True,
             executable = True,
             allow_single_file = True,
-            # Runs inside the given kernel, needs to be build for Linux/static
-            cfg = build_static_transition,
+            cfg = "target",
         ),
         "files": attr.string_keyed_label_dict(
             allow_files = True,
@@ -73,8 +71,6 @@ k_test = rule(
                 Dictionary of Labels to String, placing a given Label's output file in the initramfs at the location
                 specified by the String value. The specified labels must only have a single output.
             """,
-            # Attach static transition to ensure all binaries added to the initramfs are static binaries.
-            cfg = build_static_transition,
         ),
         "symlinks": attr.string_dict(
             default = {},
@@ -92,7 +88,6 @@ k_test = rule(
             """,
             providers = [FSSpecInfo],
             allow_files = True,
-            cfg = build_static_transition,
         ),
         "kernel": attr.label(
             default = Label("//osbase/test/ktest:linux-testing"),
@@ -110,7 +105,7 @@ k_test = rule(
         ),
         "_ktest_init": attr.label(
             default = Label("//osbase/test/ktest/init"),
-            cfg = build_static_transition,
+            cfg = "target",
             executable = True,
             allow_single_file = True,
         ),

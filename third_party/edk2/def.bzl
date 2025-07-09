@@ -7,7 +7,6 @@ load("@rules_cc//cc/common:cc_info.bzl", "CcInfo")
 load("//build/utils:detect_root.bzl", "detect_root", "detect_roots")
 load("//build/utils:foreign_build.bzl", "generate_foreign_build_env", "merge_env")
 load("//build/utils:target_info.bzl", "TargetInfo")
-load("//osbase/build:def.bzl", "ignore_unused_configuration")
 
 TOOLCHAINS = [
     "//build/toolchain/toolchain-bundle:make_toolchain",
@@ -115,7 +114,6 @@ edk2 = rule(
         Build EDK2 hermetically.
     """,
     implementation = _edk2_impl,
-    cfg = ignore_unused_configuration,
     attrs = {
         "src": attr.label(
             doc = """

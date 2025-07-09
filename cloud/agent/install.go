@@ -27,7 +27,7 @@ import (
 	"source.monogon.dev/osbase/supervisor"
 )
 
-//go:embed metropolis/node/abloader/abloader_bin.efi
+//go:embed metropolis/node/abloader/abloader.efi
 var abloader []byte
 
 // install dispatches OSInstallationRequests to the appropriate installer
