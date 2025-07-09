@@ -93,7 +93,8 @@ func fillVerityRamdisks(t *testing.T, dataDevPath, hashDevPath string) (*dm.Targ
 	// Create a Verity encoder, backed with hfd. Configure it to write the
 	// Verity superblock. Use 4096-byte blocks.
 	bs := uint32(4096)
-	verityEnc, err := NewEncoder(hfd, bs, bs, true)
+	salt := []byte("testsalt")
+	verityEnc, err := NewEncoder(hfd, bs, bs, salt, true)
 	require.NoError(t, err, "while creating a Verity encoder")
 
 	// Write pseudorandom data both to the Verity-protected data device, and

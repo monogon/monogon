@@ -28,7 +28,6 @@ package verity
 
 import (
 	"bytes"
-	"crypto/rand"
 	"crypto/sha256"
 	"encoding/binary"
 	"encoding/hex"
@@ -93,17 +92,8 @@ func newSuperblock() (*superblock, error) {
 		version:       1,
 		hashType:      1,
 		algorithm:     [32]byte{'s', 'h', 'a', '2', '5', '6'},
-		saltSize:      64,
 		dataBlockSize: 4096,
 		hashBlockSize: 4096,
-	}
-
-	// Fill in the superblock UUID and cryptographic salt.
-	if _, err := rand.Read(sb.uuid[:]); err != nil {
-		return nil, fmt.Errorf("when generating UUID: %w", err)
-	}
-	if _, err := rand.Read(sb.saltBuffer[:]); err != nil {
-		return nil, fmt.Errorf("when generating salt: %w", err)
 	}
 
 	return &sb, nil
@@ -308,6 +298,10 @@ type MappingTable struct {
 // VerityParameterList returns a list of Verity target parameters, ordered
 // as they would appear in a parameter string.
 func (t *MappingTable) VerityParameterList() []string {
+	salt := hex.EncodeToString(t.superblock.salt())
+	if salt == "" {
+		salt = "-"
+	}
 	return []string{
 		"1",
 		t.DataDevicePath,
@@ -318,7 +312,7 @@ func (t *MappingTable) VerityParameterList() []string {
 		strconv.FormatInt(t.HashStart, 10),
 		t.superblock.algorithmName(),
 		hex.EncodeToString(t.rootHash),
-		hex.EncodeToString(t.superblock.salt()),
+		salt,
 	}
 }
 
@@ -433,13 +427,14 @@ func (e *encoder) processDataBuffer(incomplete bool) (uint64, error) {
 // encoder will write to the given io.Writer object.
 // A verity superblock will be written, preceding the hash tree, if
 // writeSb is true.
-func NewEncoder(out io.Writer, dataBlockSize, hashBlockSize uint32, writeSb bool) (*encoder, error) {
+func NewEncoder(out io.Writer, dataBlockSize, hashBlockSize uint32, salt []byte, writeSb bool) (*encoder, error) {
 	sb, err := newSuperblock()
 	if err != nil {
 		return nil, fmt.Errorf("while creating a superblock: %w", err)
 	}
 	sb.dataBlockSize = dataBlockSize
 	sb.hashBlockSize = hashBlockSize
+	sb.saltSize = uint16(copy(sb.saltBuffer[:], salt))
 
 	e := encoder{
 		out:     out,

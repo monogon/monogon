@@ -11,6 +11,7 @@
 package main
 
 import (
+	"crypto/sha256"
 	"flag"
 	"fmt"
 	"io"
@@ -55,20 +56,34 @@ func createImage(dataImagePath, outputImagePath string, wsb bool) (*verity.Mappi
 	}
 	defer outputImage.Close()
 
-	// Copy the input data into the output file, then rewind dataImage to be read
-	// again by the Verity encoder.
+	// Copy the input data into the output file, then rewind dataImage.
 	_, err = io.Copy(outputImage, dataImage)
 	if err != nil {
 		return nil, err
 	}
-	_, err = dataImage.Seek(0, os.SEEK_SET)
+	_, err = dataImage.Seek(0, io.SeekStart)
 	if err != nil {
 		return nil, err
 	}
 
+	// Hash the input data for use as the salt, then rewind dataImage. The purpose
+	// of the salt is to prevent reuse of collisions across different images. 16
+	// bytes is enough for this. We use a hash of the input instead of generating
+	// random bytes to make the build reproducible.
+	dataHash := sha256.New()
+	_, err = io.Copy(dataHash, dataImage)
+	if err != nil {
+		return nil, err
+	}
+	_, err = dataImage.Seek(0, io.SeekStart)
+	if err != nil {
+		return nil, err
+	}
+	salt := dataHash.Sum(nil)[:16]
+
 	// Write outputImage contents. Start with initializing a verity encoder,
-	// seting outputImage as its output.
-	v, err := verity.NewEncoder(outputImage, bs, bs, wsb)
+	// setting outputImage as its output.
+	v, err := verity.NewEncoder(outputImage, bs, bs, salt, wsb)
 	if err != nil {
 		return nil, fmt.Errorf("while initializing a verity encoder: %w", err)
 	}
