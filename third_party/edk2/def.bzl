@@ -12,7 +12,7 @@ TOOLCHAINS = [
     "//build/toolchain/toolchain-bundle:make_toolchain",
     "//build/toolchain/toolchain-bundle:nasm_toolchain",
     "//build/toolchain/toolchain-bundle:iasl_toolchain",
-    "//build/toolchain/toolchain-bundle:strace_toolchain",
+    "//build/toolchain/toolchain-bundle:busybox_toolchain",
 ]
 
 def _edk2_impl(ctx):
