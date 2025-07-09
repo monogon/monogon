@@ -1,5 +1,18 @@
 load("@rules_foreign_cc//toolchains/native_tools:native_tools_toolchain.bzl", "native_tool_toolchain")
 
+SUPPORTED_TARGETS = [
+    struct(
+        tuple = "linux_x86_64",
+        triple = "x86_64-unknown-linux-musl",
+        constrain = ["@platforms//os:linux", "@platforms//cpu:x86_64"],
+    ),
+    struct(
+        tuple = "linux_aarch64",
+        triple = "aarch64-unknown-linux-musl",
+        constrain = ["@platforms//os:linux", "@platforms//cpu:aarch64"],
+    ),
+]
+
 # Copied from bazel-contrib/rules_foreign_cc licensed under Apache-2.0
 def _current_toolchain_impl(ctx):
     toolchain = ctx.toolchains[ctx.attr._toolchain]
@@ -39,41 +52,21 @@ def toolchain_for(name, config):
         name = name,
     )
 
-    native.toolchain(
-        name = "%s_linux_x86_64_toolchain" % name,
-        exec_compatible_with = [
-            "@platforms//os:linux",
-            "@platforms//cpu:x86_64",
-        ],
-        toolchain = ":%s_linux_x86_64" % name,
-        toolchain_type = ":%s_toolchain" % name,
-    )
+    for target in SUPPORTED_TARGETS:
+        native.toolchain(
+            name = "%s_%s_toolchain" % (name, target.tuple),
+            exec_compatible_with = target.constrain,
+            toolchain = ":%s_%s" % (name, target.tuple),
+            toolchain_type = ":%s_toolchain" % name,
+        )
 
-    native.toolchain(
-        name = "%s_linux_aarch64_toolchain" % name,
-        exec_compatible_with = [
-            "@platforms//os:linux",
-            "@platforms//cpu:aarch64",
-        ],
-        toolchain = ":%s_linux_aarch64" % name,
-        toolchain_type = ":%s_toolchain" % name,
-    )
-
-    native_tool_toolchain(
-        name = "%s_linux_aarch64" % name,
-        env = {
-            name.upper(): "$(execpath @toolchain-bundle-aarch64-unknown-linux-musl//:%s)" % config.target,
-        },
-        target = "@toolchain-bundle-aarch64-unknown-linux-musl//:%s" % config.target,
-    )
-
-    native_tool_toolchain(
-        name = "%s_linux_x86_64" % name,
-        env = {
-            name.upper(): "$(execpath @toolchain-bundle-x86_64-unknown-linux-musl//:%s)" % config.target,
-        },
-        target = "@toolchain-bundle-x86_64-unknown-linux-musl//:%s" % config.target,
-    )
+        native_tool_toolchain(
+            name = "%s_%s" % (name, target.tuple),
+            env = {
+                name.upper(): "$(execpath @toolchain-bundle-%s//:%s)" % (target.triple, config.target),
+            },
+            target = "@toolchain-bundle-%s//:%s" % (target.triple, config.target),
+        )
 
 current_qemu_img_toolchain = current_toolchain("qemu-img")
 current_qemu_kvm_toolchain = current_toolchain("qemu-kvm")
