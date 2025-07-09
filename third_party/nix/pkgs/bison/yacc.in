@@ -1,0 +1,6 @@
+#!/bin/sh
+
+# The exec-prefix is used by YACC to find Bison at runtime.
+# Since we don't exactly know that, we have to depend on an
+# environment variable we set in Bazel.
+exec "$BISON" -y "$@"

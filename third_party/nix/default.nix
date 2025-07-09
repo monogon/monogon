@@ -10,6 +10,7 @@ let
           bazel-unwrapped = import ./pkgs/bazel { pkgs = super; };
           perl = import ./pkgs/perl { pkgs = super; };
           python3Minimal = import ./pkgs/python3 { pkgs = super; };
+          bison = import ./pkgs/bison { pkgs = super; };
         })
         (self: super: {
           vde2 = super.vde2.overrideAttrs (oldAttrs: {
