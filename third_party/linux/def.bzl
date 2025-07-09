@@ -115,7 +115,7 @@ def _linux_image_impl(ctx):
         progress_message = "Building Linux Kernel: {}".format(ctx.label.name),
         mnemonic = "BuildLinux",
         command = toolchain_cmd + """
-            export BISON_PKGDATADIR=$(realpath $(dirname $BISON))/../share/bison
+            export BISON_PKGDATADIR=$(realpath $(dirname $BISON)/../share/bison)
             builddir=$(mktemp -d)
             # All source files have the same timestamp, take it from an arbitrary file.
             build_timestamp=$(date -r {kernel_src}/README)
@@ -125,6 +125,8 @@ def _linux_image_impl(ctx):
             (
                 cd {kernel_src} &&
                 make -j 16 \
+                \
+                YACC="$BISON" LEX="$FLEX" \
                 \
                 CC="$CC" CXX="$CXX" LD="$LD" AR="$AR" NM="$NM" STRIP="$STRIP" \
                 OBJCOPY="$OBJCOPY" OBJDUMP="$OBJDUMP" READELF="$READELF" \
