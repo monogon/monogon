@@ -24,7 +24,22 @@ diff --git a/config.h-linux b/config.h-linux
  
  #define HAVE_LCHOWN 1
  
-@@ -258,10 +246,8 @@
+@@ -210,14 +198,8 @@
+ #define HAVE_READLINK 1
+ 
+ #define HAVE_RECVMMSG 1
+ 
+-#define HAVE_RES_NCLOSE 1
+-
+-#define HAVE_RES_NINIT 1
+-
+-#define HAVE_RES_NQUERY 1
+-
+ #define HAVE_RTLD_GLOBAL 1
+ 
+ #define HAVE_RTLD_LAZY 1
+ 
+@@ -258,10 +240,8 @@
  #define HAVE_STPCPY 1
  
  #define HAVE_STRCASECMP 1
@@ -35,7 +50,7 @@ diff --git a/config.h-linux b/config.h-linux
  
  #define HAVE_STRING_H 1
  
-@@ -270,14 +256,8 @@
+@@ -270,14 +250,8 @@
  #define HAVE_STRNLEN 1
  
  #define HAVE_STRSIGNAL 1
