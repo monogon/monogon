@@ -38,7 +38,7 @@ new file mode 100755
 index 00000000..29805d8d
 --- /dev/null
 +++ b/rust/private/loader_wrapper.sh
-@@ -0,0 +1,18 @@
+@@ -0,0 +1,51 @@
 +#!/bin/sh
 +
 +# Running rustc and other tools directly doesn't work, because that would
@@ -47,6 +47,39 @@ index 00000000..29805d8d
 +# giving it the path to the real binary which has been renamed to {name}_real.
 +
 +set -eu
++
++dirname() {
++    # Usage: dirname "path"
++
++    # If '$1' is empty set 'dir' to '.', else '$1'.
++    dir=${1:-.}
++
++    # Strip all trailing forward-slashes '/' from
++    # the end of the string.
++    #
++    # "${dir##*[!/]}": Remove all non-forward-slashes
++    # from the start of the string, leaving us with only
++    # the trailing slashes.
++    # "${dir%%"${}"}": Remove the result of the above
++    # substitution (a string of forward slashes) from the
++    # end of the original string.
++    dir=${dir%%"${dir##*[!/]}"}
++
++    # If the variable *does not* contain any forward slashes
++    # set its value to '.'.
++    [ "${dir##*/*}" ] && dir=.
++
++    # Remove everything *after* the last forward-slash '/'.
++    dir=${dir%/*}
++
++    # Again, strip all trailing forward-slashes '/' from
++    # the end of the string (see above).
++    dir=${dir%%"${dir##*[!/]}"}
++
++    # Print the resulting string and if it is empty,
++    # print '/'.
++    printf '%s\n' "${dir:-/}"
++}
 +
 +selfDir="$(dirname "$0")"
 +rootPath="$(dirname "$selfDir")"
