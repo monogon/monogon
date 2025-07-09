@@ -1,18 +1,18 @@
 load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_library")
 
 go_library(
-    name = "static_binary_tarball_lib",
+    name = "binary_tarball_lib",
     srcs = ["main.go"],
-    importpath = "source.monogon.dev/build/static_binary_tarball",
+    importpath = "source.monogon.dev/build/binary_tarball",
     visibility = ["//visibility:private"],
     deps = [
-        "//build/static_binary_tarball/spec",
+        "//build/binary_tarball/spec",
         "@org_golang_google_protobuf//encoding/prototext",
     ],
 )
 
 go_binary(
-    name = "static_binary_tarball",
-    embed = [":static_binary_tarball_lib"],
+    name = "binary_tarball",
+    embed = [":binary_tarball_lib"],
     visibility = ["//visibility:public"],
 )

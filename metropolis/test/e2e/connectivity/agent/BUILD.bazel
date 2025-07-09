@@ -1,6 +1,6 @@
 load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_library")
 load("@rules_oci//oci:defs.bzl", "oci_image")
-load("//build/static_binary_tarball:def.bzl", "static_binary_tarball")
+load("//build/binary_tarball:def.bzl", "binary_tarball")
 
 go_library(
     name = "agent_lib",
@@ -19,7 +19,7 @@ go_binary(
     visibility = ["//visibility:private"],
 )
 
-static_binary_tarball(
+binary_tarball(
     name = "agent_layer",
     executable = ":agent",
     visibility = ["//visibility:private"],

@@ -1,6 +1,6 @@
 load("@rules_cc//cc:defs.bzl", "cc_binary")
 load("@rules_oci//oci:defs.bzl", "oci_image", "oci_load")
-load("//build/static_binary_tarball:def.bzl", "static_binary_tarball")
+load("//build/binary_tarball:def.bzl", "binary_tarball")
 
 cc_binary(
     name = "pause",
@@ -12,7 +12,7 @@ cc_binary(
     ],
 )
 
-static_binary_tarball(
+binary_tarball(
     name = "pause_layer",
     executable = ":pause",
     visibility = ["//visibility:private"],

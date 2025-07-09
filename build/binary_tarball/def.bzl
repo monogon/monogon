@@ -14,7 +14,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-def _static_binary_tarball_impl(ctx):
+def _binary_tarball_impl(ctx):
     layer_spec = ctx.actions.declare_file(ctx.label.name + ".prototxt")
     executable = ctx.attr.executable[DefaultInfo].files_to_run.executable
     runfiles = ctx.attr.executable[DefaultInfo].default_runfiles
@@ -42,8 +42,8 @@ def _static_binary_tarball_impl(ctx):
 
     return [DefaultInfo(files = depset([layer_out]), runfiles = ctx.runfiles(files = [layer_out]))]
 
-static_binary_tarball = rule(
-    implementation = _static_binary_tarball_impl,
+binary_tarball = rule(
+    implementation = _binary_tarball_impl,
     doc = """
         Build a tarball from a binary given in `executable` and its runfiles. Everything will be put under
         /app with the same filesystem layout as if run under `bazel run`. So if your executable works under bazel run,
@@ -58,7 +58,7 @@ static_binary_tarball = rule(
             cfg = "target",
         ),
         "_container_binary": attr.label(
-            default = Label("//build/static_binary_tarball"),
+            default = Label("//build/binary_tarball"),
             cfg = "exec",
             executable = True,
             allow_files = True,

@@ -23,7 +23,7 @@ proto_library(
 
 go_proto_library(
     name = "spec_go_proto",
-    importpath = "source.monogon.dev/build/static_binary_tarball/spec",
+    importpath = "source.monogon.dev/build/binary_tarball/spec",
     proto = ":spec_proto",
     visibility = ["//visibility:public"],
 )
@@ -31,6 +31,6 @@ go_proto_library(
 go_library(
     name = "spec",
     embed = [":spec_go_proto"],
-    importpath = "source.monogon.dev/build/static_binary_tarball/spec",
+    importpath = "source.monogon.dev/build/binary_tarball/spec",
     visibility = ["//visibility:public"],
 )

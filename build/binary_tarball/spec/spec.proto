@@ -16,9 +16,9 @@
 
 syntax = "proto3";
 
-package build.static_binary_tarball.spec;
+package build.binary_tarball.spec;
 
-// Spec is a spec of what goes into a static_binary_tarball
+// Spec is a spec of what goes into a binary_tarball
 message Spec {
   repeated File file = 1;
 }

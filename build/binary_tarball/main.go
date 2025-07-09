@@ -14,7 +14,7 @@ import (
 
 	"google.golang.org/protobuf/encoding/prototext"
 
-	"source.monogon.dev/build/static_binary_tarball/spec"
+	"source.monogon.dev/build/binary_tarball/spec"
 )
 
 var (

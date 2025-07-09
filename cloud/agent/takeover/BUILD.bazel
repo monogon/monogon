@@ -1,5 +1,5 @@
 load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_library")
-load("//build/static_binary_tarball:def.bzl", "static_binary_tarball")
+load("//build/binary_tarball:def.bzl", "binary_tarball")
 load("//osbase/build/genproductinfo:defs.bzl", "product_info")
 load("//osbase/build/mkcpio:def.bzl", "node_initramfs")
 
@@ -32,8 +32,7 @@ go_binary(
     visibility = ["//visibility:public"],
 )
 
-# Used by container_images, forces a static build
-static_binary_tarball(
+binary_tarball(
     name = "takeover_layer",
     executable = ":takeover",
     visibility = ["//visibility:public"],
