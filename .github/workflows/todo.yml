@@ -19,4 +19,4 @@ jobs:
         env:
           MANUAL_COMMIT_REF: ${{ inputs.MANUAL_COMMIT_REF }}
           MANUAL_BASE_REF: ${{ inputs.MANUAL_BASE_REF }}
-          INPUT_IGNORE: "MODULE\.bazel\.lock"
+          INPUT_IGNORE: "MODULE\\.bazel\\.lock"
