@@ -4,6 +4,32 @@ exports_files(glob([
     "**/*",
 ]))
 
+filegroup(
+    name = "python3.12",
+    srcs = [
+        ":bin/python3.12",
+    ],
+    data = glob([
+        "lib/python3.12/**",
+    ]),
+)
+
+filegroup(
+    name = "python3.12_headers",
+    srcs = glob([
+        "include/python3.12/**",
+    ]),
+)
+
+filegroup(
+    name = "python3.12_libs",
+    srcs = glob([
+        "lib/python3.12/**",
+    ]) + [
+        ":lib/libpython3.12.a",
+    ],
+)
+
 # rules_perl expects all files as src entry, this does prevent us using
 # $(execpath) which is why we have another filegroup that uses this as
 # data dep.

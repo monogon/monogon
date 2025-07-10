@@ -1,0 +1,64 @@
+We have to set use_default_shell_env to find bash via /usr/bin/env,
+as without it we don't have PATH available. The old behavior is fine
+for NixOS as their /usr/bin/env tries to use /run/current-system/sw/bin/bash
+which exist on NixOS, but not in our CI or any other nixos/nix container.
+
+diff --git a/oci/private/image.bzl b/oci/private/image.bzl
+--- a/oci/private/image.bzl
++++ b/oci/private/image.bzl
+@@ -131,8 +131,9 @@
+             regctl.regctl_info.binary,
+         ],
+         mnemonic = "OCIDescriptor",
+         progress_message = "OCI Descriptor %{input}",
++        use_default_shell_env = True,
+     )
+     return descriptor
+ 
+ def _oci_image_impl(ctx):
+@@ -263,8 +264,9 @@
+         mnemonic = "OCIImage",
+         progress_message = "OCI Image %{label}",
+         resource_set = resource_set(ctx.attr),
+         toolchain = None,
++        use_default_shell_env = True,
+     )
+ 
+     return [
+         DefaultInfo(
+diff --git a/oci/private/image_index.bzl b/oci/private/image_index.bzl
+--- a/oci/private/image_index.bzl
++++ b/oci/private/image_index.bzl
+@@ -129,8 +129,9 @@
+         tools = [jq.jqinfo.bin, coreutils.coreutils_info.bin],
+         mnemonic = "OCIIndex",
+         progress_message = "OCI Index %{label}",
+         toolchain = None,
++        use_default_shell_env = True,
+     )
+ 
+     return DefaultInfo(files = depset([output]))
+ 
+diff --git a/oci/private/load.bzl b/oci/private/load.bzl
+--- a/oci/private/load.bzl
++++ b/oci/private/load.bzl
+@@ -179,8 +179,9 @@
+             jq.jqinfo.bin,
+             coreutils.coreutils_info.bin,
+         ],
+         mnemonic = "OCITarballManifest",
++        use_default_shell_env = True,
+     )
+ 
+     # This action produces a large output and should rarely be used as it puts load on the cache.
+     # It will only run if the "tarball" output_group is explicitly requested
+@@ -195,8 +196,9 @@
+         inputs = tar_inputs,
+         outputs = [tarball],
+         arguments = [tar_args],
+         mnemonic = "OCITarball",
++        use_default_shell_env = True,
+     )
+ 
+     # Create an executable runner script that will create the tarball at runtime,
+     # as opposed to at build to avoid uploading large artifacts to remote cache.

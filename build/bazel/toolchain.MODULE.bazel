@@ -3,17 +3,17 @@ http_archive = use_repo_rule("@bazel_tools//tools/build_defs/repo:http.bzl", "ht
 http_archive(
     name = "toolchain-bundle-x86_64-unknown-linux-musl",
     build_file = "//build/toolchain/toolchain-bundle:toolchain-bundle.bzl",
-    integrity = "sha256-tpbvNL5S4t2WLkcj027sghf8tEzVJFL1e5leyx8JkCI=",
+    integrity = "sha256-7wceZhsWdZLXT2KW05NmmbUCYKA+DmudjPqTO3qX29I=",
     urls = [
-        "https://storage.googleapis.com/monogon-infra-public/toolchain/toolchain-bundle-x86_64-unknown-linux-musl-release-25.05.ffdcefdde9a4e540d1c875767da0e382e1ccf460.tar.zst",
+        "https://storage.googleapis.com/monogon-infra-public/toolchain/9iv889bzlsg1dglkmqdnabak5ffbp2km-toolchain/toolchain-bundle-x86_64-unknown-linux-musl.tar.zst",
     ],
 )
 
 http_archive(
     name = "toolchain-bundle-aarch64-unknown-linux-musl",
     build_file = "//build/toolchain/toolchain-bundle:toolchain-bundle.bzl",
-    integrity = "sha256-6caDQ8S+DGXHy2xSAhfRu5EXFLZ7NNqbtkY6o1i33F4=",
+    integrity = "sha256-7ckBNZ5186xDDsDlsUVMNIciY9nECfH70KoB/FUZKRc=",
     urls = [
-        "https://storage.googleapis.com/monogon-infra-public/toolchain/toolchain-bundle-aarch64-unknown-linux-musl-release-25.05.ffdcefdde9a4e540d1c875767da0e382e1ccf460.tar.zst",
+        "https://storage.googleapis.com/monogon-infra-public/toolchain/9iv889bzlsg1dglkmqdnabak5ffbp2km-toolchain/toolchain-bundle-aarch64-unknown-linux-musl.tar.zst",
     ],
 )

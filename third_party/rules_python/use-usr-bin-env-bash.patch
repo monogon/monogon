@@ -1,0 +1,12 @@
+The build environment is not guaranteed to have /bin/bash, especially on NixOS
+or in our CI runner. Use /usr/bin/env to resolve it from PATH.
+diff --git a/python/private/stage1_bootstrap_template.sh b/python/private/stage1_bootstrap_template.sh
+--- a/python/private/stage1_bootstrap_template.sh
++++ b/python/private/stage1_bootstrap_template.sh
+@@ -1,5 +1,5 @@
+-#!/bin/bash
++#!/usr/bin/env bash
+ 
+ set -e
+ 
+ if [[ -n "${RULES_PYTHON_BOOTSTRAP_VERBOSE:-}" ]]; then

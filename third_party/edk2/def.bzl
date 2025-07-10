@@ -16,6 +16,7 @@ TOOLCHAINS = [
 ]
 
 def _edk2_impl(ctx):
+    py_runtime = ctx.toolchains["@bazel_tools//tools/python:toolchain_type"].py3_runtime
     _, libuuid_gen = detect_roots(ctx.attr._libuuid[CcInfo].compilation_context.direct_public_headers)
     extra_env = {
         "HOSTLDFLAGS": " -L ".join(
@@ -32,6 +33,7 @@ def _edk2_impl(ctx):
         ),
         "CROSS_LIB_UUID_INC": libuuid_gen.rsplit("/", 1)[0],
         "CROSS_LIB_UUID": detect_root(ctx.attr._libuuid.files.to_list()).rsplit("/", 1)[0],
+        "PYTHON_COMMAND": py_runtime.interpreter.path,
     }
 
     inputs = depset(
@@ -72,7 +74,7 @@ def _edk2_impl(ctx):
     vars = ctx.actions.declare_file("VARS.fd")
     ctx.actions.run_shell(
         outputs = [code, vars],
-        inputs = depset(transitive = [inputs, toolchain_inputs]),
+        inputs = depset(transitive = [inputs, toolchain_inputs, py_runtime.files]),
         env = merge_env(toolchain_env, extra_env),
         progress_message = "Building EDK2 firmware",
         mnemonic = "BuildEDK2Firmware",
@@ -135,5 +137,7 @@ edk2 = rule(
         ),
     },
     fragments = ["cpp"],
-    toolchains = TOOLCHAINS + use_cc_toolchain(),
+    toolchains = [
+        "@bazel_tools//tools/python:toolchain_type",
+    ] + TOOLCHAINS + use_cc_toolchain(),
 )

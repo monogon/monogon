@@ -9,6 +9,7 @@ let
           util-linux-minimal = import ./pkgs/util-linux { pkgs = super; };
           bazel-unwrapped = import ./pkgs/bazel { pkgs = super; };
           perl = import ./pkgs/perl { pkgs = super; };
+          bazel_8 = self.callPackage ./pkgs/bazel_8/package.nix { };
           python3Minimal = import ./pkgs/python3 { pkgs = super; };
           bison = import ./pkgs/bison { pkgs = super; };
         })

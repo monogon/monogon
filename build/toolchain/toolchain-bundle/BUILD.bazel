@@ -1,4 +1,7 @@
 load("@rules_perl//perl:toolchain.bzl", "perl_toolchain")
+load("@rules_python//python:py_exec_tools_toolchain.bzl", "py_exec_tools_toolchain")
+load("@rules_python//python:py_runtime.bzl", "py_runtime")
+load("@rules_python//python:py_runtime_pair.bzl", "py_runtime_pair")
 load(":toolchain.bzl", "SUPPORTED_TARGETS", "TOOLCHAINS", "toolchain_for")
 
 package(default_visibility = ["//visibility:public"])
@@ -9,6 +12,42 @@ package(default_visibility = ["//visibility:public"])
         config = config,
     )
     for name, config in TOOLCHAINS.items()
+]
+
+[
+    [
+        py_runtime(
+            name = "rules_python_%s_python3_12_runtime" % target.tuple,
+            interpreter = "@toolchain-bundle-%s//:python3.12" % target.triple,
+            interpreter_version_info = {
+                "major": str(3),
+                "minor": str(12),
+                "micro": str(0),
+            },
+            python_version = "PY3",
+        ),
+        py_runtime_pair(
+            name = "rules_python_%s_python3_12_runtime_pair" % target.tuple,
+            py3_runtime = ":rules_python_%s_python3_12_runtime" % target.tuple,
+        ),
+        py_exec_tools_toolchain(
+            name = "rules_python_%s_python3_12_exec_tools_toolchain_impl" % target.tuple,
+            exec_interpreter = ":rules_python_%s_python3_12_runtime_pair" % target.tuple,
+        ),
+        toolchain(
+            name = "rules_python_%s_python3_12_runtime_toolchain" % target.tuple,
+            exec_compatible_with = target.constrain,
+            toolchain = ":rules_python_%s_python3_12_runtime_pair" % target.tuple,
+            toolchain_type = "@rules_python//python:toolchain_type",
+        ),
+        toolchain(
+            name = "rules_python_%s_python3_12_exec_tools_toolchain" % target.tuple,
+            exec_compatible_with = target.constrain,
+            toolchain = ":rules_python_%s_python3_12_exec_tools_toolchain_impl" % target.tuple,
+            toolchain_type = "@rules_python//python:exec_tools_toolchain_type",
+        ),
+    ]
+    for target in SUPPORTED_TARGETS
 ]
 
 # rules_perl wiring

@@ -184,6 +184,10 @@ OVERRIDES = {
         ],
     },
     "github.com/bytecodealliance/wasmtime-go/v14": {
+        # wasmtime brings its own BUILD files and for some reason,
+        # Bazel regenerates them in the nixos/nix container but not on
+        # NixOS. We disable replacing the existing directives to fix this.
+        "build_file_generation": "off",
         "directives": [
             "gazelle:go_naming_convention go_default_library",
         ],

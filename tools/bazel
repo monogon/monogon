@@ -34,9 +34,8 @@ if [[ -n "${USE_NIX_SHELL:-}" ]]; then
   # Jump to project root since bwrap hangs if we aren't there
   cd "${DIR}/../"
 
-  export COMMAND="bazel $*"
   export PWD="$OLDPWD"
-  exec nix-shell
+  exec nix-shell --command "bazel $*"
 fi
 
 prechecks() {

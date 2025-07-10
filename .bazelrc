@@ -71,6 +71,12 @@ build --experimental_exclude_starlark_flags_from_exec_config
 build --experimental_propagate_custom_flag=@@rules_go+//go/private:request_nogo
 build --experimental_propagate_custom_flag=@@rules_go+//go/private:bootstrap_nogo
 
+# rules_python uses host python for bootstrapping.
+# Override to use a shell script for this.
+# https://github.com/bazelbuild/rules_python/issues/691
+build --@rules_python//python/config_settings:bootstrap_impl=script
+build --experimental_propagate_custom_flag=@@rules_python+//python/config_settings:bootstrap_impl
+
 # No local CPP toolchain resolution. In our sandbox root, it doesn't make sense -
 # anything auto-detected during analysis stage is on the host instead of the sandbox.
 # Sysroot rebuild is pure Go and doesn't need it either.
