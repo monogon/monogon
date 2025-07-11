@@ -54,6 +54,18 @@ func init() {
 			panic(err)
 		}
 	}
+	// When running QEMU with snapshot=on set, QEMU creates a copy of the
+	// provided file in $TMPDIR. If $TMPDIR is set to /tmp, it will always
+	// be overridden to /var/tmp. This creates an issue for us, as the
+	// bazel tests only wire up /tmp, with /var/tmp being unaccessible
+	// because of permissions. Bazel provides $TEST_TMPDIR for this
+	// usecase, which we resolve to an absolute path and then override
+	// $TMPDIR.
+	tmpDir, err := filepath.Abs(os.Getenv("TEST_TMPDIR"))
+	if err != nil {
+		panic(err)
+	}
+	os.Setenv("TMPDIR", tmpDir)
 }
 
 // Each variable in this block points to either a test dependency or a side
