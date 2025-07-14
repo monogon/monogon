@@ -117,6 +117,7 @@ erofs_image(
 
 verity_image(
     name = "verity_rootfs",
+    salt = ":product_info",
     source = ":rootfs",
 )
 

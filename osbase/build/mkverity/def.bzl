@@ -17,22 +17,23 @@ def _verity_image_impl(ctx):
     # Run mkverity.
     image = ctx.actions.declare_file(ctx.attr.name + ".img")
     table = ctx.actions.declare_file(ctx.attr.name + ".dmt")
+    inputs = [ctx.file.source]
+    args = ctx.actions.args()
+    args.add("-input", ctx.file.source)
+    args.add("-output", image)
+    if ctx.file.salt:
+        args.add("-salt", ctx.file.salt)
+        inputs.append(ctx.file.salt)
+    args.add("-table", table)
+    args.add("-data_alias", ctx.attr.rootfs_partlabel)
+    args.add("-hash_alias", ctx.attr.rootfs_partlabel)
     ctx.actions.run(
         mnemonic = "GenVerityImage",
         progress_message = "Generating a dm-verity image: {}".format(image.short_path),
-        inputs = [ctx.file.source],
-        outputs = [
-            image,
-            table,
-        ],
+        inputs = inputs,
+        outputs = [image, table],
         executable = ctx.file._mkverity,
-        arguments = [
-            "-input=" + ctx.file.source.path,
-            "-output=" + image.path,
-            "-table=" + table.path,
-            "-data_alias=" + ctx.attr.rootfs_partlabel,
-            "-hash_alias=" + ctx.attr.rootfs_partlabel,
-        ],
+        arguments = [args],
     )
 
     return [
@@ -55,6 +56,16 @@ verity_image = rule(
     attrs = {
         "source": attr.label(
             doc = "A source image.",
+            allow_single_file = True,
+            mandatory = True,
+        ),
+        "salt": attr.label(
+            doc = """
+                A file which will be hashed to generate the salt.
+                This should be a small file which is different for each
+                released image, but which only changes when the source also
+                changes. The product info file is a good choice for this.
+            """,
             allow_single_file = True,
         ),
         "rootfs_partlabel": attr.string(

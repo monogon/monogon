@@ -26,7 +26,7 @@ import (
 // image. Then, the same contents are verity-encoded and appended to the
 // output image. The verity superblock is written only if wsb is true. It
 // returns either a dm-verity target table, or an error.
-func createImage(dataImagePath, outputImagePath string, wsb bool) (*verity.MappingTable, error) {
+func createImage(dataImagePath, outputImagePath, saltPath string, wsb bool) (*verity.MappingTable, error) {
 	// Hardcode both the data block size and the hash block size as 4096 bytes.
 	bs := uint32(4096)
 
@@ -66,20 +66,20 @@ func createImage(dataImagePath, outputImagePath string, wsb bool) (*verity.Mappi
 		return nil, err
 	}
 
-	// Hash the input data for use as the salt, then rewind dataImage. The purpose
-	// of the salt is to prevent reuse of collisions across different images. 16
-	// bytes is enough for this. We use a hash of the input instead of generating
-	// random bytes to make the build reproducible.
-	dataHash := sha256.New()
-	_, err = io.Copy(dataHash, dataImage)
+	// Generate the salt by hashing the salt file. The purpose of the salt is to
+	// prevent reuse of collisions across different images. 16 bytes is enough for
+	// this. We use a hash instead of generating random bytes to make the build
+	// reproducible.
+	saltFile, err := os.Open(saltPath)
+	if err != nil {
+		return nil, fmt.Errorf("while opening the salt file: %w", err)
+	}
+	saltHash := sha256.New()
+	_, err = io.Copy(saltHash, saltFile)
 	if err != nil {
 		return nil, err
 	}
-	_, err = dataImage.Seek(0, io.SeekStart)
-	if err != nil {
-		return nil, err
-	}
-	salt := dataHash.Sum(nil)[:16]
+	salt := saltHash.Sum(nil)[:16]
 
 	// Write outputImage contents. Start with initializing a verity encoder,
 	// setting outputImage as its output.
@@ -112,6 +112,7 @@ func createImage(dataImagePath, outputImagePath string, wsb bool) (*verity.Mappi
 var (
 	input           = flag.String("input", "", "input disk image (required)")
 	output          = flag.String("output", "", "output disk image with Verity metadata appended (required)")
+	salt            = flag.String("salt", "", "input file from which the salt is generated")
 	dataDeviceAlias = flag.String("data_alias", "", "data device alias used in the mapping table")
 	hashDeviceAlias = flag.String("hash_alias", "", "hash device alias used in the mapping table")
 	table           = flag.String("table", "", "a file the mapping table will be saved to; disables stdout")
@@ -128,8 +129,13 @@ func main() {
 		log.Fatalf("-output must be set.")
 	}
 
+	saltPath := *salt
+	if saltPath == "" {
+		saltPath = *input
+	}
+
 	// Build the image.
-	mt, err := createImage(*input, *output, false)
+	mt, err := createImage(*input, *output, saltPath, false)
 	if err != nil {
 		log.Fatal(err)
 	}
