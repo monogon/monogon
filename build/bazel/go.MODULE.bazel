@@ -1,5 +1,5 @@
 go_sdk = use_extension("@io_bazel_rules_go//go:extensions.bzl", "go_sdk")
-go_sdk.download(version = "1.24.0")
+go_sdk.from_file(go_mod = "//:go.mod")
 go_sdk.nogo(
     includes = ["all"],
     nogo = "//build/analysis:nogo",
