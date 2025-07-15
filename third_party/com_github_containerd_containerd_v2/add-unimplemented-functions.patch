@@ -1,0 +1,59 @@
+Add unimplemented function for CRI compat.
+
+
+diff --git a/internal/cri/instrument/instrumented_service.go b/internal/cri/instrument/instrumented_service.go
+--- a/internal/cri/instrument/instrumented_service.go
++++ b/internal/cri/instrument/instrumented_service.go
+@@ -17,8 +17,9 @@
+ package instrument
+ 
+ import (
+ 	"context"
++	"errors"
+ 
+ 	"github.com/containerd/errdefs"
+ 	"github.com/containerd/errdefs/pkg/errgrpc"
+ 	"github.com/containerd/log"
+@@ -641,4 +642,8 @@
+ 	}()
+ 	res, err = in.c.RuntimeConfig(ctx, r)
+ 	return res, errgrpc.ToGRPC(err)
+ }
++
++func (in *instrumentedService) UpdatePodSandboxResources(ctx context.Context, r *runtime.UpdatePodSandboxResourcesRequest) (res *runtime.UpdatePodSandboxResourcesResponse, err error) {
++	return nil, errors.New("not implemented yet")
++}
+diff --git a/internal/cri/server/sandbox_update_resources.go b/internal/cri/server/sandbox_update_resources.go
+new file mode 100644
+index 000000000000..0fcd2c7c566c
+--- /dev/null
++++ b/internal/cri/server/sandbox_update_resources.go
+@@ -0,0 +1,28 @@
++/*
++   Copyright The containerd Authors.
++
++   Licensed under the Apache License, Version 2.0 (the "License");
++   you may not use this file except in compliance with the License.
++   You may obtain a copy of the License at
++
++       http://www.apache.org/licenses/LICENSE-2.0
++
++   Unless required by applicable law or agreed to in writing, software
++   distributed under the License is distributed on an "AS IS" BASIS,
++   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++   See the License for the specific language governing permissions and
++   limitations under the License.
++*/
++
++package server
++
++import (
++	"context"
++	"errors"
++
++	runtime "k8s.io/cri-api/pkg/apis/runtime/v1"
++)
++
++func (c *criService) UpdatePodSandboxResources(ctx context.Context, r *runtime.UpdatePodSandboxResourcesRequest) (*runtime.UpdatePodSandboxResourcesResponse, error) {
++	return nil, errors.New("not implemented yet")
++}

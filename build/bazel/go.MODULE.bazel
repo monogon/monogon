@@ -86,6 +86,7 @@ use_repo(
     "io_k8s_cli_runtime",
     "io_k8s_client_go",
     "io_k8s_component_base",
+    "io_k8s_klog_v2",
     "io_k8s_kubectl",
     "io_k8s_kubelet",
     "io_k8s_kubernetes",
@@ -116,6 +117,9 @@ OVERRIDES = {
         "directives": [
             "gazelle:proto disable",
             "gazelle:build_tags no_aufs,no_btrfs,no_devmapper,no_zfs",
+        ],
+        "pre_patches": [
+            "//third_party/com_github_containerd_containerd_v2:add-unimplemented-functions.patch",
         ],
     },
     "github.com/containerd/cgroups/v3": {
@@ -170,9 +174,6 @@ OVERRIDES = {
     "github.com/google/cadvisor": {
         "directives": [
             "gazelle:proto disable_global",
-        ],
-        "pre_patches": [
-            "//third_party/com_github_google_cadvisor:cadvisor-errdefs1.patch",
         ],
     },
     "github.com/sqlc-dev/sqlc": {
@@ -379,11 +380,6 @@ OVERRIDES = {
     "github.com/seccomp/libseccomp-golang": {
         "patches": [
             "//third_party/com_github_seccomp_libseccomp_golang:libseccomp.patch",
-        ],
-    },
-    "github.com/vishvananda/netlink": {
-        "patches": [
-            "//third_party/com_github_vishvananda_netlink:netlink-psample.patch",
         ],
     },
     "gvisor.dev/gvisor": {

@@ -27,6 +27,7 @@ go_library(
         "//osbase/logbuffer",
         "//osbase/logtree/proto",
         "@com_github_mitchellh_go_wordwrap//:go-wordwrap",
+        "@io_k8s_klog_v2//:klog",
         "@org_golang_google_grpc//grpclog",
         "@org_golang_google_protobuf//types/known/timestamppb",
         "@org_uber_go_zap//:zap",

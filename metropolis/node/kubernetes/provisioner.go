@@ -38,6 +38,7 @@ import (
 	"source.monogon.dev/go/logging"
 	"source.monogon.dev/metropolis/node/core/localstorage"
 	"source.monogon.dev/osbase/fsquota"
+	"source.monogon.dev/osbase/logtree"
 	"source.monogon.dev/osbase/supervisor"
 )
 
@@ -85,6 +86,8 @@ type csiProvisionerServer struct {
 // queue. Queues are being worked on by only one worker to limit load and avoid
 // complicated locking infrastructure. Failed items are requeued.
 func (p *csiProvisionerServer) Run(ctx context.Context) error {
+	p.logger = supervisor.Logger(ctx)
+
 	// The recorder is used to log Kubernetes events for successful or failed
 	// volume provisions. These events then show up in `kubectl describe pvc`
 	// and can be used by admins to debug issues with this provisioner.
@@ -95,15 +98,15 @@ func (p *csiProvisionerServer) Run(ctx context.Context) error {
 	p.pvcInformer = p.InformerFactory.Core().V1().PersistentVolumeClaims()
 	p.pvInformer = p.InformerFactory.Core().V1().PersistentVolumes()
 	p.storageClassInformer = p.InformerFactory.Storage().V1().StorageClasses()
-	p.pvcMutationCache = cache.NewIntegerResourceVersionMutationCache(p.pvcInformer.Informer().GetStore(), nil, time.Minute, false)
-	p.pvMutationCache = cache.NewIntegerResourceVersionMutationCache(p.pvInformer.Informer().GetStore(), nil, time.Minute, false)
+
+	klogger := logtree.NewKlogLogger(p.logger)
+	p.pvcMutationCache = cache.NewIntegerResourceVersionMutationCache(klogger, p.pvcInformer.Informer().GetStore(), nil, time.Minute, false)
+	p.pvMutationCache = cache.NewIntegerResourceVersionMutationCache(klogger, p.pvInformer.Informer().GetStore(), nil, time.Minute, false)
 
 	p.claimQueue = workqueue.NewTypedDelayingQueue[string]()
 	p.claimRateLimiter = workqueue.NewTypedItemExponentialFailureRateLimiter[string](time.Second, 5*time.Minute)
 	p.claimNextTry = make(map[string]time.Time)
 	p.pvQueue = workqueue.NewTypedRateLimitingQueue(workqueue.DefaultTypedControllerRateLimiter[string]())
-
-	p.logger = supervisor.Logger(ctx)
 
 	p.pvcInformer.Informer().SetWatchErrorHandler(func(_ *cache.Reflector, err error) {
 		p.logger.Errorf("pvcInformer watch error: %v", err)

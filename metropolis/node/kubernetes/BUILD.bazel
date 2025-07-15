@@ -43,6 +43,7 @@ go_library(
         "//osbase/event/memory",
         "//osbase/fileargs",
         "//osbase/fsquota",
+        "//osbase/logtree",
         "//osbase/loop",
         "//osbase/net/dns/kubernetes",
         "//osbase/supervisor",

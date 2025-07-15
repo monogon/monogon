@@ -8,10 +8,10 @@ Subject: [PATCH] Provide native mounter implementation for Linux
  1 file changed, 140 insertions(+)
 
 diff --git a/mount_linux.go b/mount_linux.go
-index 541af2c391e..23523bf5d30 100644
+index 9c0b6d5..542d0e3 100644
 --- a/mount_linux.go
 +++ b/mount_linux.go
-@@ -70,6 +70,8 @@ type Mounter struct {
+@@ -69,6 +69,8 @@ type Mounter struct {
  	withSystemd                *bool
  	trySystemd                 bool
  	withSafeNotMountedBehavior bool
@@ -20,7 +20,7 @@ index 541af2c391e..23523bf5d30 100644
  }
  
  var _ MounterForceUnmounter = &Mounter{}
-@@ -82,6 +84,8 @@ func New(mounterPath string) Interface {
+@@ -81,6 +83,8 @@ func New(mounterPath string) Interface {
  		mounterPath:                mounterPath,
  		trySystemd:                 true,
  		withSafeNotMountedBehavior: detectSafeNotMountedBehavior(),
@@ -29,7 +29,7 @@ index 541af2c391e..23523bf5d30 100644
  	}
  }
  
-@@ -94,6 +98,8 @@ func NewWithoutSystemd(mounterPath string) Interface {
+@@ -93,6 +97,8 @@ func NewWithoutSystemd(mounterPath string) Interface {
  		mounterPath:                mounterPath,
  		trySystemd:                 false,
  		withSafeNotMountedBehavior: detectSafeNotMountedBehavior(),
@@ -38,8 +38,8 @@ index 541af2c391e..23523bf5d30 100644
  	}
  }
  
-@@ -165,6 +171,29 @@ func (mounter *Mounter) bindMountSensitive(mounterPath string, mountCmd string,
- 	}
+@@ -155,6 +161,29 @@ func (mounter *Mounter) bindMountSensitive(mounterPath string, mountCmd string,
+ 	return mounter.doMount(mounterPath, mountCmd, source, target, fstype, bindRemountOpts, bindRemountOptsSensitive, mountFlags, systemdMountRequired)
  }
  
 +func (mounter *Mounter) mountNative(source string, target string, fstype string, options []string, sensitiveOptions []string) error {
@@ -68,7 +68,7 @@ index 541af2c391e..23523bf5d30 100644
  // Mount mounts source to target as fstype with given options. 'source' and 'fstype' must
  // be an empty string in case it's not required, e.g. for remount, or for auto filesystem
  // type, where kernel handles fstype for you. The mount 'options' is a list of options,
-@@ -180,6 +209,10 @@ func (mounter *Mounter) Mount(source string, target string, fstype string, optio
+@@ -170,6 +199,10 @@ func (mounter *Mounter) Mount(source string, target string, fstype string, optio
  // method should be used by callers that pass sensitive material (like
  // passwords) as mount options.
  func (mounter *Mounter) MountSensitive(source string, target string, fstype string, options []string, sensitiveOptions []string) error {
@@ -79,7 +79,7 @@ index 541af2c391e..23523bf5d30 100644
  	// Path to mounter binary if containerized mounter is needed. Otherwise, it is set to empty.
  	// All Linux distros are expected to be shipped with a mount utility that a support bind mounts.
  	mounterPath := ""
-@@ -207,6 +240,9 @@ func (mounter *Mounter) MountSensitiveWithoutSystemd(source string, target strin
+@@ -197,6 +230,9 @@ func (mounter *Mounter) MountSensitiveWithoutSystemd(source string, target strin
  
  // MountSensitiveWithoutSystemdWithMountFlags is the same as MountSensitiveWithoutSystemd with additional mount flags.
  func (mounter *Mounter) MountSensitiveWithoutSystemdWithMountFlags(source string, target string, fstype string, options []string, sensitiveOptions []string, mountFlags []string) error {
@@ -89,7 +89,7 @@ index 541af2c391e..23523bf5d30 100644
  	mounterPath := ""
  	bind, bindOpts, bindRemountOpts, bindRemountOptsSensitive := MakeBindOptsSensitive(options, sensitiveOptions)
  	if bind {
-@@ -225,6 +261,80 @@ func (mounter *Mounter) MountSensitiveWithoutSystemdWithMountFlags(source string
+@@ -215,6 +251,80 @@ func (mounter *Mounter) MountSensitiveWithoutSystemdWithMountFlags(source string
  	return mounter.doMount(mounterPath, defaultMountCommand, source, target, fstype, options, sensitiveOptions, mountFlags, false)
  }
  
@@ -170,7 +170,7 @@ index 541af2c391e..23523bf5d30 100644
  // doMount runs the mount command. mounterPath is the path to mounter binary if containerized mounter is used.
  // sensitiveOptions is an extension of options except they will not be logged (because they may contain sensitive material)
  // systemdMountRequired is an extension of option to decide whether uses systemd mount.
-@@ -340,6 +450,30 @@ func detectSafeNotMountedBehaviorWithExec(exec utilexec.Interface) bool {
+@@ -330,6 +440,30 @@ func detectSafeNotMountedBehaviorWithExec(exec utilexec.Interface) bool {
  	return false
  }
  
@@ -201,7 +201,7 @@ index 541af2c391e..23523bf5d30 100644
  // MakeMountArgs makes the arguments to the mount(8) command.
  // options MUST not contain sensitive material (like passwords).
  func MakeMountArgs(source, target, fstype string, options []string) (mountArgs []string) {
-@@ -410,6 +544,12 @@ func AddSystemdScopeSensitive(systemdRunPath, mountName, command string, args []
+@@ -400,6 +534,12 @@ func AddSystemdScopeSensitive(systemdRunPath, mountName, command string, args []
  // If the mounter has safe "not mounted" behavior, no error will be returned when the target is not a mount point.
  func (mounter *Mounter) Unmount(target string) error {
  	klog.V(4).Infof("Unmounting %s", target)

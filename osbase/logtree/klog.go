@@ -11,6 +11,8 @@ import (
 	"strings"
 	"time"
 
+	"k8s.io/klog/v2"
+
 	"source.monogon.dev/go/logging"
 	"source.monogon.dev/osbase/logbuffer"
 )
@@ -199,4 +201,46 @@ func parseKLogTime(year int, d, t string) (time.Time, error) {
 	// TODO(q3k): add a timezone? This currently behaves as UTC, which is probably
 	// what we want, but we should formalize this.
 	return time.Parse(layout, fmt.Sprintf("%d %s %s", year, d, t))
+}
+
+// klogSink implements klog.LogSink on a logging.Leveld logger.
+type klogSink struct {
+	logging.Leveled
+}
+
+func (k *klogSink) Enabled(level int) bool {
+	return k.V(logging.VerbosityLevel(level)).Enabled()
+}
+
+func (k *klogSink) Error(err error, msg string, keysAndValues ...any) {
+	if err != nil {
+		k.Errorf("%s: %w - %v", msg, err, keysAndValues)
+	} else {
+		k.Errorf("%s: %v", msg, keysAndValues)
+	}
+}
+
+func (k *klogSink) Info(level int, msg string, keysAndValues ...any) {
+	k.Infof("%s: %v", msg, keysAndValues)
+}
+
+func (k *klogSink) Init(info klog.RuntimeInfo) {
+}
+
+// WithName is only need if we would want to wrap the logger with a new
+// name, but we don't need that.
+func (k *klogSink) WithName(name string) klog.LogSink {
+	k.Warning("logtree.klogSink: WithName() called but not implemented. This is a bug!")
+	return k
+}
+
+// WithValues is only need if we would want to wrap the logger with a list
+// of static keys/values, but we don't need that.
+func (k *klogSink) WithValues(keysAndValues ...any) klog.LogSink {
+	k.Warning("logtree.klogSink: WithValues() called but not implemented. This is a bug!")
+	return k
+}
+
+func NewKlogLogger(logger logging.Leveled) klog.Logger {
+	return klog.New(&klogSink{logger})
 }

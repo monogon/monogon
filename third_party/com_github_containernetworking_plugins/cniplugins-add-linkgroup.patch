@@ -8,10 +8,10 @@ Subject: [PATCH] Add linkGroup setting
  1 file changed, 9 insertions(+), 2 deletions(-)
 
 diff --git a/plugins/main/ptp/ptp.go b/plugins/main/ptp/ptp.go
-index 129146f2..aee37b11 100644
+index 9c88d901..e0b283c5 100644
 --- a/plugins/main/ptp/ptp.go
 +++ b/plugins/main/ptp/ptp.go
-@@ -46,6 +46,7 @@ type NetConf struct {
+@@ -47,6 +47,7 @@ type NetConf struct {
  	IPMasq        bool    `json:"ipMasq"`
  	IPMasqBackend *string `json:"ipMasqBackend,omitempty"`
  	MTU           int     `json:"mtu"`
@@ -19,16 +19,16 @@ index 129146f2..aee37b11 100644
  }
  
  func setupContainerVeth(netns ns.NetNS, ifName string, mtu int, pr *current.Result) (*current.Interface, *current.Interface, error) {
-@@ -145,7 +146,7 @@ func setupContainerVeth(netns ns.NetNS, ifName string, mtu int, pr *current.Resu
+@@ -146,7 +147,7 @@ func setupContainerVeth(netns ns.NetNS, ifName string, mtu int, pr *current.Resu
  	return hostInterface, containerInterface, nil
  }
  
 -func setupHostVeth(vethName string, result *current.Result) error {
 +func setupHostVeth(vethName string, group int, result *current.Result) error {
  	// hostVeth moved namespaces and may have a new ifindex
- 	veth, err := netlink.LinkByName(vethName)
+ 	veth, err := netlinksafe.LinkByName(vethName)
  	if err != nil {
-@@ -177,6 +178,12 @@ func setupHostVeth(vethName string, result *current.Result) error {
+@@ -178,6 +179,12 @@ func setupHostVeth(vethName string, result *current.Result) error {
  		}
  	}
  
@@ -41,7 +41,7 @@ index 129146f2..aee37b11 100644
  	return nil
  }
  
-@@ -224,7 +231,7 @@ func cmdAdd(args *skel.CmdArgs) error {
+@@ -225,7 +232,7 @@ func cmdAdd(args *skel.CmdArgs) error {
  		return err
  	}
  

@@ -43,6 +43,5 @@ func (fgs featureGates) AsMap() map[string]bool {
 }
 
 var extraFeatureGates = featureGates{
-	features.UserNamespacesSupport:              true,
 	features.UserNamespacesPodSecurityStandards: true,
 }
