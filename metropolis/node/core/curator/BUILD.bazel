@@ -71,8 +71,6 @@ go_test(
         "state_test.go",
     ],
     embed = [":curator"],
-    # TODO: https://github.com/monogon/monogon/issues/191
-    flaky = True,
     deps = [
         "//metropolis/node",
         "//metropolis/node/core/consensus",
