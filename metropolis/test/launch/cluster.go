@@ -791,6 +791,7 @@ func LaunchCluster(ctx context.Context, opts ClusterOptions) (*Cluster, error) {
 		nodeOpts[i] = opts.Node
 		nodeOpts[i].Name = fmt.Sprintf("node%d", i)
 		nodeOpts[i].SerialPort = newPrefixedStdio(i)
+		nodeOpts[i].RunVNC = true
 	}
 	nodeOpts[0].NodeParameters = &apb.NodeParameters{
 		Cluster: &apb.NodeParameters_ClusterBootstrap_{
