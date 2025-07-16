@@ -122,7 +122,7 @@ verity_image(
 
 efi_unified_kernel_image(
     name = "kernel_efi",
-    cmdline = "console=ttyS0,115200 console=ttyS1,115200 console=ttyAMA0 console=tty0 quiet rootfstype=erofs init=/init loadpin.exclude=kexec-image,kexec-initramfs kernel.unknown_nmi_panic=1",
+    cmdline = "console=ttyS0,115200 console=ttyS1,115200 console=ttyAMA0 quiet rootfstype=erofs init=/init loadpin.exclude=kexec-image,kexec-initramfs kernel.unknown_nmi_panic=1",
     initrd = ["//third_party:ucode"],
     kernel = "//third_party/linux",
     os_release = ":product_info_os_release",
