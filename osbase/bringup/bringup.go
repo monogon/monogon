@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 // Package bringup implements a simple wrapper which configures all default
-// mounts, logging and the corresponding forwarders to tty0 and ttyS0. It
-// then configures a new logtree and starts a supervisor to run the provided
+// mounts, logging and the corresponding forwarder ttyS0. It then configures
+// a new logtree and starts a supervisor to run the provided
 // supervisor.Runnable. Said Runnable is expected to return no error. If it
 // does, the supervisor will exit, an error will be printed and the system will
 // reboot after five seconds.
@@ -257,9 +257,8 @@ type console struct {
 func collectConsoles() []*console {
 	const defaultMaxWidth = 120
 
-	// Add the two standard tty0/ttyS0 consoles
+	// Add the standard ttyS0 console
 	consoles := map[string]int{
-		"tty0":  defaultMaxWidth,
 		"ttyS0": defaultMaxWidth,
 	}
 
