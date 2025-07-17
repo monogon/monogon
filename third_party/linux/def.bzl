@@ -118,7 +118,7 @@ def _linux_image_impl(ctx):
             export BISON_PKGDATADIR=$(realpath $(dirname $BISON)/../share/bison)
             builddir=$(mktemp -d)
             # All source files have the same timestamp, take it from an arbitrary file.
-            build_timestamp=$(date -r {kernel_src}/README)
+            build_timestamp=$(date --utc -r {kernel_src}/README)
 
             mkdir {kernel_src}/.bin
             cp {kconfig} $builddir/.config
