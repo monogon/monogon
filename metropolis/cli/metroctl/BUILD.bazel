@@ -1,6 +1,7 @@
 load("@aspect_bazel_lib//lib:transitions.bzl", "platform_transition_filegroup")
 load("@bazel_skylib//rules:common_settings.bzl", "string_flag")
 load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_library")
+load("//build/platforms:def.bzl", "multiplatform_transition_filegroup")
 load(":defs.bzl", "buildkind")
 
 buildkind(
@@ -149,4 +150,30 @@ go_binary(
     data = [],
     embed = [":metroctl_lib"],
     visibility = ["//metropolis:__subpackages__"],
+)
+
+config_setting(
+    name = "race_enabled",
+    flag_values = {"@io_bazel_rules_go//go/config:race": "True"},
+)
+
+# This target serves as a test that metroctl can be built for all listed
+# platforms.
+multiplatform_transition_filegroup(
+    name = "metroctl_lite_all_platforms",
+    srcs = [":metroctl_lite"],
+    platforms = [
+        "//build/platforms:linux_x86_64",
+        "//build/platforms:linux_aarch64",
+        "@io_bazel_rules_go//go/toolchain:darwin_amd64",
+        "@io_bazel_rules_go//go/toolchain:darwin_arm64",
+        "@io_bazel_rules_go//go/toolchain:windows_amd64",
+        "@io_bazel_rules_go//go/toolchain:windows_arm64",
+    ],
+    target_compatible_with = select({
+        # We can't build this with race enabled because
+        # we don't have a C toolchain for all platforms.
+        ":race_enabled": ["@platforms//:incompatible"],
+        "//conditions:default": [],
+    }),
 )

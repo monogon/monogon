@@ -22,10 +22,6 @@ pipeline {
                         echo "Gerrit change: ${GERRIT_CHANGE_URL}"
                         sh "git clean -fdx -e '/bazel-*'"
                         sh "JENKINS_NODE_COOKIE=dontKillMe tools/bazel --bazelrc=.bazelrc.ci test //..."
-                        sh "JENKINS_NODE_COOKIE=dontKillMe tools/bazel --bazelrc=.bazelrc.ci build  --//metropolis/cli/metroctl:buildkind=lite --platforms=@io_bazel_rules_go//go/toolchain:darwin_arm64 //metropolis/cli/metroctl"
-                        sh "JENKINS_NODE_COOKIE=dontKillMe tools/bazel --bazelrc=.bazelrc.ci build  --//metropolis/cli/metroctl:buildkind=lite --platforms=@io_bazel_rules_go//go/toolchain:darwin_amd64 //metropolis/cli/metroctl"
-                        sh "JENKINS_NODE_COOKIE=dontKillMe tools/bazel --bazelrc=.bazelrc.ci build  --//metropolis/cli/metroctl:buildkind=lite --platforms=@io_bazel_rules_go//go/toolchain:windows_arm64 //metropolis/cli/metroctl"
-                        sh "JENKINS_NODE_COOKIE=dontKillMe tools/bazel --bazelrc=.bazelrc.ci build  --//metropolis/cli/metroctl:buildkind=lite --platforms=@io_bazel_rules_go//go/toolchain:windows_amd64 //metropolis/cli/metroctl"
                         sh "JENKINS_NODE_COOKIE=dontKillMe tools/bazel --bazelrc=.bazelrc.ci test --config dbg //..."
                         sh "JENKINS_NODE_COOKIE=dontKillMe tools/bazel --bazelrc=.bazelrc.ci test --config race //..."
                     }
