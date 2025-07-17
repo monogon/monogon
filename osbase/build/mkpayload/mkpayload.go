@@ -31,22 +31,25 @@ func (l *stringList) Set(value string) error {
 	return nil
 }
 
+type section struct {
+	name     string
+	descr    string
+	required bool
+	file     *string
+}
+
 var (
 	// sections contains VMAs and source files of the payload PE sections. The
 	// file path pointers will be filled in when the flags are parsed. It's used
 	// to generate objcopy command line arguments. Entries that are "required"
 	// will cause the program to stop and print usage information if not provided
 	// as command line parameters.
-	sections = map[string]struct {
-		descr    string
-		required bool
-		file     *string
-	}{
-		"linux":   {"Linux kernel image", true, nil},
-		"initrd":  {"initramfs", false, nil},
-		"osrel":   {"OS release file in text format", false, nil},
-		"cmdline": {"a file containting additional kernel command line parameters", false, nil},
-		"splash":  {"a splash screen image in BMP format", false, nil},
+	sections = []section{
+		{"linux", "Linux kernel image", true, nil},
+		{"initrd", "initramfs", false, nil},
+		{"osrel", "OS release file in text format", false, nil},
+		{"cmdline", "a file containting additional kernel command line parameters", false, nil},
+		{"splash", "a splash screen image in BMP format", false, nil},
 	}
 	initrdList      stringList
 	objcopy         = flag.String("objcopy", "", "objcopy executable")
@@ -55,22 +58,32 @@ var (
 	rootfs_dm_table = flag.String("rootfs_dm_table", "", "a text file containing the DeviceMapper rootfs target table")
 )
 
+func getSection(name string) *section {
+	for i := range sections {
+		s := &sections[i]
+		if s.name == name {
+			return s
+		}
+	}
+	return nil
+}
+
 func main() {
 	flag.Var(&initrdList, "initrd", "Path to initramfs, can be given multiple times")
 	// Register parameters related to the EFI payload sections, then parse the flags.
-	for k, v := range sections {
-		if k == "initrd" { // initrd is special because it accepts multiple payloads
+	for i := range sections {
+		s := &sections[i]
+		if s.name == "initrd" { // initrd is special because it accepts multiple payloads
 			continue
 		}
-		v.file = flag.String(k, "", v.descr)
-		sections[k] = v
+		s.file = flag.String(s.name, "", s.descr)
 	}
 	flag.Parse()
 
 	// Ensure all the required parameters are filled in.
-	for n, s := range sections {
+	for _, s := range sections {
 		if s.required && *s.file == "" {
-			log.Fatalf("-%s parameter is missing.", n)
+			log.Fatalf("-%s parameter is missing.", s.name)
 		}
 	}
 	if *objcopy == "" {
@@ -88,7 +101,7 @@ func main() {
 	// parameters that might have been passed through "-cmdline".
 	if *rootfs_dm_table != "" {
 		var cmdline string
-		p := *sections["cmdline"].file
+		p := *getSection("cmdline").file
 		if p != "" {
 			c, err := os.ReadFile(p)
 			if err != nil {
@@ -117,7 +130,7 @@ func main() {
 		}
 		out.Close()
 
-		*sections["cmdline"].file = out.Name()
+		*getSection("cmdline").file = out.Name()
 	}
 
 	var initrdPath string
@@ -140,24 +153,22 @@ func main() {
 		}
 		initrdPath = initrd.Name()
 	}
-	sec := sections["initrd"]
-	sec.file = &initrdPath
-	sections["initrd"] = sec
+	getSection("initrd").file = &initrdPath
 
 	// Execute objcopy
 	var args []string
-	for name, c := range sections {
-		if *c.file != "" {
-			args = append(args, []string{
-				"--add-section", fmt.Sprintf(".%s=%s", name, *c.file),
-				fmt.Sprintf("--set-section-flags=.%s=data", name),
-			}...)
+	for _, s := range sections {
+		if *s.file != "" {
+			args = append(args,
+				"--add-section", fmt.Sprintf(".%s=%s", s.name, *s.file),
+				fmt.Sprintf("--set-section-flags=.%s=data", s.name),
+			)
 		}
 	}
-	args = append(args, []string{
+	args = append(args,
 		*stub,
 		*output,
-	}...)
+	)
 	cmd := exec.Command(*objcopy, args...)
 	cmd.Stderr = os.Stderr
 	cmd.Stdout = os.Stdout
