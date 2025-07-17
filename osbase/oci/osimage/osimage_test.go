@@ -67,7 +67,7 @@ func TestRead(t *testing.T) {
 	}
 	for _, tC := range testCases {
 		t.Run(tC.desc, func(t *testing.T) {
-			image, err := oci.ReadLayout(tC.path)
+			image, err := oci.AsImage(oci.ReadLayout(tC.path))
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -103,11 +103,11 @@ func TestRead(t *testing.T) {
 
 func TestVerification(t *testing.T) {
 	server := registry.NewServer()
-	srcImage, err := oci.ReadLayout(xImageUncompressedPath)
+	srcImage, err := oci.AsImage(oci.ReadLayout(xImageUncompressedPath))
 	if err != nil {
 		t.Fatal(err)
 	}
-	server.AddImage("test/repo", "test-tag", srcImage)
+	server.AddRef("test/repo", "test-tag", srcImage)
 	corrupter := &corruptingServer{handler: server}
 
 	listener, err := net.Listen("tcp", "127.0.0.1:0")
@@ -135,14 +135,14 @@ func TestVerification(t *testing.T) {
 	if err != nil {
 		t.Errorf("Expected reading manifest to succeed when digest not given: %v", err)
 	}
-	_, err = client.Read(context.Background(), "test-tag", srcImage.ManifestDigest)
+	_, err = client.Read(context.Background(), "test-tag", srcImage.Digest())
 	if !strings.Contains(fmt.Sprintf("%v", err), "failed verification") {
 		t.Errorf("Expected failed verification, got %v", err)
 	}
 
 	// Test config verification
 	corrupter.affectedPath = fmt.Sprintf("/v2/test/repo/blobs/%s", srcImage.Manifest.Config.Digest)
-	image, err := client.Read(context.Background(), "test-tag", srcImage.ManifestDigest)
+	image, err := oci.AsImage(client.Read(context.Background(), "test-tag", srcImage.Digest()))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -153,7 +153,7 @@ func TestVerification(t *testing.T) {
 
 	// Test payload verification
 	corrupter.affectedPath = fmt.Sprintf("/v2/test/repo/blobs/%s", srcImage.Manifest.Layers[0].Digest)
-	image, err = client.Read(context.Background(), "test-tag", srcImage.ManifestDigest)
+	image, err = oci.AsImage(client.Read(context.Background(), "test-tag", srcImage.Digest()))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -214,7 +214,7 @@ func (w *corruptingResponseWriter) Write(b []byte) (n int, err error) {
 }
 
 func TestTruncation(t *testing.T) {
-	srcImage, err := oci.ReadLayout(xImageUncompressedPath)
+	srcImage, err := oci.AsImage(oci.ReadLayout(xImageUncompressedPath))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -222,7 +222,7 @@ func TestTruncation(t *testing.T) {
 		image:  srcImage,
 		length: srcImage.Manifest.Config.Size,
 	}
-	truncatedImage, err := oci.NewImage(srcImage.RawManifest, "", blobs)
+	truncatedImage, err := oci.AsImage(oci.NewRef(srcImage.RawManifest(), ocispecv1.MediaTypeImageManifest, "", blobs))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -262,6 +262,14 @@ func (b *truncatedBlobs) Blob(d *ocispecv1.Descriptor) (io.ReadCloser, error) {
 		Closer: reader,
 	}
 	return reader, nil
+}
+
+func (b *truncatedBlobs) Manifest(_ *ocispecv1.Descriptor) ([]byte, error) {
+	return nil, fmt.Errorf("not implemented")
+}
+
+func (b *truncatedBlobs) Blobs(_ *ocispecv1.Descriptor) (oci.Blobs, error) {
+	return b, nil
 }
 
 type readCloser struct {

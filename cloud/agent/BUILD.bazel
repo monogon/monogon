@@ -22,6 +22,7 @@ go_library(
         "//osbase/efivarfs",
         "//osbase/net/proto",
         "//osbase/nvme",
+        "//osbase/oci",
         "//osbase/oci/osimage",
         "//osbase/oci/registry",
         "//osbase/pki",

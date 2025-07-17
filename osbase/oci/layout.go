@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"path"
 	"path/filepath"
 
 	"github.com/opencontainers/go-digest"
@@ -18,8 +17,8 @@ import (
 	"source.monogon.dev/osbase/structfs"
 )
 
-// ReadLayout reads an image from an OS path to an OCI layout directory.
-func ReadLayout(path string) (*Image, error) {
+// ReadLayoutIndex reads the index from an OS path to an OCI layout directory.
+func ReadLayoutIndex(path string) (*Index, error) {
 	// Read the oci-layout marker file.
 	layoutBytes, err := os.ReadFile(filepath.Join(path, "oci-layout"))
 	if err != nil {
@@ -35,41 +34,33 @@ func ReadLayout(path string) (*Image, error) {
 	}
 
 	// Read the index.
-	imageIndexBytes, err := os.ReadFile(filepath.Join(path, "index.json"))
+	indexBytes, err := os.ReadFile(filepath.Join(path, "index.json"))
 	if err != nil {
 		return nil, err
 	}
-	imageIndex := ocispecv1.Index{}
-	err = json.Unmarshal(imageIndexBytes, &imageIndex)
+	blobs := &layoutBlobs{path: path}
+	ref, err := NewRef(indexBytes, ocispecv1.MediaTypeImageIndex, "", blobs)
 	if err != nil {
-		return nil, fmt.Errorf("failed to parse index.json: %w", err)
+		return nil, err
 	}
-	if imageIndex.MediaType != ocispecv1.MediaTypeImageIndex {
-		return nil, fmt.Errorf("unknown index.json mediaType %q", imageIndex.MediaType)
+	return ref.(*Index), nil
+}
+
+// ReadLayout reads a manifest from an OS path to an OCI layout directory.
+// It expects the index to point to exactly one manifest, which is common.
+func ReadLayout(path string) (Ref, error) {
+	index, err := ReadLayoutIndex(path)
+	if err != nil {
+		return nil, err
 	}
-	if len(imageIndex.Manifests) == 0 {
+
+	if len(index.Manifest.Manifests) == 0 {
 		return nil, fmt.Errorf("index.json contains no manifests")
 	}
-	if len(imageIndex.Manifests) != 1 {
+	if len(index.Manifest.Manifests) != 1 {
 		return nil, fmt.Errorf("index.json files containing multiple manifests are not supported")
 	}
-	manifestDescriptor := &imageIndex.Manifests[0]
-	if manifestDescriptor.MediaType != ocispecv1.MediaTypeImageManifest {
-		return nil, fmt.Errorf("unexpected manifest media type %q", manifestDescriptor.MediaType)
-	}
-
-	// Read the image manifest.
-	imageManifestPath, err := layoutBlobPath(path, manifestDescriptor)
-	if err != nil {
-		return nil, err
-	}
-	imageManifestBytes, err := os.ReadFile(imageManifestPath)
-	if err != nil {
-		return nil, fmt.Errorf("failed to read image manifest: %w", err)
-	}
-
-	blobs := &layoutBlobs{path: path}
-	return NewImage(imageManifestBytes, string(manifestDescriptor.Digest), blobs)
+	return index.Ref(&index.Manifest.Manifests[0])
 }
 
 type layoutBlobs struct {
@@ -77,27 +68,43 @@ type layoutBlobs struct {
 }
 
 func (r *layoutBlobs) Blob(descriptor *ocispecv1.Descriptor) (io.ReadCloser, error) {
-	blobPath, err := layoutBlobPath(r.path, descriptor)
+	algorithm, encoded, err := ParseDigest(string(descriptor.Digest))
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse digest in descriptor: %w", err)
+	}
+	return os.Open(filepath.Join(r.path, "blobs", algorithm, encoded))
+}
+
+func (r *layoutBlobs) Manifest(descriptor *ocispecv1.Descriptor) ([]byte, error) {
+	blob, err := r.Blob(descriptor)
 	if err != nil {
 		return nil, err
 	}
-	return os.Open(blobPath)
-}
-
-func layoutBlobPath(layoutPath string, descriptor *ocispecv1.Descriptor) (string, error) {
-	algorithm, encoded, err := ParseDigest(string(descriptor.Digest))
+	defer blob.Close()
+	manifestBytes := make([]byte, descriptor.Size)
+	_, err = io.ReadFull(blob, manifestBytes)
 	if err != nil {
-		return "", fmt.Errorf("failed to parse digest in image manifest: %w", err)
+		return nil, fmt.Errorf("failed to read manifest: %w", err)
 	}
-	return filepath.Join(layoutPath, "blobs", algorithm, encoded), nil
+	return manifestBytes, nil
 }
 
-// CreateLayout builds an OCI layout from an Image.
-func CreateLayout(image *Image) (structfs.Tree, error) {
+func (r *layoutBlobs) Blobs(_ *ocispecv1.Descriptor) (Blobs, error) {
+	return r, nil
+}
+
+// CreateLayout builds an OCI layout from a Ref.
+func CreateLayout(ref Ref) (structfs.Tree, error) {
 	// Build the index.
-	artifactType := image.Manifest.Config.MediaType
-	if artifactType == ocispecv1.MediaTypeImageConfig {
-		artifactType = ""
+	artifactType := ""
+	if image, ok := ref.(*Image); ok {
+		// According to the OCI spec, the artifactType is the config descriptor
+		// mediaType, and is only set when the descriptor references the image
+		// manifest of an artifact.
+		artifactType = image.Manifest.Config.MediaType
+		if artifactType == ocispecv1.MediaTypeImageConfig {
+			artifactType = ""
+		}
 	}
 	imageIndex := ocispecv1.Index{
 		Versioned: ocispec.Versioned{SchemaVersion: 2},
@@ -105,8 +112,8 @@ func CreateLayout(image *Image) (structfs.Tree, error) {
 		Manifests: []ocispecv1.Descriptor{{
 			MediaType:    ocispecv1.MediaTypeImageManifest,
 			ArtifactType: artifactType,
-			Digest:       digest.Digest(image.ManifestDigest),
-			Size:         int64(len(image.RawManifest)),
+			Digest:       digest.Digest(ref.Digest()),
+			Size:         int64(len(ref.RawManifest())),
 		}},
 	}
 	imageIndexBytes, err := json.MarshalIndent(imageIndex, "", "\t")
@@ -120,32 +127,49 @@ func CreateLayout(image *Image) (structfs.Tree, error) {
 		structfs.File("index.json", structfs.Bytes(imageIndexBytes)),
 	}
 
-	algorithm, encoded, err := ParseDigest(image.ManifestDigest)
-	if err != nil {
-		return nil, fmt.Errorf("failed to parse manifest digest: %w", err)
+	hasBlob := make(map[string]bool)
+	blobDirs := make(map[string]*structfs.Node)
+	addBlob := func(digest string, blob structfs.Blob) error {
+		if hasBlob[digest] {
+			// If multiple blobs have the same digest, we only need the first one.
+			return nil
+		}
+		hasBlob[digest] = true
+		algorithm, encoded, err := ParseDigest(digest)
+		if err != nil {
+			return fmt.Errorf("failed to parse manifest digest: %w", err)
+		}
+		blobDir, ok := blobDirs[algorithm]
+		if !ok {
+			blobDir = structfs.Dir(algorithm, nil)
+			err = root.Place("blobs", blobDir)
+			if err != nil {
+				return err
+			}
+			blobDirs[algorithm] = blobDir
+		}
+		// root.PlaceFile is not used here because then running time would be
+		// quadratic in the number of blobs.
+		blobDir.Children = append(blobDir.Children, structfs.File(encoded, blob))
+		return nil
 	}
-	imageManifestPath := path.Join("blobs", algorithm, encoded)
-	err = root.PlaceFile(imageManifestPath, structfs.Bytes(image.RawManifest))
+	err = WalkRefs(string(imageIndex.Manifests[0].Digest), ref, func(digest string, ref Ref) error {
+		err := addBlob(digest, structfs.Bytes(ref.RawManifest()))
+		if err != nil {
+			return err
+		}
+		if image, ok := ref.(*Image); ok {
+			for descriptor := range image.Descriptors() {
+				err := addBlob(string(descriptor.Digest), image.StructfsBlob(descriptor))
+				if err != nil {
+					return err
+				}
+			}
+		}
+		return nil
+	})
 	if err != nil {
 		return nil, err
-	}
-
-	hasBlob := map[string]bool{}
-	for descriptor := range image.Descriptors() {
-		algorithm, encoded, err := ParseDigest(string(descriptor.Digest))
-		if err != nil {
-			return nil, fmt.Errorf("failed to parse digest in image manifest: %w", err)
-		}
-		blobPath := path.Join("blobs", algorithm, encoded)
-		if hasBlob[blobPath] {
-			// If multiple blobs have the same hash, we only need the first one.
-			continue
-		}
-		hasBlob[blobPath] = true
-		err = root.PlaceFile(blobPath, image.StructfsBlob(descriptor))
-		if err != nil {
-			return nil, err
-		}
 	}
 
 	return root, nil

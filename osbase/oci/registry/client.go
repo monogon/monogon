@@ -43,6 +43,12 @@ var (
 	DigestRegexp     = regexp.MustCompile(`^` + digestExpr + `$`)
 )
 
+// unknownManifest can be used to parse the media type from a manifest of
+// unknown type.
+type unknownManifest struct {
+	MediaType string `json:"mediaType,omitempty"`
+}
+
 // Client is an OCI registry client.
 type Client struct {
 	// Transport will be used to make requests. For example, this allows
@@ -69,10 +75,10 @@ type Client struct {
 	bearerToken string
 }
 
-// Read fetches an image manifest from the registry and returns an [oci.Image].
+// Read fetches a manifest from the registry and returns an [oci.Ref].
 //
-// The context is used for the manifest request and all blob requests made
-// through the Image.
+// The context is used for the manifest request and for all blob and manifest
+// requests made through the Ref.
 //
 // At least one of tag and digest must be set. If only tag is set, then you are
 // trusting the registry to return the right content. Otherwise, the digest is
@@ -80,7 +86,7 @@ type Client struct {
 // used in the request, and the digest is used to verify the response. The
 // advantage of fetching by tag is that it allows a pull through cache to
 // display tags to a user inspecting the cache contents.
-func (c *Client) Read(ctx context.Context, tag, digest string) (*oci.Image, error) {
+func (c *Client) Read(ctx context.Context, tag, digest string) (oci.Ref, error) {
 	if !RepositoryRegexp.MatchString(c.Repository) {
 		return nil, fmt.Errorf("invalid repository %q", c.Repository)
 	}
@@ -102,13 +108,14 @@ func (c *Client) Read(ctx context.Context, tag, digest string) (*oci.Image, erro
 	}
 
 	manifestPath := fmt.Sprintf("/v2/%s/manifests/%s", c.Repository, reference)
-	var imageManifestBytes []byte
+	var manifestBytes []byte
+	var manifestMediaType string
 	err := c.retry(ctx, func() error {
 		req, err := c.newGet(manifestPath)
 		if err != nil {
 			return err
 		}
-		req.Header.Set("Accept", ocispecv1.MediaTypeImageManifest)
+		req.Header.Set("Accept", ocispecv1.MediaTypeImageManifest+","+ocispecv1.MediaTypeImageIndex)
 		resp, err := c.doGet(ctx, req)
 		if err != nil {
 			return err
@@ -117,23 +124,74 @@ func (c *Client) Read(ctx context.Context, tag, digest string) (*oci.Image, erro
 			return readClientError(resp, req)
 		}
 		defer resp.Body.Close()
-		imageManifestBytes, err = readFullBody(resp, 50*1024*1024)
+		manifestMediaType = resp.Header.Get("Content-Type")
+		manifestBytes, err = readFullBody(resp, 50*1024*1024)
 		return err
 	})
 	if err != nil {
 		return nil, err
 	}
 
+	// Remove any parameters from the Content-Type header.
+	manifestMediaType, _, _ = strings.Cut(manifestMediaType, ";")
+	switch manifestMediaType {
+	case ocispecv1.MediaTypeImageManifest, ocispecv1.MediaTypeImageIndex:
+		// The Content-Type header is valid, use it.
+	default:
+		// We need to parse the manifest to extract the media type, then parse it
+		// again for that media type.
+		var manifest unknownManifest
+		if err := json.Unmarshal(manifestBytes, &manifest); err != nil {
+			return nil, fmt.Errorf("failed to parse manifest: %w", err)
+		}
+		manifestMediaType = manifest.MediaType
+	}
+
 	blobs := &clientBlobs{
 		ctx:    ctx,
 		client: c,
 	}
-	return oci.NewImage(imageManifestBytes, digest, blobs)
+	return oci.NewRef(manifestBytes, manifestMediaType, digest, blobs)
 }
 
 type clientBlobs struct {
 	ctx    context.Context
 	client *Client
+}
+
+func (r *clientBlobs) Manifest(descriptor *ocispecv1.Descriptor) ([]byte, error) {
+	digest := string(descriptor.Digest)
+	if _, _, err := oci.ParseDigest(digest); err != nil {
+		return nil, err
+	}
+
+	manifestPath := fmt.Sprintf("/v2/%s/manifests/%s", r.client.Repository, digest)
+	var manifestBytes []byte
+	err := r.client.retry(r.ctx, func() error {
+		req, err := r.client.newGet(manifestPath)
+		if err != nil {
+			return err
+		}
+		req.Header.Set("Accept", ocispecv1.MediaTypeImageManifest+","+ocispecv1.MediaTypeImageIndex)
+		resp, err := r.client.doGet(r.ctx, req)
+		if err != nil {
+			return err
+		}
+		if resp.StatusCode != http.StatusOK {
+			return readClientError(resp, req)
+		}
+		defer resp.Body.Close()
+		manifestBytes, err = readKnownSizeBody(resp, int(descriptor.Size))
+		return err
+	})
+	if err != nil {
+		return nil, err
+	}
+	return manifestBytes, nil
+}
+
+func (r *clientBlobs) Blobs(_ *ocispecv1.Descriptor) (oci.Blobs, error) {
+	return r, nil
 }
 
 func (r *clientBlobs) Blob(descriptor *ocispecv1.Descriptor) (io.ReadCloser, error) {
@@ -479,4 +537,16 @@ func readFullBody(resp *http.Response, limit int) ([]byte, error) {
 	default:
 		return nil, backoff.Permanent(fmt.Errorf("HTTP response of size %d exceeds limit of %d bytes", resp.ContentLength, limit))
 	}
+}
+
+func readKnownSizeBody(resp *http.Response, size int) ([]byte, error) {
+	if resp.ContentLength >= 0 && resp.ContentLength != int64(size) {
+		return nil, backoff.Permanent(fmt.Errorf("HTTP response has size %d, expected %d bytes", resp.ContentLength, size))
+	}
+	content := make([]byte, size)
+	_, err := io.ReadFull(resp.Body, content)
+	if err != nil {
+		return nil, err
+	}
+	return content, nil
 }

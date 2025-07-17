@@ -141,7 +141,7 @@ func setup(t *testing.T) []string {
 		Port: 80,
 	}
 
-	imageX, err := oci.ReadLayout(xImageXPath)
+	imageX, err := oci.AsImage(oci.ReadLayout(xImageXPath))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -160,8 +160,8 @@ func setup(t *testing.T) []string {
 	}
 
 	registryServer := registry.NewServer()
-	registryServer.AddImage("testos", "y", imageY)
-	registryServer.AddImage("testos", "z", imageZ)
+	registryServer.AddRef("testos", "y", imageY)
+	registryServer.AddRef("testos", "z", imageZ)
 	registryLis, err := net.Listen("tcp", "127.0.0.1:0")
 	if err != nil {
 		t.Fatal(err)
@@ -225,8 +225,8 @@ func setup(t *testing.T) []string {
 		"-device", "virtio-rng-pci",
 		"-serial", "stdio",
 		"-no-reboot",
-		"-fw_cfg", "name=opt/testos_y_digest,string=" + imageY.ManifestDigest,
-		"-fw_cfg", "name=opt/testos_z_digest,string=" + imageZ.ManifestDigest,
+		"-fw_cfg", "name=opt/testos_y_digest,string=" + imageY.Digest(),
+		"-fw_cfg", "name=opt/testos_z_digest,string=" + imageZ.Digest(),
 	}
 	return qemuArgs
 }

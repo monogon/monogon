@@ -21,6 +21,7 @@ import (
 	metropolisInstall "source.monogon.dev/metropolis/installer/install"
 	"source.monogon.dev/osbase/blockdev"
 	"source.monogon.dev/osbase/efivarfs"
+	"source.monogon.dev/osbase/oci"
 	"source.monogon.dev/osbase/oci/osimage"
 	"source.monogon.dev/osbase/oci/registry"
 	"source.monogon.dev/osbase/structfs"
@@ -75,7 +76,7 @@ func installMetropolis(ctx context.Context, req *apb.MetropolisInstallationReque
 		Repository: req.OsImage.Repository,
 	}
 
-	image, err := client.Read(ctx, req.OsImage.Tag, req.OsImage.Digest)
+	image, err := oci.AsImage(client.Read(ctx, req.OsImage.Tag, req.OsImage.Digest))
 	if err != nil {
 		return fmt.Errorf("failed to fetch OS image: %w", err)
 	}

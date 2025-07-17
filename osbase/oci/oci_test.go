@@ -33,7 +33,7 @@ func TestEmbeddedContent(t *testing.T) {
 }`
 	// Pass nil for blobs, which means reading can only work if it uses the
 	// embedded content.
-	image, err := NewImage([]byte(manifest), "", nil)
+	image, err := AsImage(NewRef([]byte(manifest), "application/vnd.oci.image.manifest.v1+json", "", nil))
 	if err != nil {
 		t.Fatal(err)
 	}

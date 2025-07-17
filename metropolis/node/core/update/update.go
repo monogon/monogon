@@ -32,6 +32,7 @@ import (
 	"source.monogon.dev/osbase/efivarfs"
 	"source.monogon.dev/osbase/gpt"
 	"source.monogon.dev/osbase/kexec"
+	"source.monogon.dev/osbase/oci"
 	"source.monogon.dev/osbase/oci/osimage"
 	"source.monogon.dev/osbase/oci/registry"
 
@@ -289,7 +290,7 @@ func (s *Service) InstallImage(ctx context.Context, imageRef *apb.OSImageRef, wi
 		Repository: imageRef.Repository,
 	}
 
-	image, err := client.Read(downloadCtx, imageRef.Tag, imageRef.Digest)
+	image, err := oci.AsImage(client.Read(downloadCtx, imageRef.Tag, imageRef.Digest))
 	if err != nil {
 		return fmt.Errorf("failed to fetch OS image: %w", err)
 	}

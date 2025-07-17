@@ -115,7 +115,7 @@ func TestMetropolisInstallE2E(t *testing.T) {
 				Host:       registryAddr.String(),
 				Repository: "testos",
 				Tag:        "latest",
-				Digest:     image.ManifestDigest,
+				Digest:     image.Digest(),
 			},
 			NodeParameters: &mpb.NodeParameters{},
 			RootDevice:     "vda",
@@ -179,7 +179,7 @@ func TestMetropolisInstallE2E(t *testing.T) {
 	grpcListenAddr := grpcLis.Addr().(*net.TCPAddr)
 
 	registryServer := registry.NewServer()
-	registryServer.AddImage("testos", "latest", image)
+	registryServer.AddRef("testos", "latest", image)
 
 	registryLis, err := net.Listen("tcp", "127.0.0.1:0")
 	if err != nil {

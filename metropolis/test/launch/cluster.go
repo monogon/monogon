@@ -166,7 +166,7 @@ func setupRuntime(ld, sd string, diskBytes uint64) (*NodeRuntime, error) {
 	}
 
 	// Initialize the node's storage.
-	ociImage, err := oci.ReadLayout(xNodeImagePath)
+	ociImage, err := oci.AsImage(oci.ReadLayout(xNodeImagePath))
 	if err != nil {
 		return nil, fmt.Errorf("failed to read OS image: %w", err)
 	}

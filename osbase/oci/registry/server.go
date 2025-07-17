@@ -15,8 +15,6 @@ import (
 	"strings"
 	"time"
 
-	ocispecv1 "github.com/opencontainers/image-spec/specs-go/v1"
-
 	"source.monogon.dev/osbase/oci"
 	"source.monogon.dev/osbase/structfs"
 )
@@ -49,15 +47,23 @@ func NewServer() *Server {
 	}
 }
 
-// AddImage adds an image to the server in the specified repository.
+// AddRef adds a Ref to the server in the specified repository.
 //
 // If the tag is empty, the image can only be fetched by digest.
-func (s *Server) AddImage(repository string, tag string, image *oci.Image) error {
+func (s *Server) AddRef(repository string, tag string, ref oci.Ref) error {
 	if !RepositoryRegexp.MatchString(repository) {
 		return fmt.Errorf("invalid repository %q", repository)
 	}
 	if tag != "" && !TagRegexp.MatchString(tag) {
 		return fmt.Errorf("invalid tag %q", tag)
+	}
+	var refs []oci.Ref
+	err := oci.WalkRefs(ref.Digest(), ref, func(_ string, r oci.Ref) error {
+		refs = append(refs, r)
+		return nil
+	})
+	if err != nil {
+		return err
 	}
 
 	s.mu.Lock()
@@ -71,17 +77,22 @@ func (s *Server) AddImage(repository string, tag string, image *oci.Image) error
 		}
 		s.repositories[repository] = repo
 	}
-	if _, ok := repo.manifests[image.ManifestDigest]; !ok {
-		for descriptor := range image.Descriptors() {
-			repo.blobs[string(descriptor.Digest)] = image.StructfsBlob(descriptor)
+	for _, ref := range refs {
+		if _, ok := repo.manifests[ref.Digest()]; ok {
+			continue
 		}
-		repo.manifests[image.ManifestDigest] = serverManifest{
-			contentType: ocispecv1.MediaTypeImageManifest,
-			content:     image.RawManifest,
+		if image, ok := ref.(*oci.Image); ok {
+			for descriptor := range image.Descriptors() {
+				repo.blobs[string(descriptor.Digest)] = image.StructfsBlob(descriptor)
+			}
+		}
+		repo.manifests[ref.Digest()] = serverManifest{
+			contentType: ref.MediaType(),
+			content:     ref.RawManifest(),
 		}
 	}
 	if tag != "" {
-		repo.tags[tag] = image.ManifestDigest
+		repo.tags[tag] = ref.Digest()
 	}
 	return nil
 }

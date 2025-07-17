@@ -94,7 +94,7 @@ func setupTakeover(nodeParamsRaw []byte, target string) ([]string, error) {
 		return nil, err
 	}
 
-	image, err := oci.ReadLayout(filepath.Join(filepath.Dir(currPath), "osimage"))
+	image, err := oci.AsImage(oci.ReadLayout(filepath.Join(filepath.Dir(currPath), "osimage")))
 	if err != nil {
 		return nil, fmt.Errorf("failed to read OS image: %w", err)
 	}

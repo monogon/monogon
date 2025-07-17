@@ -156,7 +156,7 @@ func TestMain(m *testing.M) {
 		log.Fatal(err)
 	}
 
-	image, err := oci.ReadLayout(xImagePath)
+	image, err := oci.AsImage(oci.ReadLayout(xImagePath))
 	if err != nil {
 		log.Fatal(err)
 	}

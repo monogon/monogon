@@ -39,12 +39,12 @@ func init() {
 }
 
 func TestRetries(t *testing.T) {
-	srcImage, err := oci.ReadLayout(xImagePath)
+	srcImage, err := oci.AsImage(oci.ReadLayout(xImagePath))
 	if err != nil {
 		t.Fatal(err)
 	}
 	server := NewServer()
-	server.AddImage("test/repo", "test-tag", srcImage)
+	server.AddRef("test/repo", "test-tag", srcImage)
 	wrapper := &unreliableServer{
 		handler:   server,
 		blobLimit: srcImage.Manifest.Config.Size / 2,
@@ -71,7 +71,7 @@ func TestRetries(t *testing.T) {
 		Repository: "test/repo",
 	}
 
-	image, err := client.Read(context.Background(), "test-tag", srcImage.ManifestDigest)
+	image, err := oci.AsImage(client.Read(context.Background(), "test-tag", srcImage.Digest()))
 	if err != nil {
 		t.Fatal(err)
 	}

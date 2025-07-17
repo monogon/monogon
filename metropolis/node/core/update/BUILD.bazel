@@ -18,6 +18,7 @@ go_library(
         "//osbase/efivarfs",
         "//osbase/gpt",
         "//osbase/kexec",
+        "//osbase/oci",
         "//osbase/oci/osimage",
         "//osbase/oci/registry",
         "@com_github_cenkalti_backoff_v4//:backoff",

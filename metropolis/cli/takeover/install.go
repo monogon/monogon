@@ -37,7 +37,7 @@ func installMetropolis(l logging.Leveled) error {
 		return err
 	}
 
-	image, err := oci.ReadLayout("/osimage")
+	image, err := oci.AsImage(oci.ReadLayout("/osimage"))
 	if err != nil {
 		return fmt.Errorf("failed to read OS image: %w", err)
 	}

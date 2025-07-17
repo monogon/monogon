@@ -38,7 +38,7 @@ var genusbCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
-		image, err := oci.ReadLayout(imagePathResolved)
+		image, err := oci.AsImage(oci.ReadLayout(imagePathResolved))
 		if err != nil {
 			return fmt.Errorf("failed to read OS image: %w", err)
 		}

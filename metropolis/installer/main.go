@@ -161,7 +161,7 @@ func installerRunnable(ctx context.Context) error {
 		return fmt.Errorf("failed to open node parameters from ESP: %w", err)
 	}
 
-	ociImage, err := oci.ReadLayout("/installer/metropolis-installer/osimage")
+	ociImage, err := oci.AsImage(oci.ReadLayout("/installer/metropolis-installer/osimage"))
 	if err != nil {
 		return fmt.Errorf("failed to read OS image from ESP: %w", err)
 	}

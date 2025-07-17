@@ -32,7 +32,7 @@ func FromBazelManifest(mb []byte) (*registry.Server, error) {
 		if err != nil {
 			return nil, fmt.Errorf("failed to read image from %q: %w", i.Path, err)
 		}
-		err = s.AddImage(i.Repository, i.Tag, image)
+		err = s.AddRef(i.Repository, i.Tag, image)
 		if err != nil {
 			return nil, fmt.Errorf("failed to add image: %w", err)
 		}
