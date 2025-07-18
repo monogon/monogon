@@ -2,6 +2,7 @@ load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_library", "go_test")
 load("//osbase/build/genproductinfo:defs.bzl", "product_info")
 load("//osbase/build/mkerofs:def.bzl", "erofs_image")
 load("//osbase/build/mkoci:def.bzl", "oci_os_image")
+load("//osbase/build/mkoci/index:def.bzl", "oci_index")
 load("//osbase/build/mkpayload:def.bzl", "efi_unified_kernel_image")
 load("//osbase/build/mkverity:def.bzl", "verity_image")
 
@@ -150,6 +151,15 @@ oci_os_image(
     visibility = ["//metropolis/test/launch:__pkg__"],
 )
 
+oci_index(
+    name = "oci_multiarch",
+    src = ":oci_image",
+    platforms = [
+        "//build/platforms:linux_x86_64",
+        "//build/platforms:linux_aarch64",
+    ],
+)
+
 product_info(
     name = "product_info",
     components = [
@@ -159,6 +169,7 @@ product_info(
     os_id = "metropolis-node",
     os_name = "Metropolis Node",
     out_os_release = ":product_info_os_release",
+    platform_os = "uefi",
     stamp_var = "STABLE_MONOGON_metropolis_version",
     visibility = [":__subpackages__"],
 )

@@ -12,6 +12,7 @@ def _product_info_impl(ctx):
     args.add("-id", ctx.attr.os_id)
     args.add("-architecture", ctx.attr.architecture)
     args.add("-build_flags", "-".join(ctx.attr.build_flags))
+    args.add("-platform_os", ctx.attr.platform_os)
     args.add_all(ctx.attr.components, before_each = "-component")
     ctx.actions.run(
         mnemonic = "GenProductInfo",
@@ -29,6 +30,7 @@ _product_info = rule(
         "os_name": attr.string(mandatory = True),
         "os_id": attr.string(mandatory = True),
         "stamp_var": attr.string(mandatory = True),
+        "platform_os": attr.string(default = "unknown"),
         "components": attr.string_list(),
         "out_os_release": attr.output(
             mandatory = True,

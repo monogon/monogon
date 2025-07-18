@@ -62,6 +62,9 @@ type ProductInfo struct {
 	// differs from the tree of the commit referenced by commit_hash.
 	BuildTreeDirty bool `json:"build_tree_dirty"`
 
+	// PlatformOS on top of which the product executes. This is put into the
+	// platform os field when building an OCI image index. Example: "uefi"
+	PlatformOS string `json:"platform_os"`
 	// Components contains versions of the most important components. These are
 	// mostly intended for human consumption, but could also be used for certain
 	// automations, e.g. automatically deriving Kubernetes compatibility

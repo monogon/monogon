@@ -34,6 +34,11 @@ var (
 	outPath          = flag.String("out", "", "Output OCI Image Layout directory path")
 )
 
+var architectureToOCI = map[string]string{
+	"x86_64":  "amd64",
+	"aarch64": "arm64",
+}
+
 type payload struct {
 	name string
 	path string
@@ -272,14 +277,30 @@ func main() {
 	}
 
 	// Write the index.
+	platformArchitecture, ok := architectureToOCI[productInfo.Architecture()]
+	if !ok {
+		log.Fatalf("Missing architectureToOCI entry for %q", productInfo.Architecture())
+	}
+	platformOS := productInfo.PlatformOS
+	if platformOS == "" {
+		platformOS = "unknown"
+	}
 	imageIndex := ocispecv1.Index{
 		Versioned: ocispec.Versioned{SchemaVersion: 2},
 		MediaType: ocispecv1.MediaTypeImageIndex,
 		Manifests: []ocispecv1.Descriptor{{
 			MediaType:    ocispecv1.MediaTypeImageManifest,
 			ArtifactType: osimage.MediaTypeOSImageConfig,
-			Digest:       digest.NewDigestFromEncoded(digest.SHA256, imageManifestHash),
-			Size:         int64(len(imageManifestBytes)),
+			// The platform set here is used when building an OCI index with Bazel.
+			// Other consumers cannot rely on it being present because it is not
+			// preserved when pushing to a registry. We don't use the OS field, but
+			// it's required by the OCI spec.
+			Platform: &ocispecv1.Platform{
+				Architecture: platformArchitecture,
+				OS:           platformOS,
+			},
+			Digest: digest.NewDigestFromEncoded(digest.SHA256, imageManifestHash),
+			Size:   int64(len(imageManifestBytes)),
 		}},
 	}
 	imageIndexBytes, err := json.MarshalIndent(imageIndex, "", "\t")

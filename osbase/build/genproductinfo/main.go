@@ -31,6 +31,7 @@ var (
 	flagID              = flag.String("id", "", "id parameter (see freedesktop spec)")
 	flagArchitecture    = flag.String("architecture", "", "CPU architecture")
 	flagBuildFlags      = flag.String("build_flags", "", "build flags joined by '-'")
+	flagPlatformOS      = flag.String("platform_os", "", "platform OS")
 )
 
 var (
@@ -117,6 +118,7 @@ func main() {
 		CommitHash:     statusVars["STABLE_MONOGON_gitCommit"],
 		CommitDate:     statusVars["STABLE_MONOGON_gitCommitDate"],
 		BuildTreeDirty: statusVars["STABLE_MONOGON_gitTreeState"] == "dirty",
+		PlatformOS:     *flagPlatformOS,
 		Components:     components,
 	}
 	productInfoBytes, err := json.MarshalIndent(productInfo, "", "\t")
