@@ -1,3 +1,9 @@
+# Platform for platform-independent targets.
+platform(
+    name = "all",
+    visibility = ["//visibility:public"],
+)
+
 # Generic platform for Linux targets.
 platform(
     name = "linux_x86_64",

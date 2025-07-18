@@ -47,6 +47,7 @@ build --@io_bazel_rules_go//go/config:tags=osusergo,netgo
 # name should be assigned here, otherwise Bazel uses a hash.
 build --experimental_platform_in_output_dir
 build --noexperimental_use_platforms_in_output_dir_legacy_heuristic
+build --experimental_override_name_platform_in_output_dir=//build/platforms:all=all
 build --experimental_override_name_platform_in_output_dir=//build/platforms:linux_x86_64=linux-x86_64
 build --experimental_override_name_platform_in_output_dir=//build/platforms:linux_aarch64=linux-aarch64
 build --experimental_override_name_platform_in_output_dir=//build/platforms:uefi_x86_64=uefi-x86_64

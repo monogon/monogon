@@ -1,0 +1,20 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_library")
+
+go_library(
+    name = "index_lib",
+    srcs = ["main.go"],
+    importpath = "source.monogon.dev/osbase/build/mkoci/index",
+    visibility = ["//visibility:private"],
+    deps = [
+        "//osbase/oci",
+        "@com_github_opencontainers_go_digest//:go-digest",
+        "@com_github_opencontainers_image_spec//specs-go",
+        "@com_github_opencontainers_image_spec//specs-go/v1:specs-go",
+    ],
+)
+
+go_binary(
+    name = "mkoci_index",
+    embed = [":index_lib"],
+    visibility = ["//visibility:public"],
+)
