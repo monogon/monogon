@@ -1,0 +1,5 @@
+[gerrit]
+host=review.monogon.dev
+port=30022
+project=monogon.git
+defaultbranch=main
