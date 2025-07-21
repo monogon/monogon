@@ -5,7 +5,6 @@ package logtree
 
 import (
 	"errors"
-	"sort"
 	"strings"
 	"sync"
 
@@ -197,10 +196,6 @@ func (j *journal) scanEntries(count int, filters ...filter) (res []*entry) {
 		cur = cur.prevGlobal
 	}
 
-	// Reverse entries back into chronological order.
-	sort.SliceStable(res, func(i, j int) bool {
-		return i > j
-	})
 	return
 }
 
@@ -233,10 +228,6 @@ func (j *journal) getEntries(count int, exact DN, filters ...filter) (res []*ent
 		cur = cur.prevLocal
 	}
 
-	// Reverse entries back into chronological order.
-	sort.SliceStable(res, func(i, j int) bool {
-		return i > j
-	})
 	return
 }
 

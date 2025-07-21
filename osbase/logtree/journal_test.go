@@ -38,7 +38,7 @@ func TestJournalRetention(t *testing.T) {
 		t.Fatalf("wanted %d entries, got %d", want, got)
 	}
 	for i, entry := range entries {
-		want := fmt.Sprintf("test %d", (9000-defaultDNQuota)+i)
+		want := fmt.Sprintf("test %d", 9000-1-i)
 		got := strings.Join(entry.leveled.messages, "\n")
 		if want != got {
 			t.Fatalf("wanted entry %q, got %q", want, got)
