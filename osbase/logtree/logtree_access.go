@@ -20,6 +20,7 @@ type logReaderOptions struct {
 	onlyLeveled                bool
 	onlyRaw                    bool
 	leveledWithMinimumSeverity logging.Severity
+	withStreamBufferSize       int
 }
 
 // WithChildren makes Read return/stream data for both a given DN and all its
@@ -34,6 +35,15 @@ func WithChildren() LogReadOption {
 // to create a read-and-stream construct.
 func WithStream() LogReadOption {
 	return func(lro *logReaderOptions) {
+		lro.withStream = true
+	}
+}
+
+// WithStreamBuffer applies WithStream and overrides the default stream buffer
+// size of 128.
+func WithStreamBuffer(size int) LogReadOption {
+	return func(lro *logReaderOptions) {
+		lro.withStreamBufferSize = size
 		lro.withStream = true
 	}
 }
@@ -109,7 +119,9 @@ func (l *LogTree) Read(dn DN, opts ...LogReadOption) (*LogReader, error) {
 	l.journal.mu.RLock()
 	defer l.journal.mu.RUnlock()
 
-	var lro logReaderOptions
+	lro := logReaderOptions{
+		withStreamBufferSize: 128,
+	}
 
 	for _, opt := range opts {
 		opt(&lro)
@@ -147,8 +159,7 @@ func (l *LogTree) Read(dn DN, opts ...LogReadOption) (*LogReader, error) {
 	lr := &LogReader{}
 	if lro.withStream {
 		sub := &subscriber{
-			// TODO(q3k): make buffer size configurable
-			dataC:   make(chan *LogEntry, 128),
+			dataC:   make(chan *LogEntry, lro.withStreamBufferSize),
 			doneC:   make(chan struct{}),
 			filters: filters,
 		}
