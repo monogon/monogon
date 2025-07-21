@@ -45,6 +45,9 @@ type entry struct {
 	seqLocal uint64
 }
 
+// defaultDNQuota defines how many messages should be stored per DN.
+const defaultDNQuota = 8192
+
 // external returns a LogEntry object for this entry, ie. the public version of
 // this object, without fields relating to the parent journal, linked lists,
 // sequences, etc. These objects are visible to library consumers.
@@ -119,7 +122,7 @@ func (j *journal) append(e *entry) {
 
 	// Create quota if necessary.
 	if _, ok := j.quota[e.origin]; !ok {
-		j.quota[e.origin] = &quota{origin: e.origin, max: 8192}
+		j.quota[e.origin] = &quota{origin: e.origin, max: defaultDNQuota}
 	}
 
 	// Insert at head in local linked list, calculate seqLocal, set pointers.

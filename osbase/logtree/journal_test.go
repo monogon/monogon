@@ -34,11 +34,11 @@ func TestJournalRetention(t *testing.T) {
 	}
 
 	entries := j.getEntries(BacklogAllAvailable, "main")
-	if want, got := 8192, len(entries); want != got {
+	if want, got := defaultDNQuota, len(entries); want != got {
 		t.Fatalf("wanted %d entries, got %d", want, got)
 	}
 	for i, entry := range entries {
-		want := fmt.Sprintf("test %d", (9000-8192)+i)
+		want := fmt.Sprintf("test %d", (9000-defaultDNQuota)+i)
 		got := strings.Join(entry.leveled.messages, "\n")
 		if want != got {
 			t.Fatalf("wanted entry %q, got %q", want, got)
@@ -63,7 +63,7 @@ func TestJournalQuota(t *testing.T) {
 	}
 
 	entries := j.getEntries(BacklogAllAvailable, "chatty")
-	if want, got := 8192, len(entries); want != got {
+	if want, got := defaultDNQuota, len(entries); want != got {
 		t.Fatalf("wanted %d chatty entries, got %d", want, got)
 	}
 	entries = j.getEntries(BacklogAllAvailable, "solemn")
@@ -76,7 +76,7 @@ func TestJournalQuota(t *testing.T) {
 	}
 
 	entries = j.scanEntries(BacklogAllAvailable, filterAll())
-	if want, got := 8192+900, len(entries); want != got {
+	if want, got := defaultDNQuota+900, len(entries); want != got {
 		t.Fatalf("wanted %d total entries, got %d", want, got)
 	}
 	setMessages := make(map[string]bool)
@@ -90,8 +90,8 @@ func TestJournalQuota(t *testing.T) {
 			t.Fatalf("could not find entry %q in journal", want)
 		}
 	}
-	for i := 0; i < 8192; i += 1 {
-		want := fmt.Sprintf("chatty %d", i+(9000-8192))
+	for i := 0; i < defaultDNQuota; i += 1 {
+		want := fmt.Sprintf("chatty %d", i+(9000-defaultDNQuota))
 		if !setMessages[want] {
 			t.Fatalf("could not find entry %q in journal", want)
 		}
