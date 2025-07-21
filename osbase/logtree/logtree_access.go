@@ -144,26 +144,25 @@ func (l *LogTree) Read(dn DN, opts ...LogReadOption) (*LogReader, error) {
 		}
 	}
 
-	var sub *subscriber
+	lr := &LogReader{}
 	if lro.withStream {
-		sub = &subscriber{
+		sub := &subscriber{
 			// TODO(q3k): make buffer size configurable
 			dataC:   make(chan *LogEntry, 128),
 			doneC:   make(chan struct{}),
 			filters: filters,
 		}
 		l.journal.subscribe(sub)
-	}
 
-	lr := &LogReader{}
-	lr.Backlog = make([]*LogEntry, len(entries))
-	for i, entry := range entries {
-		lr.Backlog[i] = entry.external()
-	}
-	if lro.withStream {
 		lr.Stream = sub.dataC
 		lr.done = sub.doneC
 		lr.missed = &sub.missed
 	}
+
+	lr.Backlog = make([]*LogEntry, len(entries))
+	for i, entry := range entries {
+		lr.Backlog[i] = entry.external()
+	}
+
 	return lr, nil
 }
