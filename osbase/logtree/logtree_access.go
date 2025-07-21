@@ -11,7 +11,9 @@ import (
 )
 
 // LogReadOption describes options for the LogTree.Read call.
-type LogReadOption struct {
+type LogReadOption func(*logReaderOptions)
+
+type logReaderOptions struct {
 	withChildren               bool
 	withStream                 bool
 	withBacklog                int
@@ -22,29 +24,39 @@ type LogReadOption struct {
 
 // WithChildren makes Read return/stream data for both a given DN and all its
 // children.
-func WithChildren() LogReadOption { return LogReadOption{withChildren: true} }
+func WithChildren() LogReadOption {
+	return func(lro *logReaderOptions) {
+		lro.withChildren = true
+	}
+}
 
 // WithStream makes Read return a stream of data. This works alongside WithBacklog
 // to create a read-and-stream construct.
-func WithStream() LogReadOption { return LogReadOption{withStream: true} }
+func WithStream() LogReadOption {
+	return func(lro *logReaderOptions) {
+		lro.withStream = true
+	}
+}
 
 // WithBacklog makes Read return already recorded log entries, up to count
 // elements.
-func WithBacklog(count int) LogReadOption { return LogReadOption{withBacklog: count} }
+func WithBacklog(count int) LogReadOption {
+	return func(lro *logReaderOptions) { lro.withBacklog = count }
+}
 
 // BacklogAllAvailable makes WithBacklog return all backlogged log data that
 // logtree possesses.
 const BacklogAllAvailable int = -1
 
-func OnlyRaw() LogReadOption { return LogReadOption{onlyRaw: true} }
+func OnlyRaw() LogReadOption { return func(lro *logReaderOptions) { lro.onlyRaw = true } }
 
-func OnlyLeveled() LogReadOption { return LogReadOption{onlyLeveled: true} }
+func OnlyLeveled() LogReadOption { return func(lro *logReaderOptions) { lro.onlyLeveled = true } }
 
 // LeveledWithMinimumSeverity makes Read return only log entries that are at least
 // at a given Severity. If only leveled entries are needed, OnlyLeveled must be
 // used. This is a no-op when OnlyRaw is used.
 func LeveledWithMinimumSeverity(s logging.Severity) LogReadOption {
-	return LogReadOption{leveledWithMinimumSeverity: s}
+	return func(lro *logReaderOptions) { lro.leveledWithMinimumSeverity = s }
 }
 
 // LogReader permits reading an already existing backlog of log entries and to
@@ -97,64 +109,43 @@ func (l *LogTree) Read(dn DN, opts ...LogReadOption) (*LogReader, error) {
 	l.journal.mu.RLock()
 	defer l.journal.mu.RUnlock()
 
-	var backlog int
-	var stream bool
-	var recursive bool
-	var leveledSeverity logging.Severity
-	var onlyRaw, onlyLeveled bool
+	var lro logReaderOptions
 
 	for _, opt := range opts {
-		if opt.withBacklog > 0 || opt.withBacklog == BacklogAllAvailable {
-			backlog = opt.withBacklog
-		}
-		if opt.withStream {
-			stream = true
-		}
-		if opt.withChildren {
-			recursive = true
-		}
-		if opt.leveledWithMinimumSeverity != "" {
-			leveledSeverity = opt.leveledWithMinimumSeverity
-		}
-		if opt.onlyLeveled {
-			onlyLeveled = true
-		}
-		if opt.onlyRaw {
-			onlyRaw = true
-		}
+		opt(&lro)
 	}
 
-	if onlyLeveled && onlyRaw {
+	if lro.onlyLeveled && lro.onlyRaw {
 		return nil, ErrRawAndLeveled
 	}
 
 	var filters []filter
-	if onlyLeveled {
+	if lro.onlyLeveled {
 		filters = append(filters, filterOnlyLeveled)
 	}
-	if onlyRaw {
+	if lro.onlyRaw {
 		filters = append(filters, filterOnlyRaw)
 	}
-	if recursive {
+	if lro.withChildren {
 		filters = append(filters, filterSubtree(dn))
 	} else {
 		filters = append(filters, filterExact(dn))
 	}
-	if leveledSeverity != "" {
-		filters = append(filters, filterSeverity(leveledSeverity))
+	if lro.leveledWithMinimumSeverity != "" {
+		filters = append(filters, filterSeverity(lro.leveledWithMinimumSeverity))
 	}
 
 	var entries []*entry
-	if backlog > 0 || backlog == BacklogAllAvailable {
-		if recursive {
-			entries = l.journal.scanEntries(backlog, filters...)
+	if lro.withBacklog > 0 || lro.withBacklog == BacklogAllAvailable {
+		if lro.withChildren {
+			entries = l.journal.scanEntries(lro.withBacklog, filters...)
 		} else {
-			entries = l.journal.getEntries(backlog, dn, filters...)
+			entries = l.journal.getEntries(lro.withBacklog, dn, filters...)
 		}
 	}
 
 	var sub *subscriber
-	if stream {
+	if lro.withStream {
 		sub = &subscriber{
 			// TODO(q3k): make buffer size configurable
 			dataC:   make(chan *LogEntry, 128),
@@ -169,7 +160,7 @@ func (l *LogTree) Read(dn DN, opts ...LogReadOption) (*LogReader, error) {
 	for i, entry := range entries {
 		lr.Backlog[i] = entry.external()
 	}
-	if stream {
+	if lro.withStream {
 		lr.Stream = sub.dataC
 		lr.done = sub.doneC
 		lr.missed = &sub.missed
