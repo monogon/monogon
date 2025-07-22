@@ -10,7 +10,9 @@ Our build environment is self-contained and requires only minimal host dependenc
 
 - A Linux machine or VM.
 - [Bazelisk](https://github.com/bazelbuild/bazelisk) >= v1.15.0 (or a working Nix environment).
-- A reasonably recent kernel with user namespaces enabled.
+- `git` to check out modules.
+- `python3` to generate the workspace status to stamp.
+- A reasonably recent kernel, user namespaces are recommended for performance reasons.
 - Working KVM with access to `/dev/kvm` (if you want to run tests).
 
 Our docs assume that Bazelisk is available as `bazel` on your PATH.
