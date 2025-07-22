@@ -48,7 +48,14 @@ func (i ModuleInfo) GetDependencies() []string {
 	if len(i["depends"]) == 1 && i["depends"][0] == "" {
 		return nil
 	}
-	return i["depends"]
+	out := make([]string, 0, len(i["depends"]))
+	for _, dep := range i["depends"] {
+		parts := strings.Split(dep, ",")
+		for _, part := range parts {
+			out = append(out, strings.ReplaceAll(part, "-", "_"))
+		}
+	}
+	return out
 }
 
 type OptionalDependencies struct {

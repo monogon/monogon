@@ -5,7 +5,6 @@ package kmod
 
 import (
 	"fmt"
-	"log"
 
 	kmodpb "source.monogon.dev/osbase/kmod/spec"
 )
@@ -44,7 +43,7 @@ func MakeMetaFromModuleInfo(modinfos []ModuleInfo) (*kmodpb.Meta, error) {
 	for _, m := range meta.Modules {
 		for _, dep := range modInfoMap[m.Name].GetDependencies() {
 			if _, ok := modIndices[dep]; !ok {
-				log.Printf("Unknown dependency %q for module %q", modInfoMap[m.Name].GetDependencies(), m.Name)
+				return nil, fmt.Errorf("unknown dependency %q for module %q", dep, m.Name)
 			}
 			m.Depends = append(m.Depends, modIndices[dep])
 		}
