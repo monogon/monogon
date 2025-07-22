@@ -30,7 +30,7 @@ func main() {
 
 func testosRunnable(ctx context.Context) error {
 	supervisor.Logger(ctx).Info("TESTOS_VARIANT=" + Variant)
-	networkSvc := network.New(nil, nil)
+	networkSvc := network.New(nil, nil, nil)
 	networkSvc.DHCPVendorClassID = "dev.monogon.testos.v1"
 	supervisor.Run(ctx, "networking", networkSvc.Run)
 

@@ -1,0 +1,21 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "workloads",
+    srcs = ["workloads.go"],
+    importpath = "source.monogon.dev/metropolis/node/core/network/workloads",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//metropolis/node",
+        "//metropolis/node/core/clusternet",
+        "//metropolis/node/core/network/workloads/spec",
+        "//osbase/event",
+        "//osbase/supervisor",
+        "@com_github_vishvananda_netlink//:netlink",
+        "@com_github_vishvananda_netns//:netns",
+        "@org_golang_google_grpc//:grpc",
+        "@org_golang_google_grpc//codes",
+        "@org_golang_google_grpc//status",
+        "@org_golang_x_sys//unix",
+    ],
+)

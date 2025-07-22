@@ -1,0 +1,195 @@
+From 9bd63f7ca7d4a248f31600bb09fe1c828d40115a Mon Sep 17 00:00:00 2001
+From: Lorenz Brun <lorenz@monogon.tech>
+Date: Wed, 6 Aug 2025 04:07:56 +0200
+Subject: [PATCH] Use our CNI adapter instead of go-cni
+
+We're not really using CNI here, just straight-up intercepting the Go
+calls and redirecting them to us.
+---
+ cmd/ctr/commands/run/run.go             | 2 +-
+ cmd/ctr/commands/tasks/kill.go          | 2 +-
+ internal/cri/server/cni_conf_syncer.go  | 2 +-
+ internal/cri/server/sandbox_run.go      | 2 +-
+ internal/cri/server/sandbox_run_test.go | 2 +-
+ internal/cri/server/service.go          | 2 +-
+ internal/cri/server/service_linux.go    | 2 +-
+ internal/cri/server/service_other.go    | 2 +-
+ internal/cri/server/service_test.go     | 2 +-
+ internal/cri/server/service_windows.go  | 2 +-
+ internal/cri/store/sandbox/metadata.go  | 2 +-
+ internal/cri/testing/fake_cni_plugin.go | 2 +-
+ internal/cri/types/sandbox_info.go      | 2 +-
+ 13 files changed, 13 insertions(+), 13 deletions(-)
+
+diff --git a/cmd/ctr/commands/run/run.go b/cmd/ctr/commands/run/run.go
+index 365f77746..298f004f2 100644
+--- a/cmd/ctr/commands/run/run.go
++++ b/cmd/ctr/commands/run/run.go
+@@ -24,7 +24,7 @@ import (
+ 	"strings"
+ 
+ 	"github.com/containerd/console"
+-	gocni "github.com/containerd/go-cni"
++	gocni "source.monogon.dev/metropolis/node/kubernetes/containerd/cniproxy"
+ 	specs "github.com/opencontainers/runtime-spec/specs-go"
+ 	"github.com/urfave/cli/v2"
+ 
+diff --git a/cmd/ctr/commands/tasks/kill.go b/cmd/ctr/commands/tasks/kill.go
+index 78b5584e2..d03a2aa48 100644
+--- a/cmd/ctr/commands/tasks/kill.go
++++ b/cmd/ctr/commands/tasks/kill.go
+@@ -23,7 +23,7 @@ import (
+ 
+ 	containerd "github.com/containerd/containerd/v2/client"
+ 	"github.com/containerd/containerd/v2/cmd/ctr/commands"
+-	gocni "github.com/containerd/go-cni"
++	gocni "source.monogon.dev/metropolis/node/kubernetes/containerd/cniproxy"
+ 	"github.com/containerd/log"
+ 	"github.com/containerd/typeurl/v2"
+ 	"github.com/moby/sys/signal"
+diff --git a/internal/cri/server/cni_conf_syncer.go b/internal/cri/server/cni_conf_syncer.go
+index 822e7e54a..646286c4e 100644
+--- a/internal/cri/server/cni_conf_syncer.go
++++ b/internal/cri/server/cni_conf_syncer.go
+@@ -22,7 +22,7 @@ import (
+ 	"path/filepath"
+ 	"sync"
+ 
+-	"github.com/containerd/go-cni"
++	"source.monogon.dev/metropolis/node/kubernetes/containerd/cniproxy"
+ 	"github.com/containerd/log"
+ 	"github.com/fsnotify/fsnotify"
+ )
+diff --git a/internal/cri/server/sandbox_run.go b/internal/cri/server/sandbox_run.go
+index 3142efb72..1e26479f6 100644
+--- a/internal/cri/server/sandbox_run.go
++++ b/internal/cri/server/sandbox_run.go
+@@ -26,7 +26,7 @@ import (
+ 	"strings"
+ 	"time"
+ 
+-	"github.com/containerd/go-cni"
++	"source.monogon.dev/metropolis/node/kubernetes/containerd/cniproxy"
+ 	"github.com/containerd/log"
+ 	"github.com/containerd/typeurl/v2"
+ 	runtime "k8s.io/cri-api/pkg/apis/runtime/v1"
+diff --git a/internal/cri/server/sandbox_run_test.go b/internal/cri/server/sandbox_run_test.go
+index 3b3b01187..7c643f7c7 100644
+--- a/internal/cri/server/sandbox_run_test.go
++++ b/internal/cri/server/sandbox_run_test.go
+@@ -21,7 +21,7 @@ import (
+ 	"net"
+ 	"testing"
+ 
+-	"github.com/containerd/go-cni"
++	"source.monogon.dev/metropolis/node/kubernetes/containerd/cniproxy"
+ 	"github.com/stretchr/testify/assert"
+ 	runtime "k8s.io/cri-api/pkg/apis/runtime/v1"
+ )
+diff --git a/internal/cri/server/service.go b/internal/cri/server/service.go
+index 8b65b1465..4ffe73acc 100644
+--- a/internal/cri/server/service.go
++++ b/internal/cri/server/service.go
+@@ -26,7 +26,7 @@ import (
+ 	"sync/atomic"
+ 	"time"
+ 
+-	"github.com/containerd/go-cni"
++	"source.monogon.dev/metropolis/node/kubernetes/containerd/cniproxy"
+ 	"github.com/containerd/log"
+ 	"github.com/containerd/typeurl/v2"
+ 	imagespec "github.com/opencontainers/image-spec/specs-go/v1"
+diff --git a/internal/cri/server/service_linux.go b/internal/cri/server/service_linux.go
+index a115e5f67..c9451e41e 100644
+--- a/internal/cri/server/service_linux.go
++++ b/internal/cri/server/service_linux.go
+@@ -25,7 +25,7 @@ import (
+ 
+ 	"github.com/containerd/containerd/v2/pkg/cap"
+ 	"github.com/containerd/containerd/v2/pkg/kernelversion"
+-	"github.com/containerd/go-cni"
++	"source.monogon.dev/metropolis/node/kubernetes/containerd/cniproxy"
+ 	"github.com/containerd/log"
+ )
+ 
+diff --git a/internal/cri/server/service_other.go b/internal/cri/server/service_other.go
+index 70e050f11..4b027730a 100644
+--- a/internal/cri/server/service_other.go
++++ b/internal/cri/server/service_other.go
+@@ -19,7 +19,7 @@
+ package server
+ 
+ import (
+-	"github.com/containerd/go-cni"
++	"source.monogon.dev/metropolis/node/kubernetes/containerd/cniproxy"
+ )
+ 
+ // initPlatform handles initialization of the CRI service for non-windows
+diff --git a/internal/cri/server/service_test.go b/internal/cri/server/service_test.go
+index b6d9ecfb3..7dc40781d 100644
+--- a/internal/cri/server/service_test.go
++++ b/internal/cri/server/service_test.go
+@@ -20,7 +20,7 @@ import (
+ 	"context"
+ 
+ 	"github.com/containerd/errdefs"
+-	"github.com/containerd/go-cni"
++	"source.monogon.dev/metropolis/node/kubernetes/containerd/cniproxy"
+ 	"github.com/containerd/platforms"
+ 	imagespec "github.com/opencontainers/image-spec/specs-go/v1"
+ 
+diff --git a/internal/cri/server/service_windows.go b/internal/cri/server/service_windows.go
+index 1bf71413f..0ebae652d 100644
+--- a/internal/cri/server/service_windows.go
++++ b/internal/cri/server/service_windows.go
+@@ -19,7 +19,7 @@ package server
+ import (
+ 	"fmt"
+ 
+-	"github.com/containerd/go-cni"
++	"source.monogon.dev/metropolis/node/kubernetes/containerd/cniproxy"
+ )
+ 
+ // windowsNetworkAttachCount is the minimum number of networks the PodSandbox
+diff --git a/internal/cri/store/sandbox/metadata.go b/internal/cri/store/sandbox/metadata.go
+index 20fe2f1d1..8a2d22aa5 100644
+--- a/internal/cri/store/sandbox/metadata.go
++++ b/internal/cri/store/sandbox/metadata.go
+@@ -20,7 +20,7 @@ import (
+ 	"encoding/json"
+ 	"fmt"
+ 
+-	cni "github.com/containerd/go-cni"
++	cni "source.monogon.dev/metropolis/node/kubernetes/containerd/cniproxy"
+ 	runtime "k8s.io/cri-api/pkg/apis/runtime/v1"
+ )
+ 
+diff --git a/internal/cri/testing/fake_cni_plugin.go b/internal/cri/testing/fake_cni_plugin.go
+index fcc060f1c..cac2d5173 100644
+--- a/internal/cri/testing/fake_cni_plugin.go
++++ b/internal/cri/testing/fake_cni_plugin.go
+@@ -19,7 +19,7 @@ package testing
+ import (
+ 	"context"
+ 
+-	cni "github.com/containerd/go-cni"
++	cni "source.monogon.dev/metropolis/node/kubernetes/containerd/cniproxy"
+ )
+ 
+ // FakeCNIPlugin is a fake plugin used for test.
+diff --git a/internal/cri/types/sandbox_info.go b/internal/cri/types/sandbox_info.go
+index 49acadae8..fbe6af925 100644
+--- a/internal/cri/types/sandbox_info.go
++++ b/internal/cri/types/sandbox_info.go
+@@ -17,7 +17,7 @@
+ package types
+ 
+ import (
+-	"github.com/containerd/go-cni"
++	"source.monogon.dev/metropolis/node/kubernetes/containerd/cniproxy"
+ 	"github.com/opencontainers/runtime-spec/specs-go"
+ 	runtime "k8s.io/cri-api/pkg/apis/runtime/v1"
+ 
+-- 
+2.49.0
+

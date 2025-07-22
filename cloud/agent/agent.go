@@ -76,7 +76,7 @@ func agentRunnable(ctx context.Context) error {
 	devmgrSvc := devmgr.New()
 	supervisor.Run(ctx, "devmgr", devmgrSvc.Run)
 
-	networkSvc := network.New(agentInit.NetworkConfig, nil)
+	networkSvc := network.New(agentInit.NetworkConfig, nil, nil)
 	networkSvc.DHCPVendorClassID = "dev.monogon.cloud.agent.v1"
 	supervisor.Run(ctx, "networking", networkSvc.Run)
 	l.Info("Started networking")

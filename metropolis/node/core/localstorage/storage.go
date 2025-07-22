@@ -168,9 +168,6 @@ type EphemeralContainerdDirectory struct {
 	RunSCLogsFIFO declarative.File      `file:"runsc-logs.fifo"`
 	Tmp           declarative.Directory `dir:"tmp"`
 	RunSC         declarative.Directory `dir:"runsc"`
-	IPAM          declarative.Directory `dir:"ipam"`
-	CNI           declarative.Directory `dir:"cni"`
-	CNICache      declarative.Directory `dir:"cni-cache"` // Hardcoded @com_github_containernetworking_cni via patch
 }
 
 type TmpDirectory struct {

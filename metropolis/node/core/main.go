@@ -12,6 +12,7 @@ import (
 
 	"source.monogon.dev/go/logging"
 	"source.monogon.dev/metropolis/node/core/cluster"
+	"source.monogon.dev/metropolis/node/core/clusternet"
 	"source.monogon.dev/metropolis/node/core/devmgr"
 	"source.monogon.dev/metropolis/node/core/localstorage"
 	"source.monogon.dev/metropolis/node/core/localstorage/declarative"
@@ -24,6 +25,7 @@ import (
 	timesvc "source.monogon.dev/metropolis/node/core/time"
 	"source.monogon.dev/metropolis/node/core/update"
 	"source.monogon.dev/osbase/bringup"
+	"source.monogon.dev/osbase/event/memory"
 	"source.monogon.dev/osbase/logtree"
 	"source.monogon.dev/osbase/net/dns"
 	"source.monogon.dev/osbase/supervisor"
@@ -119,7 +121,8 @@ func root(ctx context.Context) error {
 	}
 
 	metrics.CoreRegistry.MustRegister(dns.MetricsRegistry)
-	networkSvc := network.New(nil, []string{"hosts", "kubernetes"})
+	var podNetwork memory.Value[*clusternet.Prefixes]
+	networkSvc := network.New(nil, []string{"hosts", "kubernetes"}, &podNetwork)
 	networkSvc.DHCPVendorClassID = "dev.monogon.metropolis.node.v1"
 	timeSvc := timesvc.New()
 	devmgrSvc := devmgr.New()
@@ -195,6 +198,7 @@ func root(ctx context.Context) error {
 		Resolver:    res,
 		LogTree:     supervisor.LogTree(ctx),
 		Update:      updateSvc,
+		PodNetwork:  &podNetwork,
 	})
 	if err := supervisor.Run(ctx, "role", rs.Run); err != nil {
 		return fmt.Errorf("failed to start role service: %w", err)

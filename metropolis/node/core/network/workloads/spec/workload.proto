@@ -1,0 +1,66 @@
+syntax = "proto3";
+
+package metropolis.node.core.network.workloads;
+
+message NetNSAttachment {
+    // Path to either a nsfs mountpoint or /proc/$pid/ns/net of the network
+    // namespace the workload to be attached will/is running in.
+    string netns_path = 1;
+    // Name of the network interface created in the given network namespace.
+    string if_name = 2;
+}
+
+message AttachRequest {
+    // Workload ID is the identity of the workload to attach to the network.
+    // Right now this is just the Kubernetes Pod ID.
+    string workload_id = 1;
+
+    // This will be extended to support things like vhost-user
+    // and PCIe VFs for DPUs.
+    NetNSAttachment netns = 2;
+}
+
+message AttachResponse {
+    repeated bytes ip = 1;
+}
+
+message DetachRequest {
+    // Workload ID is the identity of the workload to attach to the network.
+    // Right now this is just the Kubernetes Pod ID.
+    string workload_id = 1;
+
+    // This will be extended to support things like vhost-user
+    // and PCIe VFs for DPUs.
+    NetNSAttachment netns = 2;
+}
+
+message DetachResponse {
+
+}
+
+message StatusRequest {}
+message StatusResponse {}
+
+// The workload networking service attaches workloads to the network.
+// The service is served over a unix socket.
+// It is called by containerd, and possibly other workload runtimes later.
+// It is a replacement for the Container Network Interface (CNI);
+// see https://github.com/containernetworking/cni/blob/main/SPEC.md
+//
+// Concurrent calls are allowed if they don't have the same workload_id.
+// For a specific workload_id, Attach may not be followed by another Attach
+// without a Detach in-between. Detach may be called multiple times.
+service WorkloadNetworking {
+    // Attach the workload to the network. This allocates the workload IP
+    // addresses (at most one for IPv4 and IPv6), and sets up the main network
+    // interface. For network namespaces, it also enables the loopback
+    // interface.
+    rpc Attach(AttachRequest) returns (AttachResponse);
+    // Detach removes the interfaces and IP address allocation of the workload.
+    // It succeeds even if some or all resources don't exist, and removes those
+    // which do exist.
+    rpc Detach(DetachRequest) returns (DetachResponse);
+    // Status returns an error if the service is not ready.
+    rpc Status(StatusRequest) returns (StatusResponse);
+}
+

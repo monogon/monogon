@@ -26,7 +26,7 @@ use_repo(
     "com_github_cenkalti_backoff_v4",
     "com_github_container_storage_interface_spec",
     "com_github_containerd_containerd_v2",
-    "com_github_containernetworking_plugins",
+    "com_github_containernetworking_cni",
     "com_github_coreos_go_semver",
     "com_github_corverroos_commentwrap",
     "com_github_diskfs_go_diskfs",
@@ -72,6 +72,7 @@ use_repo(
     "com_github_sqlc_dev_sqlc",
     "com_github_stretchr_testify",
     "com_github_vishvananda_netlink",
+    "com_github_vishvananda_netns",
     "com_github_yalue_native_endian",
     "com_google_cloud_go_storage",
     "com_zx2c4_golang_wireguard_wgctrl",
@@ -118,9 +119,11 @@ OVERRIDES = {
         "directives": [
             "gazelle:proto disable",
             "gazelle:build_tags no_aufs,no_btrfs,no_devmapper,no_zfs",
+            "gazelle:resolve go source.monogon.dev/metropolis/node/kubernetes/containerd/cniproxy @monogon//metropolis/node/kubernetes/containerd/cniproxy",
         ],
         "pre_patches": [
             "//third_party/com_github_containerd_containerd_v2:add-unimplemented-functions.patch",
+            "//third_party/com_github_containerd_containerd_v2:cni-adapter.patch",
         ],
     },
     "github.com/containerd/cgroups/v3": {
@@ -340,16 +343,6 @@ OVERRIDES = {
         "build_extra_args": [
             "-go_naming_convention=import_alias",
             "-go_naming_convention_external=import_alias",
-        ],
-    },
-    "github.com/containernetworking/cni": {
-        "patches": [
-            "//third_party/com_github_containernetworking_cni:cni-fix-cachepath.patch",
-        ],
-    },
-    "github.com/containernetworking/plugins": {
-        "patches": [
-            "//third_party/com_github_containernetworking_plugins:cniplugins-add-linkgroup.patch",
         ],
     },
     "github.com/corverroos/commentwrap": {

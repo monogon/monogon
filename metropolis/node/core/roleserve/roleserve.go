@@ -66,6 +66,8 @@ type Config struct {
 	// Network is a handle to the network service, used by workloads.
 	Network *network.Service
 
+	PodNetwork *memory.Value[*clusternet.Prefixes]
+
 	// resolver is the main, long-lived, authenticated cluster resolver that is used
 	// for all subsequent gRPC calls by the subordinates of the roleserver. It is
 	// created early in the roleserver lifecycle, and is seeded with node
@@ -86,7 +88,6 @@ type Service struct {
 	KubernetesStatus      memory.Value[*KubernetesStatus]
 	bootstrapData         memory.Value[*BootstrapData]
 	LocalRoles            memory.Value[*cpb.NodeRoles]
-	podNetwork            memory.Value[*clusternet.Prefixes]
 	clusterDirectorySaved memory.Value[bool]
 	localControlPlane     memory.Value[*localControlPlane]
 	CuratorConnection     memory.Value[*CuratorConnection]
@@ -141,7 +142,7 @@ func New(c Config) *Service {
 		curatorConnection: &s.CuratorConnection,
 
 		kubernetesStatus: &s.KubernetesStatus,
-		podNetwork:       &s.podNetwork,
+		podNetwork:       s.Config.PodNetwork,
 	}
 
 	s.rolefetch = &workerRoleFetch{
@@ -161,7 +162,7 @@ func New(c Config) *Service {
 		storageRoot: s.StorageRoot,
 
 		curatorConnection: &s.CuratorConnection,
-		podNetwork:        &s.podNetwork,
+		podNetwork:        s.Config.PodNetwork,
 		network:           s.Network,
 	}
 

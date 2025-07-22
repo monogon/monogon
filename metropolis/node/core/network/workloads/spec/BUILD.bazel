@@ -1,0 +1,27 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+load("@io_bazel_rules_go//proto:def.bzl", "go_proto_library")
+load("@rules_proto//proto:defs.bzl", "proto_library")
+
+proto_library(
+    name = "metropolis_node_core_network_workloads_proto",
+    srcs = ["workload.proto"],
+    visibility = ["//visibility:public"],
+)
+
+go_proto_library(
+    name = "metropolis_node_core_network_workloads_go_proto",
+    compilers = [
+        "@io_bazel_rules_go//proto:go_proto",
+        "@io_bazel_rules_go//proto:go_grpc_v2",
+    ],
+    importpath = "source.monogon.dev/metropolis/node/core/network/workloads/spec",
+    proto = ":metropolis_node_core_network_workloads_proto",
+    visibility = ["//visibility:public"],
+)
+
+go_library(
+    name = "spec",
+    embed = [":metropolis_node_core_network_workloads_go_proto"],
+    importpath = "source.monogon.dev/metropolis/node/core/network/workloads/spec",
+    visibility = ["//visibility:public"],
+)

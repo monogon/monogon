@@ -142,11 +142,11 @@ imports = []
             TypeUrl = "io.containerd.runsc.v1.options"
 
     [plugins."io.containerd.cri.v1.runtime".cni]
-      bin_dir = "/containerd/bin/cni"
-      conf_dir = "/ephemeral/containerd/cni"
+      bin_dir = ""
+      conf_dir = ""
       max_conf_num = 0
       setup_serially = false
-      conf_template = "/containerd/conf/cnispec.gojson"
+      conf_template = ""
       ip_pref = ""
       use_internal_loopback = false
 

@@ -86,16 +86,10 @@ erofs_image(
         # Containerd config files
         "/containerd/conf/runsc.toml": "//metropolis/node/kubernetes/containerd:runsc.toml",
         "/containerd/conf/config.toml": "//metropolis/node/kubernetes/containerd:config.toml",
-        "/containerd/conf/cnispec.gojson": "//metropolis/node/kubernetes/containerd:cnispec.gojson",
 
         # Containerd preseed bundles
         "/containerd/preseed/k8s.io/preseedtest.tar": "//metropolis/test/e2e/preseedtest:preseedtest_tarball",
         "/containerd/preseed/k8s.io/pause.tar": "//metropolis/node/kubernetes/pause:pause_tarball",
-
-        # CNI Plugins
-        "/containerd/bin/cni/loopback": "@com_github_containernetworking_plugins//plugins/main/loopback",
-        "/containerd/bin/cni/ptp": "@com_github_containernetworking_plugins//plugins/main/ptp",
-        "/containerd/bin/cni/host-local": "@com_github_containernetworking_plugins//plugins/ipam/host-local",
 
         # Delve
         "/dlv": "@com_github_go_delve_delve//cmd/dlv:dlv",

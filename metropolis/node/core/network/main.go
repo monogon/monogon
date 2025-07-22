@@ -17,8 +17,11 @@ import (
 	"github.com/vishvananda/netlink"
 
 	"source.monogon.dev/metropolis/node"
+	"source.monogon.dev/metropolis/node/core/clusternet"
 	"source.monogon.dev/metropolis/node/core/network/dhcp4c"
 	dhcpcb "source.monogon.dev/metropolis/node/core/network/dhcp4c/callback"
+	"source.monogon.dev/metropolis/node/core/network/workloads"
+	"source.monogon.dev/osbase/event"
 	"source.monogon.dev/osbase/event/memory"
 	"source.monogon.dev/osbase/net/dns"
 	"source.monogon.dev/osbase/net/dns/forward"
@@ -59,6 +62,8 @@ type Service struct {
 
 	// Status is the current status of the network as seen by the service.
 	Status memory.Value[*node.NetStatus]
+
+	workloadSvc *workloads.Service
 }
 
 // New instantiates a new network service. If autoconfiguration is desired,
@@ -67,15 +72,21 @@ type Service struct {
 // If dnsHandlerNames is non-nil, DNS handlers with these names must be set
 // on the DNS service with s.DNS.SetHandler. When serving DNS queries, they
 // will be tried in the order they appear here before forwarding.
-func New(staticConfig *netpb.Net, dnsHandlerNames []string) *Service {
+func New(staticConfig *netpb.Net, dnsHandlerNames []string, ipamPrefixSrc event.Value[*clusternet.Prefixes]) *Service {
 	dnsSvc := dns.New(slices.Concat(dnsHandlerNames, []string{"forward"}))
 	dnsForward := forward.New()
 	dnsSvc.SetHandler("forward", dnsForward)
+
+	var wlSvc *workloads.Service
+	if ipamPrefixSrc != nil {
+		wlSvc = workloads.New(ipamPrefixSrc)
+	}
 
 	return &Service{
 		DNS:          dnsSvc,
 		dnsForward:   dnsForward,
 		StaticConfig: staticConfig,
+		workloadSvc:  wlSvc,
 	}
 }
 
@@ -242,6 +253,10 @@ func (s *Service) Run(ctx context.Context) error {
 
 	supervisor.Run(ctx, "dns", s.DNS.Run)
 	supervisor.Run(ctx, "dns-forward", s.dnsForward.Run)
+
+	if s.workloadSvc != nil {
+		supervisor.Run(ctx, "workloads", s.workloadSvc.Run)
+	}
 
 	s.natTable = s.nftConn.AddTable(&nftables.Table{
 		Family: nftables.TableFamilyIPv4,
