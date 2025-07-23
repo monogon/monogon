@@ -8,6 +8,10 @@
 # NOTE: When editing this file, also update the lockfile.
 #   bazel mod deps --lockfile_mode=update
 
+module(
+    name = "monogon",
+)
+
 bazel_dep(name = "platforms", version = "1.0.0")
 bazel_dep(name = "rules_go", repo_name = "io_bazel_rules_go")
 single_version_override(

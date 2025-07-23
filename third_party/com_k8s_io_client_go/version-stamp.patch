@@ -6,7 +6,7 @@ index a0ab203..1514297 100644
          "doc.go",
          "version.go",
      ],
-+    embedsrcs = ["@@//build:kubernetes_stamp"],
++    embedsrcs = ["@monogon//build:kubernetes_stamp"],
      importpath = "k8s.io/client-go/pkg/version",
      visibility = ["//visibility:public"],
      deps = ["@io_k8s_apimachinery//pkg/version"],

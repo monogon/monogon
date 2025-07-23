@@ -6,7 +6,7 @@ index d6aeae2..978a9d3 100644
          "dynamic.go",
          "version.go",
      ],
-+    embedsrcs = ["@@//build:kubernetes_stamp"],
++    embedsrcs = ["@monogon//build:kubernetes_stamp"],
      importpath = "k8s.io/component-base/version",
      visibility = ["//visibility:public"],
      deps = [

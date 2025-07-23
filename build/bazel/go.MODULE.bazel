@@ -12,6 +12,7 @@ inject_repo(
     go_deps,
     "libpg_query",
     "seccomp",
+    "monogon",
 )
 
 # All *direct* Go dependencies of the module have to be listed explicitly.

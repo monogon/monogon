@@ -6,7 +6,7 @@ index fa870760490..0f67fe7eb9b 100644
          "@io_k8s_client_go//util/retry",
          "@io_k8s_component_base//metrics",
          "@io_k8s_component_base//metrics/legacyregistry",
-+        "@@//metropolis/node",
++        "@monogon//metropolis/node",
      ],
  )
 
