@@ -5,17 +5,9 @@ package logtree
 
 import (
 	"errors"
-	"slices"
 	"sync/atomic"
 
 	"source.monogon.dev/go/logging"
-)
-
-type BacklogOrder int
-
-const (
-	BacklogOrderLatestFirst BacklogOrder = iota
-	BacklogOrderOldestFirst
 )
 
 // LogReadOption describes options for the LogTree.Read call.
@@ -25,7 +17,6 @@ type logReaderOptions struct {
 	withChildren               bool
 	withStream                 bool
 	withBacklog                int
-	withBacklogOrder           BacklogOrder
 	onlyLeveled                bool
 	onlyRaw                    bool
 	leveledWithMinimumSeverity logging.Severity
@@ -61,12 +52,6 @@ func WithStreamBuffer(size int) LogReadOption {
 // elements.
 func WithBacklog(count int) LogReadOption {
 	return func(lro *logReaderOptions) { lro.withBacklog = count }
-}
-
-// WithBacklogOrder makes Read return log entries in the given order,
-// default being latest messages first.
-func WithBacklogOrder(order BacklogOrder) LogReadOption {
-	return func(lro *logReaderOptions) { lro.withBacklogOrder = order }
 }
 
 // BacklogAllAvailable makes WithBacklog return all backlogged log data that
@@ -169,11 +154,6 @@ func (l *LogTree) Read(dn DN, opts ...LogReadOption) (*LogReader, error) {
 		} else {
 			entries = l.journal.getEntries(lro.withBacklog, dn, filters...)
 		}
-	}
-
-	if lro.withBacklogOrder == BacklogOrderLatestFirst {
-		// Reverse entries back into chronological order.
-		slices.Reverse(entries)
 	}
 
 	lr := &LogReader{}
