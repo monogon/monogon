@@ -16,16 +16,16 @@ import (
 //go:embed build/copyright_line.txt
 var copyrightLine string
 
-// pageStatusData encompasses all data to be shown within the status page.
-type pageStatusData struct {
+// pageStatus encompasses all data to be shown within the status page.
+type pageStatus struct {
 	netAddr     string
 	roles       string
 	id          string
 	fingerprint string
 }
 
-// pageStatus renders the status page to the user given pageStatusData.
-func (c *Console) pageStatus(d *pageStatusData) {
+// render renders the status page to the user.
+func (d *pageStatus) render(c *Console) {
 	c.screen.Clear()
 	sty1 := tcell.StyleDefault.Background(c.color(colorPink)).Foreground(c.color(colorBlack))
 	sty2 := tcell.StyleDefault.Background(c.color(colorBlue)).Foreground(c.color(colorBlack))
@@ -93,4 +93,7 @@ func (c *Console) pageStatus(d *pageStatusData) {
 	if drawLogo {
 		c.drawLogo(splitH-logoWidth, splitV+center(c.height-splitV, logoHeight), sty2)
 	}
+}
+
+func (d *pageStatus) processEvent(*Console, tcell.Event) {
 }

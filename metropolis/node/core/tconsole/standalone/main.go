@@ -66,7 +66,7 @@ func main() {
 		supervisor.Run(ctx, "log-dawdle", func(ctx context.Context) error {
 			for {
 				supervisor.Logger(ctx).Infof("It is currently: %s", time.Now().Format(time.DateTime))
-				if err := delay(ctx, time.Second); err != nil {
+				if err := delay(ctx, time.Millisecond*100); err != nil {
 					return err
 				}
 			}

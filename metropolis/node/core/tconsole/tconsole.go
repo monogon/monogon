@@ -21,6 +21,11 @@ import (
 	"source.monogon.dev/osbase/supervisor"
 )
 
+type page interface {
+	render(*Console)
+	processEvent(*Console, tcell.Event)
+}
+
 type Config struct {
 	Terminal    Terminal
 	LogTree     *logtree.LogTree
@@ -46,8 +51,8 @@ type Console struct {
 	// constructed dynamically in Run.
 	activePage int
 
-	config Config
-	reader *logtree.LogReader
+	config    Config
+	logReader *logtree.LogReader
 }
 
 // New creates a new Console, taking over the TTY at the given path. The given
@@ -57,7 +62,12 @@ type Console struct {
 // network, roles, curatorConn point to various Metropolis subsystems that are
 // used to populate the console data.
 func New(config Config, ttyPath string) (*Console, error) {
-	reader, err := config.LogTree.Read("", logtree.WithChildren(), logtree.WithStream())
+	reader, err := config.LogTree.Read(
+		"",
+		logtree.WithChildren(),
+		logtree.WithStream(),
+		logtree.WithBacklog(logtree.BacklogAllAvailable),
+	)
 	if err != nil {
 		return nil, fmt.Errorf("lt.Read: %w", err)
 	}
@@ -96,7 +106,7 @@ func New(config Config, ttyPath string) (*Console, error) {
 		Quit:       make(chan struct{}),
 		activePage: 0,
 		config:     config,
-		reader:     reader,
+		logReader:  reader,
 	}, nil
 }
 
@@ -104,7 +114,7 @@ func New(config Config, ttyPath string) (*Console, error) {
 // the Metropolis console always runs.
 func (c *Console) Cleanup() {
 	c.screen.Fini()
-	c.reader.Close()
+	c.logReader.Close()
 }
 
 func (c *Console) processEvent(ev tcell.Event) {
@@ -145,18 +155,22 @@ func (c *Console) Run(ctx context.Context) error {
 	supervisor.Signal(ctx, supervisor.SignalHealthy)
 
 	// Per-page data.
-	pageStatus := pageStatusData{
+	pageStatus := pageStatus{
 		netAddr:     "Waiting...",
 		roles:       "Waiting...",
 		id:          "Waiting...",
 		fingerprint: "Waiting...",
 	}
-	pageLogs := pageLogsData{}
+	pageLogs := pageLogs{}
+	// Fetch backlog
+	for _, le := range c.logReader.Backlog {
+		pageLogs.appendLine(le)
+	}
 
 	// Page references and names.
-	pages := []func(){
-		func() { c.pageStatus(&pageStatus) },
-		func() { c.pageLogs(&pageLogs) },
+	pages := []page{
+		&pageStatus,
+		&pageLogs,
 	}
 	pageNames := []string{
 		"Status", "Logs",
@@ -175,7 +189,8 @@ func (c *Console) Run(ctx context.Context) error {
 	for {
 		// Draw active page.
 		c.activePage %= len(pages)
-		pages[c.activePage]()
+		page := pages[c.activePage]
+		page.render(c)
 
 		// Draw status bar.
 		c.statusBar(c.activePage, pageNames...)
@@ -191,6 +206,7 @@ func (c *Console) Run(ctx context.Context) error {
 			return ctx.Err()
 		case ev := <-evC:
 			c.processEvent(ev)
+			page.processEvent(c, ev)
 		case t := <-netAddrC:
 			pageStatus.netAddr = t.ExternalAddress.String()
 		case t := <-rolesC:
@@ -214,8 +230,8 @@ func (c *Console) Run(ctx context.Context) error {
 			sum := sha256.New()
 			sum.Write(cert.Raw)
 			pageStatus.fingerprint = hex.EncodeToString(sum.Sum(nil))
-		case le := <-c.reader.Stream:
-			pageLogs.appendLine(le.String())
+		case le := <-c.logReader.Stream:
+			pageLogs.appendLine(le)
 		}
 	}
 }
