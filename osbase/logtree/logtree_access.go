@@ -10,6 +10,13 @@ import (
 	"source.monogon.dev/go/logging"
 )
 
+type ReadDirection int
+
+const (
+	ReadDirectionAfter ReadDirection = iota
+	ReadDirectionBefore
+)
+
 // LogReadOption describes options for the LogTree.Read call.
 type LogReadOption func(*logReaderOptions)
 
@@ -21,6 +28,8 @@ type logReaderOptions struct {
 	onlyRaw                    bool
 	leveledWithMinimumSeverity logging.Severity
 	withStreamBufferSize       int
+	withStartPosition          int
+	startPositionReadDirection ReadDirection
 }
 
 // WithChildren makes Read return/stream data for both a given DN and all its
@@ -52,6 +61,20 @@ func WithStreamBuffer(size int) LogReadOption {
 // elements.
 func WithBacklog(count int) LogReadOption {
 	return func(lro *logReaderOptions) { lro.withBacklog = count }
+}
+
+// WithStartPosition makes Read return log entries from the given position.
+// It requires WithBacklog to be provided.
+//
+// The Journal keeps a global counter for all logs, starting at 0 for the
+// first message. Based on this the user can read entries
+// (based on the ReadDirection option) either after or before the given
+// position.
+func WithStartPosition(pos int, direction ReadDirection) LogReadOption {
+	return func(lro *logReaderOptions) {
+		lro.withStartPosition = pos
+		lro.startPositionReadDirection = direction
+	}
 }
 
 // BacklogAllAvailable makes WithBacklog return all backlogged log data that
@@ -107,7 +130,8 @@ func (l *LogReader) Close() {
 }
 
 var (
-	ErrRawAndLeveled = errors.New("cannot return logs that are simultaneously OnlyRaw and OnlyLeveled")
+	ErrRawAndLeveled               = errors.New("cannot return logs that are simultaneously OnlyRaw and OnlyLeveled")
+	ErrStartPositionWithoutBacklog = errors.New("cannot return logs that are WithStartingPosition and missing WithBacklog")
 )
 
 // Read and/or stream entries from a LogTree. The returned LogReader is influenced
@@ -121,6 +145,7 @@ func (l *LogTree) Read(dn DN, opts ...LogReadOption) (*LogReader, error) {
 
 	lro := logReaderOptions{
 		withStreamBufferSize: 128,
+		withStartPosition:    -1,
 	}
 
 	for _, opt := range opts {
@@ -131,7 +156,15 @@ func (l *LogTree) Read(dn DN, opts ...LogReadOption) (*LogReader, error) {
 		return nil, ErrRawAndLeveled
 	}
 
+	isWithBacklog := lro.withBacklog > 0 || lro.withBacklog == BacklogAllAvailable
+	if lro.withStartPosition != -1 && !isWithBacklog {
+		return nil, ErrStartPositionWithoutBacklog
+	}
+
 	var filters []filter
+	if lro.withStartPosition != -1 {
+		filters = append(filters, filterStartPosition(lro.withBacklog, lro.withStartPosition, lro.startPositionReadDirection))
+	}
 	if lro.onlyLeveled {
 		filters = append(filters, filterOnlyLeveled)
 	}
@@ -148,7 +181,7 @@ func (l *LogTree) Read(dn DN, opts ...LogReadOption) (*LogReader, error) {
 	}
 
 	var entries []*entry
-	if lro.withBacklog > 0 || lro.withBacklog == BacklogAllAvailable {
+	if isWithBacklog {
 		if lro.withChildren {
 			entries = l.journal.scanEntries(lro.withBacklog, filters...)
 		} else {

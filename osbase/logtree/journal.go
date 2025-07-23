@@ -5,7 +5,7 @@ package logtree
 
 import (
 	"errors"
-	"sort"
+	"slices"
 	"strings"
 	"sync"
 
@@ -96,6 +96,10 @@ type journal struct {
 	// provided filters (eg. to limit events to subtrees that interest that particular
 	// subscriber).
 	subscribers []*subscriber
+
+	// seq is a counter tracking the total amount of log entries appended since
+	// creation.
+	seq uint64
 }
 
 // newJournal creates a new empty journal. All journals are independent from
@@ -169,6 +173,19 @@ func filterOnlyLeveled(e *entry) bool {
 	return e.leveled != nil
 }
 
+func filterStartPosition(count int, pos int, direction ReadDirection) filter {
+	return func(e *entry) bool {
+		switch direction {
+		case ReadDirectionAfter:
+			return e.seqGlobal >= uint64(pos) && (count == BacklogAllAvailable || e.seqGlobal < uint64(pos+count))
+		case ReadDirectionBefore:
+			return e.seqGlobal < uint64(pos) && (count == BacklogAllAvailable || e.seqGlobal >= uint64(max(0, pos-count)))
+		default:
+			panic("unreachable")
+		}
+	}
+}
+
 // scanEntries does a linear scan through the global entry list and returns all
 // entries that match the given filters. If retrieving entries for an exact event,
 // getEntries should be used instead, as it will leverage DN-local linked lists to
@@ -198,9 +215,8 @@ func (j *journal) scanEntries(count int, filters ...filter) (res []*entry) {
 	}
 
 	// Reverse entries back into chronological order.
-	sort.SliceStable(res, func(i, j int) bool {
-		return i > j
-	})
+	slices.Reverse(res)
+
 	return
 }
 
@@ -234,9 +250,8 @@ func (j *journal) getEntries(count int, exact DN, filters ...filter) (res []*ent
 	}
 
 	// Reverse entries back into chronological order.
-	sort.SliceStable(res, func(i, j int) bool {
-		return i > j
-	})
+	slices.Reverse(res)
+
 	return
 }
 

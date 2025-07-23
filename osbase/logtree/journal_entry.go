@@ -43,6 +43,10 @@ type entry struct {
 	// length calculation for local linked lists as long as entries are only unlinked
 	// from the head or tail (which is the case in the current implementation).
 	seqLocal uint64
+
+	// seqGlobal is a counter within the global log structure that increases by
+	// one each time a new log entry is added.
+	seqGlobal uint64
 }
 
 // defaultDNQuota defines how many messages should be stored per DN.
@@ -53,9 +57,10 @@ const defaultDNQuota = 8192
 // sequences, etc. These objects are visible to library consumers.
 func (e *entry) external() *LogEntry {
 	return &LogEntry{
-		DN:      e.origin,
-		Leveled: e.leveled,
-		Raw:     e.raw,
+		DN:       e.origin,
+		Leveled:  e.leveled,
+		Raw:      e.raw,
+		Position: int(e.seqGlobal),
 	}
 }
 
@@ -108,6 +113,8 @@ func (j *journal) append(e *entry) {
 	defer j.mu.Unlock()
 
 	e.journal = j
+	e.seqGlobal = j.seq
+	j.seq++
 
 	// Insert at head in global linked list, set pointers.
 	e.nextGlobal = nil

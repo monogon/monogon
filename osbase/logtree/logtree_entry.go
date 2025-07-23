@@ -23,6 +23,9 @@ type LogEntry struct {
 	Raw *logbuffer.Line
 	// DN from which this entry was logged.
 	DN DN
+	// Position of this entry in the global journal. This is only available
+	// locally and is not set if the entry was obtained via protobuf.
+	Position int
 }
 
 // String returns a canonical representation of this payload as a single string

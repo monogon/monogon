@@ -49,6 +49,7 @@ go_test(
         "journal_test.go",
         "klog_test.go",
         "kmsg_test.go",
+        "logtree_access_test.go",
         "logtree_test.go",
         "zap_test.go",
     ],
