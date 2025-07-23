@@ -14,7 +14,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-load("@@//build/utils:template_file.bzl", "template_file")
+load("@aspect_bazel_lib//lib:expand_template.bzl", "expand_template")
 load("@rules_cc//cc:defs.bzl", "cc_library")
 
 # These are only for the headers of libcommon, which is a private dependency of libblkid and
@@ -59,9 +59,10 @@ libcommon_hdrs_defines = [
     "HAVE___FPENDING",
 ]
 
-template_file(
-    name = "blkid.h",
-    src = "libblkid/src/blkid.h.in",
+expand_template(
+    name = "blkid.h_expanded",
+    template = ":libblkid/src/blkid.h.in",
+    out = "blkid.h",
     substitutions = {
         "@LIBBLKID_VERSION@": "0.0.0",
         "@LIBBLKID_DATE@": "01.01.1970",

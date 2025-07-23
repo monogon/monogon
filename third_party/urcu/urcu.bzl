@@ -1,9 +1,10 @@
-load("@@//build/utils:template_file.bzl", "template_file")
+load("@aspect_bazel_lib//lib:expand_template.bzl", "expand_template")
 load("@rules_cc//cc:defs.bzl", "cc_library")
 
-template_file(
-    name = "config.h",
-    src = ":config.h.in",
+expand_template(
+    name = "config.h_expanded",
+    template = ":config.h.in",
+    out = "config.h",
     substitutions = {},
 )
 

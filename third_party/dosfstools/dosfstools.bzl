@@ -1,4 +1,4 @@
-load("@@//build/utils:template_file.bzl", "template_file")
+load("@aspect_bazel_lib//lib:expand_template.bzl", "expand_template")
 load("@rules_cc//cc:defs.bzl", "cc_binary")
 
 cc_binary(
@@ -31,9 +31,10 @@ cc_binary(
     includes = ["."],
 )
 
-template_file(
-    name = "version.h",
-    src = "src/version.h.in",
+expand_template(
+    name = "version.h_expanded",
+    template = ":src/version.h.in",
+    out = "version.h",
     substitutions = {
         # ONCHANGE(//build/bazel:third_party.MODULE.bazel): version needs to be kept in sync
         "@PACKAGE_VERSION@": "unstable-2022-07-25",

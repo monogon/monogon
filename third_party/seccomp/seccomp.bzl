@@ -14,7 +14,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-load("@@//build/utils:template_file.bzl", "template_file")
+load("@aspect_bazel_lib//lib:expand_template.bzl", "expand_template")
 load("@rules_cc//cc:defs.bzl", "cc_library")
 
 genrule(
@@ -49,9 +49,10 @@ genrule(
     ],
 )
 
-template_file(
-    name = "seccomp.h",
-    src = "include/seccomp.h.in",
+expand_template(
+    name = "seccomp.h_expanded",
+    template = ":include/seccomp.h.in",
+    out = "seccomp.h",
     substitutions = {
         # Known dependencies relying on this version information:
         # - @com_github_seccomp_libseccomp_golang//:libseccomp-golang
@@ -59,7 +60,6 @@ template_file(
         "@VERSION_MINOR@": "5",
         "@VERSION_MICRO@": "1",
     },
-    visibility = ["//visibility:public"],
 )
 
 cc_library(
