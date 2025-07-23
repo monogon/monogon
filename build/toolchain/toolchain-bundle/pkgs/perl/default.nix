@@ -1,5 +1,9 @@
-{ pkgs }: with pkgs;
-if (!stdenv.hostPlatform.isStatic) then perl else
+{ lib, super, ... }@inputs:
+let
+  # Passthrough default configuration without our custom super attribute. Perl
+  # requires itself which breaks when we don't pass through the default attributes.
+  perl = super.perl.override (_: (lib.filterAttrs (name: _: name != "super") inputs));
+in
 perl.overrideAttrs (old: {
   patches = old.patches ++ [
     ./static_build.patch

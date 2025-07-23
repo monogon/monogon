@@ -1,5 +1,4 @@
-{ pkgs }: with pkgs;
-
+{ qemu_kvm, audit, ... }:
 let
   qemuMinimal = qemu_kvm.override (old: {
     hostCpuOnly = true;
@@ -43,6 +42,6 @@ qemuMinimal.overrideAttrs (old: {
   configureFlags = (builtins.filter (v: v != "--static") old.configureFlags) ++ [ "--disable-libcbor" ];
   strictDeps = true;
   # a private dependency of PAM which is not linked explicitly in static builds
-  buildInputs = old.buildInputs ++ [ pkgs.audit ];
+  buildInputs = old.buildInputs ++ [ audit ];
   env.NIX_LDFLAGS = " -laudit ";
 })

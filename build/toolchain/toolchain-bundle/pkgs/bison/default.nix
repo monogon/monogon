@@ -1,6 +1,5 @@
-{ pkgs }: with pkgs;
-if (!stdenv.hostPlatform.isStatic) then bison else
-bison.overrideAttrs (old: {
+{ super, ... }:
+super.bison.overrideAttrs (_: {
   # Check overrided file for more informations
   postPatch = ''
     cp ${./yacc.in} src/yacc.in
