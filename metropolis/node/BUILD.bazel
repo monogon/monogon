@@ -1,5 +1,4 @@
 load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_library", "go_test")
-load("@rules_pkg//:pkg.bzl", "pkg_zip")
 load("//osbase/build/genproductinfo:defs.bzl", "product_info")
 load("//osbase/build/mkerofs:def.bzl", "erofs_image")
 load("//osbase/build/mkoci:def.bzl", "oci_os_image")
@@ -149,18 +148,6 @@ oci_os_image(
     compression_level = 0,
     product_info = ":product_info",
     visibility = ["//metropolis/test/launch:__pkg__"],
-)
-
-# An intermediary "bundle" format until we finalize the actual bundle format. This is NOT stable until migrated
-# to the actual bundle format.
-# TODO(lorenz): Replace this
-pkg_zip(
-    name = "bundle",
-    srcs = [
-        ":kernel_efi",
-        ":verity_rootfs",
-    ],
-    visibility = ["//visibility:public"],
 )
 
 product_info(
