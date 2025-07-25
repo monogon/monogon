@@ -15,11 +15,13 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"runtime"
 	"strconv"
 	"strings"
 	"time"
 
 	"github.com/cenkalti/backoff/v4"
+	ocispecv1 "github.com/opencontainers/image-spec/specs-go/v1"
 	"golang.org/x/sys/unix"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -260,6 +262,30 @@ func (s *Service) setABState(d *abloaderpb.ABLoaderData) error {
 	return nil
 }
 
+func selectArchitecture(ref oci.Ref, architecture string) (*oci.Image, error) {
+	switch ref := ref.(type) {
+	case *oci.Image:
+		return ref, nil
+	case *oci.Index:
+		var found *ocispecv1.Descriptor
+		for i := range ref.Manifest.Manifests {
+			descriptor := &ref.Manifest.Manifests[i]
+			if descriptor.Platform != nil && descriptor.Platform.Architecture == architecture {
+				if found != nil {
+					return nil, fmt.Errorf("invalid index, found multiple matching entries")
+				}
+				found = descriptor
+			}
+		}
+		if found == nil {
+			return nil, fmt.Errorf("no matching entry found in index for architecture %s", architecture)
+		}
+		return oci.AsImage(ref.Ref(found))
+	default:
+		return nil, fmt.Errorf("unknown manifest media type %q", ref.MediaType())
+	}
+}
+
 // InstallImage fetches the given image, installs it into the currently inactive
 // slot and sets that slot to boot next. If it doesn't return an error, a reboot
 // boots into the new slot.
@@ -290,7 +316,11 @@ func (s *Service) InstallImage(ctx context.Context, imageRef *apb.OSImageRef, wi
 		Repository: imageRef.Repository,
 	}
 
-	image, err := oci.AsImage(client.Read(downloadCtx, imageRef.Tag, imageRef.Digest))
+	ref, err := client.Read(downloadCtx, imageRef.Tag, imageRef.Digest)
+	if err != nil {
+		return fmt.Errorf("failed to fetch OS image: %w", err)
+	}
+	image, err := selectArchitecture(ref, runtime.GOARCH)
 	if err != nil {
 		return fmt.Errorf("failed to fetch OS image: %w", err)
 	}

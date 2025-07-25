@@ -22,6 +22,7 @@ go_library(
         "//osbase/oci/osimage",
         "//osbase/oci/registry",
         "@com_github_cenkalti_backoff_v4//:backoff",
+        "@com_github_opencontainers_image_spec//specs-go/v1:specs-go",
         "@org_golang_google_grpc//codes",
         "@org_golang_google_grpc//status",
         "@org_golang_google_protobuf//proto",

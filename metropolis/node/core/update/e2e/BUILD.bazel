@@ -12,13 +12,13 @@ go_test(
         "//metropolis/node/abloader",
         # For the two update tests
         "//metropolis/node/core/update/e2e/testos:testos_image_y",
-        "//metropolis/node/core/update/e2e/testos:testos_image_z",
+        "//metropolis/node/core/update/e2e/testos:testos_multiarch_z",
         "//build/toolchain/toolchain-bundle:qemu-kvm",
     ],
     x_defs = {
         "xImageXPath": "$(rlocationpath //metropolis/node/core/update/e2e/testos:testos_image_x )",
         "xImageYPath": "$(rlocationpath //metropolis/node/core/update/e2e/testos:testos_image_y )",
-        "xImageZPath": "$(rlocationpath //metropolis/node/core/update/e2e/testos:testos_image_z )",
+        "xImageZPath": "$(rlocationpath //metropolis/node/core/update/e2e/testos:testos_multiarch_z )",
         "xOvmfVarsPath": "$(rlocationpath //third_party/edk2:VARS.fd )",
         "xOvmfCodePath": "$(rlocationpath //third_party/edk2:CODE.fd )",
         "xAbloaderPath": "$(rlocationpath //metropolis/node/abloader )",
