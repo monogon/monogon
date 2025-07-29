@@ -1,0 +1,21 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_library")
+load(":def.bzl", "generate_analyzers")
+
+generate_analyzers(
+    name = "analyzers",
+    visibility = ["//build/analysis/staticcheck:__pkg__"],
+)
+
+go_library(
+    name = "generate_analyzers_lib",
+    srcs = ["main.go"],
+    importpath = "source.monogon.dev/build/analysis/staticcheck/generate_analyzers",
+    visibility = ["//visibility:private"],
+    deps = ["//build/analysis/staticcheck:staticcheck_lib"],
+)
+
+go_binary(
+    name = "generate_analyzers",
+    embed = [":generate_analyzers_lib"],
+    visibility = ["//visibility:public"],
+)

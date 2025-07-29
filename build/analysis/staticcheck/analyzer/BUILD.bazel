@@ -1,0 +1,27 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+load("//build/analysis/staticcheck:analyzers.bzl", "ANALYZER_NAMES")
+
+[
+    go_library(
+        name = analyzer,
+        srcs = ["analyzer.go"],
+        importpath = "source.monogon.dev/build/analysis/staticcheck/analyzer/" + analyzer,
+        visibility = ["//visibility:public"],
+        x_defs = {
+            "name": analyzer,
+        },
+        deps = ["//build/analysis/staticcheck:staticcheck_lib"],
+    )
+    for analyzer in ANALYZER_NAMES
+]
+
+go_library(
+    name = "analyzer",
+    srcs = ["analyzer.go"],
+    importpath = "source.monogon.dev/build/analysis/staticcheck/analyzer",
+    # Gazelle generated target that doesn't do anything,
+    # disable via incompatible.
+    target_compatible_with = ["@platforms//:incompatible"],
+    visibility = ["//visibility:private"],
+    deps = ["//build/analysis/staticcheck:staticcheck_lib"],
+)

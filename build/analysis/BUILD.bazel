@@ -1,6 +1,6 @@
 load("@bazel_skylib//rules:write_file.bzl", "write_file")
-load("@com_github_sluongng_nogo_analyzer//staticcheck:def.bzl", ALL_STATICCHECK_ANALYZERS = "ANALYZERS", format_staticcheck_analyzers = "staticcheck_analyzers")
 load("@io_bazel_rules_go//go:def.bzl", "nogo")
+load("//build/analysis/staticcheck:def.bzl", ALL_STATICCHECK_ANALYZERS = "ANALYZER_NAMES", filtered_staticcheck_analyzers = "filtered_analyzers")
 load(":def.bzl", "build_nogo_config", "exclude_from_checks", "exclude_from_external")
 
 # NOGO_PASSES contains all enabled analyzers that nogo should execute.
@@ -73,12 +73,12 @@ NOGO_PASSES += [
 # Combine all staticcheck analyzers with a list
 # of all globally disabled staticcheck analyzers
 # and append them to the nogo passes.
-NOGO_PASSES += format_staticcheck_analyzers(ALL_STATICCHECK_ANALYZERS + [
-    "-ST1000",  # at least one file in a package should have a package comment
-    "-ST1003",  # should not use ALL_CAPS in Go names; use CamelCase instead
-    "-QF1006",  # could lift into loop condition
-    "-QF1003",  # could use tagged switch
-    "-QF1008",  # Omit embedded fields from selector expression
+NOGO_PASSES += filtered_staticcheck_analyzers([
+    "ST1000",  # at least one file in a package should have a package comment
+    "ST1003",  # should not use ALL_CAPS in Go names; use CamelCase instead
+    "QF1006",  # could lift into loop condition
+    "QF1003",  # could use tagged switch
+    "QF1008",  # Omit embedded fields from selector expression
 ])
 
 NOGO_PASSES += [

@@ -1,0 +1,25 @@
+load("@aspect_bazel_lib//lib:write_source_files.bzl", "write_source_files")
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "staticcheck_lib",
+    srcs = ["staticcheck.go"],
+    importpath = "source.monogon.dev/build/analysis/staticcheck",
+    visibility = ["//build/analysis/staticcheck:__subpackages__"],
+    deps = [
+        "@co_honnef_go_tools//analysis/lint",
+        "@co_honnef_go_tools//quickfix",
+        "@co_honnef_go_tools//simple",
+        "@co_honnef_go_tools//staticcheck",
+        "@co_honnef_go_tools//stylecheck",
+        "@co_honnef_go_tools//unused",
+        "@org_golang_x_tools//go/analysis",
+    ],
+)
+
+write_source_files(
+    name = "staticcheck_analyzers",
+    files = {
+        "analyzers.bzl": "//build/analysis/staticcheck/generate_analyzers:analyzers",
+    },
+)

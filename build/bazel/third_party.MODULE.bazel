@@ -59,16 +59,6 @@ http_file(
     ],
 )
 
-# Used to include staticcheck as nogo analyzer
-http_archive(
-    name = "com_github_sluongng_nogo_analyzer",
-    integrity = "sha256-Dca16GCU0IHgW80MPkH8J1ojmMZOVFN2FmE5QSGB8VA=",
-    strip_prefix = "nogo-analyzer-0.0.3",
-    urls = [
-        "https://github.com/sluongng/nogo-analyzer/archive/refs/tags/v0.0.3.tar.gz",
-    ],
-)
-
 # CockroachDB repository used for linter passes.
 COCKROACH_VERSION = "22.1.6"
 
