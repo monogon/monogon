@@ -1,0 +1,20 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+filegroup(
+    name = "testdata",
+    srcs = glob(["testdata/**"]),
+    visibility = ["//pkg/testutils/lint/passes:__subpackages__"],
+)
+
+go_library(
+    name = "unconvert",
+    srcs = ["unconvert.go"],
+    importpath = "source.monogon.dev/third_party/com_github_cockroachdb_cockroach/unconvert",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//third_party/com_github_cockroachdb_cockroach/passesutil",
+        "@org_golang_x_tools//go/analysis",
+        "@org_golang_x_tools//go/analysis/passes/inspect",
+        "@org_golang_x_tools//go/ast/inspector",
+    ],
+)

@@ -1,0 +1,15 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "returnerrcheck",
+    srcs = ["returnerrcheck.go"],
+    importpath = "source.monogon.dev/third_party/com_github_cockroachdb_cockroach/returnerrcheck",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//third_party/com_github_cockroachdb_cockroach/passesutil",
+        "@org_golang_x_tools//go/analysis",
+        "@org_golang_x_tools//go/analysis/passes/inspect",
+        "@org_golang_x_tools//go/ast/astutil",
+        "@org_golang_x_tools//go/ast/inspector",
+    ],
+)

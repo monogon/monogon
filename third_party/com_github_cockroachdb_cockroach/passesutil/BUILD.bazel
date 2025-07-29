@@ -1,0 +1,12 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "passesutil",
+    srcs = ["passes_util.go"],
+    importpath = "source.monogon.dev/third_party/com_github_cockroachdb_cockroach/passesutil",
+    visibility = ["//visibility:public"],
+    deps = [
+        "@org_golang_x_tools//go/analysis",
+        "@org_golang_x_tools//go/ast/astutil",
+    ],
+)

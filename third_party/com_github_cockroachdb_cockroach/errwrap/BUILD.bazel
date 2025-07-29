@@ -1,0 +1,17 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "errwrap",
+    srcs = [
+        "errwrap.go",
+        "functions.go",
+    ],
+    importpath = "source.monogon.dev/third_party/com_github_cockroachdb_cockroach/errwrap",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//third_party/com_github_cockroachdb_cockroach/passesutil",
+        "@org_golang_x_tools//go/analysis",
+        "@org_golang_x_tools//go/analysis/passes/inspect",
+        "@org_golang_x_tools//go/ast/inspector",
+    ],
+)

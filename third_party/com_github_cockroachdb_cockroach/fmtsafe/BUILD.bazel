@@ -1,0 +1,18 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "fmtsafe",
+    srcs = [
+        "fmtsafe.go",
+        "functions.go",
+    ],
+    importpath = "source.monogon.dev/third_party/com_github_cockroachdb_cockroach/fmtsafe",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//third_party/com_github_cockroachdb_cockroach/errwrap",
+        "@org_golang_x_tools//go/analysis",
+        "@org_golang_x_tools//go/analysis/passes/inspect",
+        "@org_golang_x_tools//go/ast/inspector",
+        "@org_golang_x_tools//go/types/typeutil",
+    ],
+)

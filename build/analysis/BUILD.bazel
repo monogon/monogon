@@ -62,12 +62,12 @@ NOGO_PASSES += [
 
 # Append some passes provided by CockroachDB.
 NOGO_PASSES += [
-    "@com_github_cockroachdb_cockroach//pkg/testutils/lint/passes/errcmp",
-    "@com_github_cockroachdb_cockroach//pkg/testutils/lint/passes/errwrap",
-    "@com_github_cockroachdb_cockroach//pkg/testutils/lint/passes/hash",
-    "@com_github_cockroachdb_cockroach//pkg/testutils/lint/passes/nilness",
-    "@com_github_cockroachdb_cockroach//pkg/testutils/lint/passes/returnerrcheck",
-    "@com_github_cockroachdb_cockroach//pkg/testutils/lint/passes/unconvert",
+    "//third_party/com_github_cockroachdb_cockroach/errcmp",
+    "//third_party/com_github_cockroachdb_cockroach/errwrap",
+    "//third_party/com_github_cockroachdb_cockroach/hash",
+    "//third_party/com_github_cockroachdb_cockroach/nilness",
+    "//third_party/com_github_cockroachdb_cockroach/returnerrcheck",
+    "//third_party/com_github_cockroachdb_cockroach/unconvert",
 ]
 
 # Combine all staticcheck analyzers with a list
@@ -145,6 +145,11 @@ NOGO_CONFIG = [
         "unsafeptr": {
             "exclude_files": {
                 "sqlite3.*go": "third_party",
+            },
+        },
+        "haslicense": {
+            "exclude_files": {
+                "third_party/": "third_party",
             },
         },
     },
