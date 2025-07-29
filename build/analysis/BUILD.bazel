@@ -113,9 +113,15 @@ NOGO_CONFIG = [
     # All analyzers that should be disabled for external, generated or cgo code.
     exclude_from_external(ALL_STATICCHECK_ANALYZERS),
     exclude_from_external([
-        "exclude_files",
         "commentwrap",
+        "gocheckcompilerdirectives",
+        "noioutil",
         "importsort",
+        "gofmt",
+        "haslicense",
+    ]),
+    exclude_from_external([
+        "exclude_files",
         "unreachable",
         "unusedwrite",
         "composites",
@@ -127,14 +133,10 @@ NOGO_CONFIG = [
         "returnerrcheck",
         "hash",
         "errcmp",
-        "gofmt",
         "unparam",
-        "haslicense",
         "nilness",
         "printf",
-        "gocheckcompilerdirectives",
         "copylocks",
-        "noioutil",
         "lostcancel",
     ]),
 
