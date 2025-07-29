@@ -1,7 +1,7 @@
 // Copyright The Monogon Project Authors.
 // SPDX-License-Identifier: Apache-2.0
 
-package checkcompilerdirectives
+package gocheckcompilerdirectives
 
 import "4d63.com/gocheckcompilerdirectives/checkcompilerdirectives"
 

@@ -89,7 +89,7 @@ NOGO_PASSES += [
     # 'standard' 80 characters long, as prose within comment blocks does not
     # soft-reflow well.
     "@com_github_corverroos_commentwrap//:go_default_library",
-    "//build/analysis/checkcompilerdirectives",
+    "//build/analysis/gocheckcompilerdirectives",
     "//build/analysis/noioutil",
     "//build/analysis/importsort",
     "//build/analysis/gofmt",
