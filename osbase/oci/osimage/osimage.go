@@ -44,7 +44,7 @@ func Read(image *oci.Image) (*Image, error) {
 		return nil, fmt.Errorf("failed to read config: %w", err)
 	}
 	config := &Config{}
-	err = json.Unmarshal(rawConfig, &config)
+	err = json.Unmarshal(rawConfig, config)
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse config: %w", err)
 	}
