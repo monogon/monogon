@@ -23,5 +23,6 @@
         "bazel-testlogs/**": true,
         ".bazeldnf/**": true,
     },
-    "bazel.executable": "tools/bazel"
+    "bazel.executable": "tools/bazel",
+    "bazel.buildifierExecutable": "@buildifier_prebuilt//:buildifier",
 }
