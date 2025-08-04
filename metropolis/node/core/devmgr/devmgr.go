@@ -34,6 +34,9 @@ func (s *Service) Run(ctx context.Context) error {
 		return fmt.Errorf("unable to create kobject uevent socket: %w", err)
 	}
 	defer c.Close()
+	// The default buffer is very small, use a larger one to not constantly
+	// run out of buffer space needing a restart of this runnable.
+	c.SetReadBuffer(4 * 1024 * 1024)
 
 	l := supervisor.Logger(ctx)
 

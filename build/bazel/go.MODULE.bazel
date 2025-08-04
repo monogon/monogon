@@ -157,6 +157,11 @@ OVERRIDES = {
             "gazelle:proto disable",
         ],
     },
+    "github.com/mdlayher/kobject": {
+        "pre_patches": [
+            "//third_party/com_github_mdlayher_kobject:add_read_buffer_size.patch",
+        ],
+    },
     "github.com/Microsoft/hcsshim": {
         "directives": [
             "gazelle:proto disable",

@@ -1,0 +1,100 @@
+From 49c8d4613389f1326d9a2e96bb676b342cf79a68 Mon Sep 17 00:00:00 2001
+From: Andrey Smirnov <andrey.smirnov@siderolabs.com>
+Date: Mon, 4 Mar 2024 15:18:26 +0400
+Subject: [PATCH] feat: add support for setting read buffer size
+
+Without it, under high even rate from the kernel (e.g. OS boot), the
+call will fail with ENOBUFS, and the client would lose the event stream.
+
+Signed-off-by: Andrey Smirnov <andrey.smirnov@siderolabs.com>
+---
+ client.go           | 21 +++++++++++++++++++++
+ client_linux.go     |  4 +++-
+ cmd/kobject/main.go |  7 +++++++
+ 3 files changed, 31 insertions(+), 1 deletion(-)
+
+diff --git a/client.go b/client.go
+index 86c45ab..392bf21 100644
+--- a/client.go
++++ b/client.go
+@@ -59,6 +59,14 @@ func (c *Client) Close() error {
+ 	return c.rc.Close()
+ }
+ 
++// SetReceiveBuffer sets the size of the buffer used to read kobject uevents.
++func (c *Client) SetReceiveBuffer(size int) {
++	c.mu.Lock()
++	defer c.mu.Unlock()
++
++	c.b = make([]byte, size)
++}
++
+ // Receive waits until a kobject userspace event is triggered, and then returns
+ // the Event.
+ func (c *Client) Receive() (*Event, error) {
+@@ -103,11 +111,24 @@ func (c *Client) SetDeadline(t time.Time) error {
+ 	return conn.SetDeadline(t)
+ }
+ 
++// SetReadBuffer sets the read buffer size associated with the connection.
++//
++// When the buffer is too small, kernel events are dropped with ENOBUFS error.
++func (c *Client) SetReadBuffer(bytes int) error {
++	conn, ok := c.rc.(conn)
++	if !ok {
++		panicf("kobject: BUG: read buffer size not supported on internal conn type: %#v", c.rc)
++	}
++
++	return conn.SetReadBuffer(bytes)
++}
++
+ // A conn is the full set of required functionality for an internal type to
+ // expose via Client.
+ type conn interface {
+ 	tryReadCloser
+ 	SetDeadline(t time.Time) error
++	SetReadBuffer(bytes int) error
+ }
+ 
+ type tryReadCloser interface {
+diff --git a/client_linux.go b/client_linux.go
+index fea3376..00946a2 100644
+--- a/client_linux.go
++++ b/client_linux.go
+@@ -1,4 +1,5 @@
+-//+build linux
++//go:build linux
++// +build linux
+ 
+ package kobject
+ 
+@@ -90,3 +91,4 @@ func (sc *sysConn) TryRead(b []byte) (int, bool, error) {
+ 
+ func (sc *sysConn) Close() error                  { return sc.c.Close() }
+ func (sc *sysConn) SetDeadline(t time.Time) error { return sc.c.SetDeadline(t) }
++func (sc *sysConn) SetReadBuffer(bytes int) error { return sc.c.SetReadBuffer(bytes) }
+diff --git a/cmd/kobject/main.go b/cmd/kobject/main.go
+index 4df3554..c69d996 100644
+--- a/cmd/kobject/main.go
++++ b/cmd/kobject/main.go
+@@ -14,6 +14,7 @@ import (
+ func main() {
+ 	var (
+ 		tFlag = flag.Duration("t", 0*time.Second, "the amount of time to wait between events before timing out (default: forever)")
++		rFlag = flag.Int("r", 0, "the size of the read buffer for kobject events (0 for default size)")
+ 	)
+ 	flag.Parse()
+ 
+@@ -23,6 +24,12 @@ func main() {
+ 	}
+ 	defer c.Close()
+ 
++	if *rFlag != 0 {
++		if err = c.SetReadBuffer(*rFlag); err != nil {
++			log.Fatalf("failed to set read buffer: %v", err)
++		}
++	}
++
+ 	for {
+ 		if *tFlag > 0 {
+ 			if err := c.SetDeadline(time.Now().Add(*tFlag)); err != nil {
