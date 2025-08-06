@@ -20,6 +20,7 @@ import (
 
 	"source.monogon.dev/go/algorithm/toposort"
 	"source.monogon.dev/go/logging"
+	"source.monogon.dev/metropolis/node"
 	"source.monogon.dev/metropolis/node/core/network/dhcp4c"
 	dhcpcb "source.monogon.dev/metropolis/node/core/network/dhcp4c/callback"
 	"source.monogon.dev/osbase/supervisor"
@@ -175,7 +176,7 @@ func (s *Service) runStaticConfig(ctx context.Context) error {
 				}
 			}
 		}
-		s.Status.Set(&Status{
+		s.Status.Set(&node.NetStatus{
 			ExternalAddress: selectedAddr,
 		})
 	}

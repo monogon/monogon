@@ -32,6 +32,7 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/protobuf/proto"
 
+	"source.monogon.dev/metropolis/node"
 	"source.monogon.dev/metropolis/node/core/curator/watcher"
 	"source.monogon.dev/metropolis/node/core/localstorage"
 	"source.monogon.dev/metropolis/node/core/network"
@@ -159,7 +160,7 @@ func (s *Service) Run(ctx context.Context) error {
 		supervisor.Logger(ctx).Infof("Saved cluster directory absent, not restoring any host data.")
 	}
 
-	localC := make(chan *network.Status)
+	localC := make(chan *node.NetStatus)
 	s.clusterC = make(chan nodeMap)
 
 	if err := supervisor.Run(ctx, "local", event.Pipe(&s.Network.Status, localC)); err != nil {

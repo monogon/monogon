@@ -16,7 +16,7 @@ go_library(
     importpath = "source.monogon.dev/metropolis/node/core/tconsole",
     visibility = ["//visibility:public"],
     deps = [
-        "//metropolis/node/core/network",
+        "//metropolis/node",
         "//metropolis/node/core/productinfo",
         "//metropolis/node/core/roleserve",
         "//metropolis/proto/common",

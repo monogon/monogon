@@ -34,9 +34,9 @@ import (
 	"github.com/cenkalti/backoff/v4"
 	"github.com/vishvananda/netlink"
 
+	"source.monogon.dev/metropolis/node"
 	"source.monogon.dev/metropolis/node/core/curator/watcher"
 	"source.monogon.dev/metropolis/node/core/localstorage"
-	"source.monogon.dev/metropolis/node/core/network"
 	"source.monogon.dev/osbase/event"
 	"source.monogon.dev/osbase/supervisor"
 
@@ -61,7 +61,7 @@ type Service struct {
 	// it knows about the local node's IPAM address assignment.
 	LocalKubernetesPodNetwork event.Value[*Prefixes]
 	// Network service used to get the local node's IP address to submit it as a /32.
-	Network event.Value[*network.Status]
+	Network event.Value[*node.NetStatus]
 
 	// wg is the interface to all the low-level interactions with WireGuard (and
 	// kernel routing). If not set, this defaults to a production implementation.
@@ -84,7 +84,7 @@ func (s *Service) Run(ctx context.Context) error {
 	supervisor.Logger(ctx).Infof("Wireguard setup complete, starting updaters...")
 
 	kubeC := make(chan *Prefixes)
-	netC := make(chan *network.Status)
+	netC := make(chan *node.NetStatus)
 	if err := supervisor.RunGroup(ctx, map[string]supervisor.Runnable{
 		"source-kubernetes": event.Pipe(s.LocalKubernetesPodNetwork, kubeC),
 		"source-network":    event.Pipe(s.Network, netC),
@@ -105,7 +105,7 @@ func (s *Service) Run(ctx context.Context) error {
 
 // push is the sub-runnable responsible for letting the Curator know about what
 // prefixes that are originated by this node.
-func (s *Service) push(ctx context.Context, kubeC chan *Prefixes, netC chan *network.Status) error {
+func (s *Service) push(ctx context.Context, kubeC chan *Prefixes, netC chan *node.NetStatus) error {
 	supervisor.Signal(ctx, supervisor.SignalHealthy)
 
 	var kubePrefixes *Prefixes

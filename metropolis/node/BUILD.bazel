@@ -13,6 +13,7 @@ go_library(
         "labels.go",
         "net_ips.go",
         "net_protocols.go",
+        "net_status.go",
         "ports.go",
         "validation.go",
     ],

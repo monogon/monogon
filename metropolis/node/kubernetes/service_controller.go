@@ -13,6 +13,7 @@ import (
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
 
+	"source.monogon.dev/metropolis/node"
 	"source.monogon.dev/metropolis/node/core/consensus"
 	"source.monogon.dev/metropolis/node/core/identity"
 	"source.monogon.dev/metropolis/node/core/localstorage"
@@ -101,7 +102,7 @@ func (s *Controller) Run(ctx context.Context) error {
 		networkWatch := s.c.Network.Status.Watch()
 		defer networkWatch.Close()
 
-		var status *network.Status
+		var status *node.NetStatus
 
 		supervisor.Logger(ctx).Info("Waiting for node networking...")
 		for status == nil || status.ExternalAddress == nil {

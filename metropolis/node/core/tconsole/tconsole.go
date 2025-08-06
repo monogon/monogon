@@ -13,7 +13,7 @@ import (
 
 	"github.com/gdamore/tcell/v2"
 
-	"source.monogon.dev/metropolis/node/core/network"
+	"source.monogon.dev/metropolis/node"
 	"source.monogon.dev/metropolis/node/core/roleserve"
 	cpb "source.monogon.dev/metropolis/proto/common"
 	"source.monogon.dev/osbase/event"
@@ -24,7 +24,7 @@ import (
 type Config struct {
 	Terminal    Terminal
 	LogTree     *logtree.LogTree
-	Network     event.Value[*network.Status]
+	Network     event.Value[*node.NetStatus]
 	Roles       event.Value[*cpb.NodeRoles]
 	CuratorConn event.Value[*roleserve.CuratorConnection]
 }
@@ -130,7 +130,7 @@ func (c *Console) Run(ctx context.Context) error {
 	go c.screen.ChannelEvents(evC, evQuitC)
 
 	// Pipe event values into channels.
-	netAddrC := make(chan *network.Status)
+	netAddrC := make(chan *node.NetStatus)
 	rolesC := make(chan *cpb.NodeRoles)
 	curatorConnC := make(chan *roleserve.CuratorConnection)
 	if err := supervisor.Run(ctx, "netpipe", event.Pipe(c.config.Network, netAddrC)); err != nil {

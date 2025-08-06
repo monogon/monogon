@@ -12,7 +12,7 @@ go_library(
         "source.monogon.dev/metropolis/node/core/productinfo.path": "$(rlocationpath //metropolis/node:product_info )",
     },
     deps = [
-        "//metropolis/node/core/network",
+        "//metropolis/node",
         "//metropolis/node/core/roleserve",
         "//metropolis/node/core/tconsole",
         "//metropolis/proto/common",

@@ -58,7 +58,7 @@ type Service struct {
 	natPostroutingChain *nftables.Chain
 
 	// Status is the current status of the network as seen by the service.
-	Status memory.Value[*Status]
+	Status memory.Value[*node.NetStatus]
 }
 
 // New instantiates a new network service. If autoconfiguration is desired,
@@ -77,14 +77,6 @@ func New(staticConfig *netpb.Net, dnsHandlerNames []string) *Service {
 		dnsForward:   dnsForward,
 		StaticConfig: staticConfig,
 	}
-}
-
-// Status is the current network status of the host. It will be updated by the
-// network Service whenever the node's network configuration changes. Spurious
-// changes might occur, consumers should ensure that the change that occured is
-// meaningful to them.
-type Status struct {
-	ExternalAddress net.IP
 }
 
 func singleIPtoNetlinkAddr(ip net.IP, label string) *netlink.Addr {
@@ -171,7 +163,7 @@ func (s *Service) statusCallback(ctx context.Context) dhcp4c.LeaseCallback {
 		if !newAddress.Equal(s.dhcpAddress) {
 			s.dhcpAddress = newAddress
 			// Notify status waiters.
-			s.Status.Set(&Status{
+			s.Status.Set(&node.NetStatus{
 				ExternalAddress: newAddress,
 			})
 			if newAddress != nil {

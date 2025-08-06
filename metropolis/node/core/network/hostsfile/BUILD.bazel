@@ -6,6 +6,7 @@ go_library(
     importpath = "source.monogon.dev/metropolis/node/core/network/hostsfile",
     visibility = ["//visibility:public"],
     deps = [
+        "//metropolis/node",
         "//metropolis/node/core/curator/proto/api",
         "//metropolis/node/core/curator/watcher",
         "//metropolis/node/core/localstorage",

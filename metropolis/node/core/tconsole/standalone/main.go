@@ -18,7 +18,7 @@ import (
 	"os/signal"
 	"time"
 
-	"source.monogon.dev/metropolis/node/core/network"
+	"source.monogon.dev/metropolis/node"
 	"source.monogon.dev/metropolis/node/core/roleserve"
 	"source.monogon.dev/metropolis/node/core/tconsole"
 	cpb "source.monogon.dev/metropolis/proto/common"
@@ -28,7 +28,7 @@ import (
 )
 
 func main() {
-	var netV memory.Value[*network.Status]
+	var netV memory.Value[*node.NetStatus]
 	var rolesV memory.Value[*cpb.NodeRoles]
 	var curV memory.Value[*roleserve.CuratorConnection]
 
@@ -77,7 +77,7 @@ func main() {
 				if err := delay(ctx, time.Millisecond*1000); err != nil {
 					return err
 				}
-				netV.Set(&network.Status{
+				netV.Set(&node.NetStatus{
 					ExternalAddress: net.ParseIP(fmt.Sprintf("203.0.113.%d", mrand.Intn(256))),
 				})
 			}
