@@ -8,7 +8,6 @@ import (
 	"net"
 
 	"source.monogon.dev/metropolis/node/core/localstorage"
-	"source.monogon.dev/metropolis/node/core/network"
 	"source.monogon.dev/metropolis/node/core/network/ipam"
 	"source.monogon.dev/metropolis/node/core/network/overlay"
 	"source.monogon.dev/osbase/event/memory"
@@ -24,7 +23,6 @@ type workerClusternet struct {
 	curatorConnection *memory.Value[*CuratorConnection]
 	// podNetwork will be read.
 	podNetwork *memory.Value[*ipam.Prefixes]
-	network    *network.Service
 }
 
 func (s *workerClusternet) run(ctx context.Context) error {
@@ -44,9 +42,8 @@ func (s *workerClusternet) run(ctx context.Context) error {
 			IP:   []byte{10, 192, 0, 0},
 			Mask: net.IPMask{255, 224, 0, 0},
 		},
-		DataDirectory:             &s.storageRoot.Data.Kubernetes.ClusterNetworking,
-		LocalKubernetesPodNetwork: s.podNetwork,
-		Network:                   &s.network.Status,
+		DataDirectory:   &s.storageRoot.Data.Kubernetes.ClusterNetworking,
+		OverlayPrefixes: s.podNetwork,
 	}
 	return svc.Run(ctx)
 }

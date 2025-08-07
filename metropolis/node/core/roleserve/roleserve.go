@@ -163,7 +163,6 @@ func New(c Config) *Service {
 
 		curatorConnection: &s.CuratorConnection,
 		podNetwork:        s.Config.PodNetwork,
-		network:           s.Network,
 	}
 
 	s.hostsfile = &workerHostsfile{

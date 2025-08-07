@@ -94,9 +94,7 @@ func TestClusternetBasic(t *testing.T) {
 	defer cl.Close()
 	curator := apb.NewCuratorClient(cl)
 
-	var nval memory.Value[*common.NetStatus]
-
-	var podNetwork memory.Value[*ipam.Prefixes]
+	var overlayNetwork memory.Value[*ipam.Prefixes]
 	wg := &fakeWireguard{}
 	svc := Service{
 		Curator: curator,
@@ -104,9 +102,8 @@ func TestClusternetBasic(t *testing.T) {
 			IP:   net.IP([]byte{10, 10, 0, 0}),
 			Mask: net.IPv4Mask(255, 255, 0, 0),
 		},
-		DataDirectory:             nil,
-		LocalKubernetesPodNetwork: &podNetwork,
-		Network:                   &nval,
+		DataDirectory:   nil,
+		OverlayPrefixes: &overlayNetwork,
 
 		wg: wg,
 	}
