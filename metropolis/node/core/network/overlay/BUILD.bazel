@@ -2,19 +2,19 @@ load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
 load("//osbase/test/ktest:ktest.bzl", "k_test")
 
 go_library(
-    name = "clusternet",
+    name = "overlay",
     srcs = [
-        "clusternet.go",
-        "types.go",
+        "overlay.go",
         "wireguard.go",
     ],
-    importpath = "source.monogon.dev/metropolis/node/core/clusternet",
+    importpath = "source.monogon.dev/metropolis/node/core/network/overlay",
     visibility = ["//visibility:public"],
     deps = [
         "//metropolis/node",
         "//metropolis/node/core/curator/proto/api",
         "//metropolis/node/core/curator/watcher",
         "//metropolis/node/core/localstorage",
+        "//metropolis/node/core/network/ipam",
         "//metropolis/proto/common",
         "//osbase/event",
         "//osbase/supervisor",
@@ -26,14 +26,15 @@ go_library(
 )
 
 go_test(
-    name = "clusternet_test",
-    srcs = ["clusternet_test.go"],
-    embed = [":clusternet"],
+    name = "overlay_test",
+    srcs = ["overlay_test.go"],
+    embed = [":overlay"],
     deps = [
         "//metropolis/node",
         "//metropolis/node/core/curator/proto/api",
         "//metropolis/node/core/localstorage",
         "//metropolis/node/core/localstorage/declarative",
+        "//metropolis/node/core/network/ipam",
         "//metropolis/proto/common",
         "//metropolis/test/util",
         "//osbase/event/memory",
@@ -46,5 +47,5 @@ go_test(
 k_test(
     name = "ktest",
     cmdline = "ramdisk_size=128",
-    tester = ":clusternet_test",
+    tester = ":overlay_test",
 )

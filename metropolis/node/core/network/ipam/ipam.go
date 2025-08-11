@@ -1,7 +1,9 @@
 // Copyright The Monogon Project Authors.
 // SPDX-License-Identifier: Apache-2.0
 
-package clusternet
+// Package ipam is just a stub right now which contains a type for
+// describing prefix lists.
+package ipam
 
 import (
 	"net/netip"
@@ -15,7 +17,7 @@ import (
 // Cluster Networking mesh.
 type Prefixes []netip.Prefix
 
-func (p *Prefixes) proto() (res []*cpb.NodeClusterNetworking_Prefix) {
+func (p *Prefixes) Proto() (res []*cpb.NodeClusterNetworking_Prefix) {
 	for _, prefix := range *p {
 		res = append(res, &cpb.NodeClusterNetworking_Prefix{
 			Cidr: prefix.String(),

@@ -8,10 +8,10 @@ import (
 	"fmt"
 	"net"
 
-	"source.monogon.dev/metropolis/node/core/clusternet"
 	"source.monogon.dev/metropolis/node/core/identity"
 	"source.monogon.dev/metropolis/node/core/localstorage"
 	"source.monogon.dev/metropolis/node/core/network"
+	"source.monogon.dev/metropolis/node/core/network/ipam"
 	"source.monogon.dev/metropolis/node/kubernetes"
 	"source.monogon.dev/metropolis/node/kubernetes/containerd"
 	kpki "source.monogon.dev/metropolis/node/kubernetes/pki"
@@ -40,7 +40,7 @@ type workerKubernetes struct {
 	localControlPlane *memory.Value[*localControlPlane]
 	curatorConnection *memory.Value[*CuratorConnection]
 	kubernetesStatus  *memory.Value[*KubernetesStatus]
-	podNetwork        *memory.Value[*clusternet.Prefixes]
+	podNetwork        *memory.Value[*ipam.Prefixes]
 }
 
 // kubernetesStartup is used internally to provide a reduced (as in MapReduce

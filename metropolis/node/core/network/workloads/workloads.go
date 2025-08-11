@@ -20,7 +20,7 @@ import (
 	"google.golang.org/grpc/status"
 
 	"source.monogon.dev/metropolis/node"
-	"source.monogon.dev/metropolis/node/core/clusternet"
+	"source.monogon.dev/metropolis/node/core/network/ipam"
 	wlapi "source.monogon.dev/metropolis/node/core/network/workloads/spec"
 	"source.monogon.dev/osbase/event"
 	"source.monogon.dev/osbase/supervisor"
@@ -43,10 +43,10 @@ type Service struct {
 	// intfUsed is the set of allocated short interface names.
 	intfUsed map[string]struct{}
 
-	k8sNodePrefix event.Value[*clusternet.Prefixes]
+	k8sNodePrefix event.Value[*ipam.Prefixes]
 }
 
-func New(k8sNodePrefix event.Value[*clusternet.Prefixes]) *Service {
+func New(k8sNodePrefix event.Value[*ipam.Prefixes]) *Service {
 	return &Service{
 		workloadNets:   []netip.Prefix{},
 		attachments:    make(map[netip.Addr]string),

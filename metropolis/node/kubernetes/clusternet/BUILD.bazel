@@ -7,7 +7,7 @@ go_library(
     visibility = ["//metropolis/node/kubernetes:__subpackages__"],
     deps = [
         "//go/logging",
-        "//metropolis/node/core/clusternet",
+        "//metropolis/node/core/network/ipam",
         "//osbase/event",
         "//osbase/supervisor",
         "@io_k8s_api//core/v1:core",

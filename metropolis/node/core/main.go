@@ -12,12 +12,12 @@ import (
 
 	"source.monogon.dev/go/logging"
 	"source.monogon.dev/metropolis/node/core/cluster"
-	"source.monogon.dev/metropolis/node/core/clusternet"
 	"source.monogon.dev/metropolis/node/core/devmgr"
 	"source.monogon.dev/metropolis/node/core/localstorage"
 	"source.monogon.dev/metropolis/node/core/localstorage/declarative"
 	"source.monogon.dev/metropolis/node/core/metrics"
 	"source.monogon.dev/metropolis/node/core/network"
+	"source.monogon.dev/metropolis/node/core/network/ipam"
 	"source.monogon.dev/metropolis/node/core/productinfo"
 	"source.monogon.dev/metropolis/node/core/roleserve"
 	"source.monogon.dev/metropolis/node/core/rpc/resolver"
@@ -121,7 +121,7 @@ func root(ctx context.Context) error {
 	}
 
 	metrics.CoreRegistry.MustRegister(dns.MetricsRegistry)
-	var podNetwork memory.Value[*clusternet.Prefixes]
+	var podNetwork memory.Value[*ipam.Prefixes]
 	networkSvc := network.New(nil, []string{"hosts", "kubernetes"}, &podNetwork)
 	networkSvc.DHCPVendorClassID = "dev.monogon.metropolis.node.v1"
 	timeSvc := timesvc.New()

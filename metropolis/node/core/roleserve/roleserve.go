@@ -43,11 +43,11 @@ import (
 	"crypto/ed25519"
 
 	common "source.monogon.dev/metropolis/node"
-	"source.monogon.dev/metropolis/node/core/clusternet"
 	"source.monogon.dev/metropolis/node/core/curator"
 	"source.monogon.dev/metropolis/node/core/identity"
 	"source.monogon.dev/metropolis/node/core/localstorage"
 	"source.monogon.dev/metropolis/node/core/network"
+	"source.monogon.dev/metropolis/node/core/network/ipam"
 	"source.monogon.dev/metropolis/node/core/rpc/resolver"
 	"source.monogon.dev/metropolis/node/core/update"
 	cpb "source.monogon.dev/metropolis/proto/common"
@@ -66,7 +66,7 @@ type Config struct {
 	// Network is a handle to the network service, used by workloads.
 	Network *network.Service
 
-	PodNetwork *memory.Value[*clusternet.Prefixes]
+	PodNetwork *memory.Value[*ipam.Prefixes]
 
 	// resolver is the main, long-lived, authenticated cluster resolver that is used
 	// for all subsequent gRPC calls by the subordinates of the roleserver. It is

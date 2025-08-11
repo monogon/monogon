@@ -7,9 +7,10 @@ import (
 	"context"
 	"net"
 
-	"source.monogon.dev/metropolis/node/core/clusternet"
 	"source.monogon.dev/metropolis/node/core/localstorage"
 	"source.monogon.dev/metropolis/node/core/network"
+	"source.monogon.dev/metropolis/node/core/network/ipam"
+	"source.monogon.dev/metropolis/node/core/network/overlay"
 	"source.monogon.dev/osbase/event/memory"
 	"source.monogon.dev/osbase/supervisor"
 
@@ -22,7 +23,7 @@ type workerClusternet struct {
 	// curatorConnection will be read
 	curatorConnection *memory.Value[*CuratorConnection]
 	// podNetwork will be read.
-	podNetwork *memory.Value[*clusternet.Prefixes]
+	podNetwork *memory.Value[*ipam.Prefixes]
 	network    *network.Service
 }
 
@@ -37,7 +38,7 @@ func (s *workerClusternet) run(ctx context.Context) error {
 	supervisor.Logger(ctx).Infof("Got curator connection, starting...")
 	cur := ipb.NewCuratorClient(cc.conn)
 
-	svc := clusternet.Service{
+	svc := overlay.Service{
 		Curator: cur,
 		ClusterNet: net.IPNet{
 			IP:   []byte{10, 192, 0, 0},

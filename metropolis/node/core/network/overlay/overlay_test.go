@@ -1,7 +1,7 @@
 // Copyright The Monogon Project Authors.
 // SPDX-License-Identifier: Apache-2.0
 
-package clusternet
+package overlay
 
 import (
 	"fmt"
@@ -19,6 +19,7 @@ import (
 	common "source.monogon.dev/metropolis/node"
 	"source.monogon.dev/metropolis/node/core/localstorage"
 	"source.monogon.dev/metropolis/node/core/localstorage/declarative"
+	"source.monogon.dev/metropolis/node/core/network/ipam"
 	"source.monogon.dev/metropolis/test/util"
 	"source.monogon.dev/osbase/event/memory"
 	"source.monogon.dev/osbase/supervisor"
@@ -95,7 +96,7 @@ func TestClusternetBasic(t *testing.T) {
 
 	var nval memory.Value[*common.NetStatus]
 
-	var podNetwork memory.Value[*Prefixes]
+	var podNetwork memory.Value[*ipam.Prefixes]
 	wg := &fakeWireguard{}
 	svc := Service{
 		Curator: curator,

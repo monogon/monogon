@@ -1,7 +1,7 @@
 // Copyright The Monogon Project Authors.
 // SPDX-License-Identifier: Apache-2.0
 
-package clusternet
+package overlay
 
 import (
 	"fmt"
@@ -89,7 +89,7 @@ func (s *localWireguard) setup(clusterNet *net.IPNet) error {
 		}
 	}
 
-	wgInterface := &netlink.Wireguard{LinkAttrs: netlink.LinkAttrs{Name: clusterNetDeviceName, Flags: net.FlagUp, Group: common.LinkGroupClusternet}}
+	wgInterface := &netlink.Wireguard{LinkAttrs: netlink.LinkAttrs{Name: clusterNetDeviceName, Flags: net.FlagUp, Group: common.LinkGroupOverlay}}
 	if err := netlink.LinkAdd(wgInterface); err != nil {
 		return fmt.Errorf("when adding network interface: %w", err)
 	}
@@ -111,7 +111,7 @@ func (s *localWireguard) setup(clusterNet *net.IPNet) error {
 	if err := netlink.RouteAdd(&netlink.Route{
 		Dst:       clusterNet,
 		LinkIndex: wgInterface.Index,
-		Protocol:  netlink.RouteProtocol(common.ProtocolClusternet),
+		Protocol:  netlink.RouteProtocol(common.ProtocolOverlay),
 	}); err != nil && !os.IsExist(err) {
 		return fmt.Errorf("when creating cluster route: %w", err)
 	}

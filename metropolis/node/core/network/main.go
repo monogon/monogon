@@ -17,9 +17,9 @@ import (
 	"github.com/vishvananda/netlink"
 
 	"source.monogon.dev/metropolis/node"
-	"source.monogon.dev/metropolis/node/core/clusternet"
 	"source.monogon.dev/metropolis/node/core/network/dhcp4c"
 	dhcpcb "source.monogon.dev/metropolis/node/core/network/dhcp4c/callback"
+	"source.monogon.dev/metropolis/node/core/network/ipam"
 	"source.monogon.dev/metropolis/node/core/network/workloads"
 	"source.monogon.dev/osbase/event"
 	"source.monogon.dev/osbase/event/memory"
@@ -72,7 +72,7 @@ type Service struct {
 // If dnsHandlerNames is non-nil, DNS handlers with these names must be set
 // on the DNS service with s.DNS.SetHandler. When serving DNS queries, they
 // will be tried in the order they appear here before forwarding.
-func New(staticConfig *netpb.Net, dnsHandlerNames []string, ipamPrefixSrc event.Value[*clusternet.Prefixes]) *Service {
+func New(staticConfig *netpb.Net, dnsHandlerNames []string, ipamPrefixSrc event.Value[*ipam.Prefixes]) *Service {
 	dnsSvc := dns.New(slices.Concat(dnsHandlerNames, []string{"forward"}))
 	dnsForward := forward.New()
 	dnsSvc.SetHandler("forward", dnsForward)
@@ -271,7 +271,7 @@ func (s *Service) Run(ctx context.Context) error {
 		Type:     nftables.ChainTypeNAT,
 	})
 	// SNAT/Masquerade all traffic coming from pod interface (identified by
-	// group) not going to another pod, either local or over clusternet.
+	// group) not going to another pod, either local or over the overlay.
 	// Will need to be changed when we support L3 attachments (BGP, ...).
 	s.nftConn.AddRule(&nftables.Rule{
 		Table: s.natTable,
@@ -297,11 +297,11 @@ func (s *Service) Run(ctx context.Context) error {
 				Register: 8,
 				Data:     binaryutil.NativeEndian.PutUint32(node.LinkGroupK8sPod),
 			},
-			// Check if outgoing interface isn't clusternet
+			// Check if outgoing interface is not part of the overlay
 			&expr.Cmp{
 				Op:       expr.CmpOpNeq,
 				Register: 8,
-				Data:     binaryutil.NativeEndian.PutUint32(node.LinkGroupClusternet),
+				Data:     binaryutil.NativeEndian.PutUint32(node.LinkGroupOverlay),
 			},
 			&expr.Masq{},
 		},

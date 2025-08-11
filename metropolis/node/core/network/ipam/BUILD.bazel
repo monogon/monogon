@@ -1,0 +1,9 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "ipam",
+    srcs = ["ipam.go"],
+    importpath = "source.monogon.dev/metropolis/node/core/network/ipam",
+    visibility = ["//visibility:public"],
+    deps = ["//metropolis/proto/common"],
+)

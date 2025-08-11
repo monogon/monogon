@@ -19,7 +19,6 @@ go_library(
     visibility = ["//visibility:public"],
     deps = [
         "//metropolis/node",
-        "//metropolis/node/core/clusternet",
         "//metropolis/node/core/consensus",
         "//metropolis/node/core/curator",
         "//metropolis/node/core/curator/proto/api",
@@ -30,6 +29,8 @@ go_library(
         "//metropolis/node/core/mgmt",
         "//metropolis/node/core/network",
         "//metropolis/node/core/network/hostsfile",
+        "//metropolis/node/core/network/ipam",
+        "//metropolis/node/core/network/overlay",
         "//metropolis/node/core/productinfo",
         "//metropolis/node/core/rpc",
         "//metropolis/node/core/rpc/resolver",

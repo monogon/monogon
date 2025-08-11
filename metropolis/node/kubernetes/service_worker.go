@@ -17,10 +17,10 @@ import (
 
 	"source.monogon.dev/go/net/tinylb"
 	"source.monogon.dev/metropolis/node"
-	oclusternet "source.monogon.dev/metropolis/node/core/clusternet"
 	"source.monogon.dev/metropolis/node/core/localstorage"
 	"source.monogon.dev/metropolis/node/core/metrics"
 	"source.monogon.dev/metropolis/node/core/network"
+	"source.monogon.dev/metropolis/node/core/network/ipam"
 	"source.monogon.dev/metropolis/node/kubernetes/clusternet"
 	"source.monogon.dev/metropolis/node/kubernetes/metricsprovider"
 	"source.monogon.dev/metropolis/node/kubernetes/networkpolicy"
@@ -44,7 +44,7 @@ type ConfigWorker struct {
 	Network       *network.Service
 	NodeID        string
 	CuratorClient ipb.CuratorClient
-	PodNetwork    event.Value[*oclusternet.Prefixes]
+	PodNetwork    event.Value[*ipam.Prefixes]
 }
 
 type Worker struct {

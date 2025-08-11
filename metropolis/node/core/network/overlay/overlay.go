@@ -1,7 +1,7 @@
 // Copyright The Monogon Project Authors.
 // SPDX-License-Identifier: Apache-2.0
 
-// Package clusternet implements a Cluster Networking mesh service running on all
+// Package overlay implements a Cluster Networking mesh service running on all
 // Metropolis nodes.
 //
 // The mesh is based on wireguard and a centralized configuration store in the
@@ -22,7 +22,7 @@
 // Second, we have two hardcoded/purpose-specific sources of prefixes:
 //  1. Pod networking node prefixes from the kubelet
 //  2. The host's external IP address (as a /32) from the network service.
-package clusternet
+package overlay
 
 import (
 	"context"
@@ -37,6 +37,7 @@ import (
 	"source.monogon.dev/metropolis/node"
 	"source.monogon.dev/metropolis/node/core/curator/watcher"
 	"source.monogon.dev/metropolis/node/core/localstorage"
+	"source.monogon.dev/metropolis/node/core/network/ipam"
 	"source.monogon.dev/osbase/event"
 	"source.monogon.dev/osbase/supervisor"
 
@@ -59,7 +60,7 @@ type Service struct {
 	// LocalKubernetesPodNetwork is an event.Value watched for prefixes that should
 	// be announced into the mesh. This is to be Set by the Kubernetes service once
 	// it knows about the local node's IPAM address assignment.
-	LocalKubernetesPodNetwork event.Value[*Prefixes]
+	LocalKubernetesPodNetwork event.Value[*ipam.Prefixes]
 	// Network service used to get the local node's IP address to submit it as a /32.
 	Network event.Value[*node.NetStatus]
 
@@ -83,7 +84,7 @@ func (s *Service) Run(ctx context.Context) error {
 
 	supervisor.Logger(ctx).Infof("Wireguard setup complete, starting updaters...")
 
-	kubeC := make(chan *Prefixes)
+	kubeC := make(chan *ipam.Prefixes)
 	netC := make(chan *node.NetStatus)
 	if err := supervisor.RunGroup(ctx, map[string]supervisor.Runnable{
 		"source-kubernetes": event.Pipe(s.LocalKubernetesPodNetwork, kubeC),
@@ -105,11 +106,11 @@ func (s *Service) Run(ctx context.Context) error {
 
 // push is the sub-runnable responsible for letting the Curator know about what
 // prefixes that are originated by this node.
-func (s *Service) push(ctx context.Context, kubeC chan *Prefixes, netC chan *node.NetStatus) error {
+func (s *Service) push(ctx context.Context, kubeC chan *ipam.Prefixes, netC chan *node.NetStatus) error {
 	supervisor.Signal(ctx, supervisor.SignalHealthy)
 
-	var kubePrefixes *Prefixes
-	var prevKubePrefixes *Prefixes
+	var kubePrefixes *ipam.Prefixes
+	var prevKubePrefixes *ipam.Prefixes
 
 	var localAddr net.IP
 	var prevLocalAddr net.IP
@@ -144,7 +145,7 @@ func (s *Service) push(ctx context.Context, kubeC chan *Prefixes, netC chan *nod
 		}
 
 		// Prepare prefixes to submit to cluster.
-		var prefixes Prefixes
+		var prefixes ipam.Prefixes
 
 		// Do we have a local node address? Add it to the prefixes.
 		if len(localAddr) > 0 {
@@ -164,7 +165,7 @@ func (s *Service) push(ctx context.Context, kubeC chan *Prefixes, netC chan *nod
 			_, err := s.Curator.UpdateNodeClusterNetworking(ctx, &apb.UpdateNodeClusterNetworkingRequest{
 				Clusternet: &cpb.NodeClusterNetworking{
 					WireguardPubkey: s.wg.key().PublicKey().String(),
-					Prefixes:        prefixes.proto(),
+					Prefixes:        prefixes.Proto(),
 				},
 			})
 			if err != nil {
@@ -186,7 +187,7 @@ func (s *Service) push(ctx context.Context, kubeC chan *Prefixes, netC chan *nod
 // node host network namespace (i.e. the one container P2P interfaces point to)
 // on its loopback interface to make it eligible to be used as a source IP
 // address for communication into the clusternet overlay.
-func configureKubeNetwork(oldPrefixes *Prefixes, newPrefixes *Prefixes) error {
+func configureKubeNetwork(oldPrefixes *ipam.Prefixes, newPrefixes *ipam.Prefixes) error {
 	// diff maps prefixes to be removed to false
 	// and prefixes to be added to true.
 	diff := make(map[netip.Prefix]bool)

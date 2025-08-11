@@ -29,7 +29,7 @@ import (
 	"k8s.io/client-go/tools/cache"
 
 	"source.monogon.dev/go/logging"
-	oclusternet "source.monogon.dev/metropolis/node/core/clusternet"
+	"source.monogon.dev/metropolis/node/core/network/ipam"
 	"source.monogon.dev/osbase/event"
 	"source.monogon.dev/osbase/supervisor"
 )
@@ -37,7 +37,7 @@ import (
 type Service struct {
 	NodeName   string
 	Kubernetes kubernetes.Interface
-	Prefixes   event.Value[*oclusternet.Prefixes]
+	Prefixes   event.Value[*ipam.Prefixes]
 
 	logger logging.Leveled
 }
@@ -50,7 +50,7 @@ func (s *Service) ensureNode(newNode *corev1.Node) error {
 		return nil
 	}
 
-	var prefixes oclusternet.Prefixes
+	var prefixes ipam.Prefixes
 	for _, podNetStr := range newNode.Spec.PodCIDRs {
 		prefix, err := netip.ParsePrefix(podNetStr)
 		if err != nil {
