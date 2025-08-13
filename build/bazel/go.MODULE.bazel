@@ -293,12 +293,12 @@ OVERRIDES = {
     "k8s.io/kubernetes": {
         "directives": [
             "gazelle:proto disable",
+            "gazelle:resolve go source.monogon.dev/metropolis/node @monogon//metropolis/node",
         ],
         "patches": [
             "//third_party/com_k8s_io_kubernetes:k8s-native-metrics.patch",
             "//third_party/com_k8s_io_kubernetes:k8s-removed-block-device-pseudo-locks.patch",
             "//third_party/com_k8s_io_kubernetes:k8s-add-pause-build-file.patch",
-            "//third_party/com_k8s_io_kubernetes:k8s-reserve-metropolis-ports-import.patch",
         ],
         "pre_patches": [
             "//third_party/com_k8s_io_kubernetes:k8s-drop-legacy-log-path.patch",
