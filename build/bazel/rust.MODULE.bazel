@@ -8,7 +8,7 @@ RUSTC_EFI_FLAGS = [
 
 rust = use_extension("@rules_rust//rust:extensions.bzl", "rust")
 rust.toolchain(
-    edition = "2021",
+    edition = "2024",
     extra_rustc_flags_triples = {
         "x86_64-unknown-uefi": RUSTC_EFI_FLAGS,
         "aarch64-unknown-uefi": RUSTC_EFI_FLAGS,
@@ -17,7 +17,9 @@ rust.toolchain(
         "x86_64-unknown-uefi",
         "aarch64-unknown-uefi",
     ],
-    versions = ["1.82.0"],
+    # Newer versions are currently not usable, because of mangled symbols.
+    # https://github.com/bazelbuild/rules_rust/issues/3459
+    versions = ["1.87.0"],
 )
 use_repo(rust, "rust_toolchains")
 
