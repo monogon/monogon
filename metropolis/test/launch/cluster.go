@@ -248,6 +248,21 @@ func (c *Cluster) CuratorClient() (*grpc.ClientConn, error) {
 	return c.authClient, nil
 }
 
+// NodeClient returns an authenticated owner connection to the specified
+// node within Cluster c, or nil together with an error.
+func (c *Cluster) NodeClient(n *NodeInCluster) (*grpc.ClientConn, error) {
+	authCreds := rpc.NewAuthenticatedCredentials(c.Owner, rpc.WantRemoteCluster(c.CACertificate), rpc.WantRemoteNode(n.ID))
+	endpoint := net.JoinHostPort(n.ManagementAddress, allocs.PortNodeManagement.PortString())
+	authClient, err := grpc.NewClient(endpoint,
+		grpc.WithTransportCredentials(authCreds),
+		grpc.WithContextDialer(c.DialNode),
+	)
+	if err != nil {
+		return nil, fmt.Errorf("creating client with owner credentials failed: %w", err)
+	}
+	return authClient, nil
+}
+
 // LaunchNode launches a single Metropolis node instance with the given options.
 // The instance runs mostly paravirtualized but with some emulated hardware
 // similar to how a cloud provider might set up its VMs. The disk is fully
@@ -1175,8 +1190,21 @@ func (c *Cluster) RebootNode(ctx context.Context, idx int) error {
 	}
 	mgmt := apb.NewManagementClient(curC)
 
-	// Cancel the node's context. This will shut down QEMU.
-	c.nodeOpts[idx].Runtime.CtxC()
+	nodeC, err := c.NodeClient(c.Nodes[id])
+	if err != nil {
+		return err
+	}
+
+	// Shut down the Node. QEMU will exit once the node powers it off.
+	nmgmt := apb.NewNodeManagementClient(nodeC)
+	_, err = nmgmt.Reboot(ctx, &apb.RebootRequest{
+		Type:     apb.RebootRequest_TYPE_POWER_OFF,
+		NextBoot: apb.RebootRequest_NEXT_BOOT_START_NORMAL,
+	})
+	if err != nil {
+		return err
+	}
+
 	logf("Cluster: waiting for node %d (%s) to stop.", idx, id)
 	err = <-c.nodesDone[idx]
 	if err != nil {
