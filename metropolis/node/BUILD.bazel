@@ -33,10 +33,6 @@ config_setting(
     },
 )
 
-exports_files([
-    "passwd",
-])
-
 go_binary(
     name = "runc",
     embed = ["@com_github_opencontainers_runc//:runc_lib"],
