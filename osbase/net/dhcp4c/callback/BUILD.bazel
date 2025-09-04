@@ -4,14 +4,10 @@ load("//osbase/test/ktest:ktest.bzl", "k_test")
 go_library(
     name = "callback",
     srcs = ["callback.go"],
-    importpath = "source.monogon.dev/metropolis/node/core/network/dhcp4c/callback",
-    visibility = [
-        "//metropolis/node:__subpackages__",
-        # Exception for this package: the DHCP client is also used by nanoswitch.
-        "//metropolis/test/nanoswitch:__subpackages__",
-    ],
+    importpath = "source.monogon.dev/osbase/net/dhcp4c/callback",
+    visibility = ["//visibility:public"],
     deps = [
-        "//metropolis/node/core/network/dhcp4c",
+        "//osbase/net/dhcp4c",
         "@com_github_insomniacslk_dhcp//dhcpv4",
         "@com_github_vishvananda_netlink//:netlink",
         "@org_golang_x_sys//unix",
@@ -23,7 +19,7 @@ go_test(
     srcs = ["callback_test.go"],
     embed = [":callback"],
     deps = [
-        "//metropolis/node/core/network/dhcp4c",
+        "//osbase/net/dhcp4c",
         "@com_github_google_go_cmp//cmp",
         "@com_github_insomniacslk_dhcp//dhcpv4",
         "@com_github_vishvananda_netlink//:netlink",

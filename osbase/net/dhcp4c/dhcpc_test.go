@@ -14,7 +14,7 @@ import (
 	"github.com/insomniacslk/dhcp/dhcpv4"
 	"github.com/stretchr/testify/assert"
 
-	"source.monogon.dev/metropolis/node/core/network/dhcp4c/transport"
+	"source.monogon.dev/osbase/net/dhcp4c/transport"
 )
 
 type fakeTime struct {

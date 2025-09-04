@@ -11,9 +11,9 @@ go_library(
     visibility = ["//visibility:private"],
     deps = [
         "//metropolis/node",
-        "//metropolis/node/core/network/dhcp4c",
-        "//metropolis/node/core/network/dhcp4c/callback",
         "//osbase/bringup",
+        "//osbase/net/dhcp4c",
+        "//osbase/net/dhcp4c/callback",
         "//osbase/supervisor",
         "//osbase/test/socksproxy",
         "@com_github_google_nftables//:nftables",

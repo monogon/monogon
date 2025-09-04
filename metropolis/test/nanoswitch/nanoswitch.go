@@ -29,9 +29,9 @@ import (
 	"github.com/vishvananda/netlink"
 
 	common "source.monogon.dev/metropolis/node"
-	"source.monogon.dev/metropolis/node/core/network/dhcp4c"
-	dhcpcb "source.monogon.dev/metropolis/node/core/network/dhcp4c/callback"
 	"source.monogon.dev/osbase/bringup"
+	"source.monogon.dev/osbase/net/dhcp4c"
+	dhcpcb "source.monogon.dev/osbase/net/dhcp4c/callback"
 	"source.monogon.dev/osbase/supervisor"
 )
 

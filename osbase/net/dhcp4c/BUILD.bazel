@@ -7,14 +7,10 @@ go_library(
         "doc.go",
         "lease.go",
     ],
-    importpath = "source.monogon.dev/metropolis/node/core/network/dhcp4c",
-    visibility = [
-        "//metropolis/node:__subpackages__",
-        # Exception for this package: the DHCP client is also used by nanoswitch.
-        "//metropolis/test/nanoswitch:__subpackages__",
-    ],
+    importpath = "source.monogon.dev/osbase/net/dhcp4c",
+    visibility = ["//visibility:public"],
     deps = [
-        "//metropolis/node/core/network/dhcp4c/transport",
+        "//osbase/net/dhcp4c/transport",
         "//osbase/supervisor",
         "@com_github_cenkalti_backoff_v4//:backoff",
         "@com_github_insomniacslk_dhcp//dhcpv4",
@@ -30,7 +26,7 @@ go_test(
     ],
     embed = [":dhcp4c"],
     deps = [
-        "//metropolis/node/core/network/dhcp4c/transport",
+        "//osbase/net/dhcp4c/transport",
         "@com_github_cenkalti_backoff_v4//:backoff",
         "@com_github_insomniacslk_dhcp//dhcpv4",
         "@com_github_stretchr_testify//assert",

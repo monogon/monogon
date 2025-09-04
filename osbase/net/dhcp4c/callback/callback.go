@@ -25,7 +25,7 @@ import (
 	"github.com/vishvananda/netlink"
 	"golang.org/x/sys/unix"
 
-	"source.monogon.dev/metropolis/node/core/network/dhcp4c"
+	"source.monogon.dev/osbase/net/dhcp4c"
 )
 
 // Compose can be used to chain multiple callbacks
