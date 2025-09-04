@@ -18,7 +18,7 @@ go_library(
     importpath = "source.monogon.dev/metropolis/node/core/roleserve",
     visibility = ["//visibility:public"],
     deps = [
-        "//metropolis/node",
+        "//metropolis/node/allocs",
         "//metropolis/node/core/consensus",
         "//metropolis/node/core/curator",
         "//metropolis/node/core/curator/proto/api",
@@ -64,7 +64,7 @@ go_test(
         "source.monogon.dev/metropolis/node/core/productinfo.path": "$(rlocationpath //metropolis/node:product_info )",
     },
     deps = [
-        "//metropolis/node",
+        "//metropolis/node/allocs",
         "//metropolis/node/core/consensus",
         "//metropolis/node/core/curator",
         "//metropolis/node/core/curator/proto/api",

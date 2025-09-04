@@ -1,7 +1,7 @@
 // Copyright The Monogon Project Authors.
 // SPDX-License-Identifier: Apache-2.0
 
-package node
+package allocs
 
 // These are netlink protocol numbers used internally for various netlink
 // resource (e.g. route) owners/manager.

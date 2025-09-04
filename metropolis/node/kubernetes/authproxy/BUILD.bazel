@@ -6,7 +6,7 @@ go_library(
     importpath = "source.monogon.dev/metropolis/node/kubernetes/authproxy",
     visibility = ["//visibility:public"],
     deps = [
-        "//metropolis/node",
+        "//metropolis/node/allocs",
         "//metropolis/node/core/identity",
         "//metropolis/node/kubernetes/pki",
         "//osbase/supervisor",

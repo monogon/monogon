@@ -10,7 +10,7 @@ go_library(
     importpath = "source.monogon.dev/metropolis/node/core/network/overlay",
     visibility = ["//visibility:public"],
     deps = [
-        "//metropolis/node",
+        "//metropolis/node/allocs",
         "//metropolis/node/core/curator/proto/api",
         "//metropolis/node/core/curator/watcher",
         "//metropolis/node/core/localstorage",
@@ -30,7 +30,7 @@ go_test(
     srcs = ["overlay_test.go"],
     embed = [":overlay"],
     deps = [
-        "//metropolis/node",
+        "//metropolis/node/allocs",
         "//metropolis/node/core/curator/proto/api",
         "//metropolis/node/core/localstorage",
         "//metropolis/node/core/localstorage/declarative",

@@ -23,7 +23,7 @@ import (
 	apb "source.monogon.dev/metropolis/proto/api"
 	cpb "source.monogon.dev/metropolis/proto/common"
 
-	common "source.monogon.dev/metropolis/node"
+	"source.monogon.dev/metropolis/node/allocs"
 	"source.monogon.dev/metropolis/node/core/rpc"
 	mlaunch "source.monogon.dev/metropolis/test/launch"
 	"source.monogon.dev/metropolis/test/localregistry"
@@ -101,7 +101,7 @@ func TestE2ECore(t *testing.T) {
 
 	// Dial first node's curator.
 	creds := rpc.NewAuthenticatedCredentials(cluster.Owner, rpc.WantInsecure())
-	remote := net.JoinHostPort(cluster.Nodes[cluster.NodeIDs[0]].ManagementAddress, common.CuratorServicePort.PortString())
+	remote := net.JoinHostPort(cluster.Nodes[cluster.NodeIDs[0]].ManagementAddress, allocs.PortCuratorService.PortString())
 	cl, err := grpc.NewClient(remote, grpc.WithContextDialer(cluster.DialNode), grpc.WithTransportCredentials(creds))
 	if err != nil {
 		t.Fatalf("failed to create first node's curator client: %v", err)
@@ -163,7 +163,7 @@ func TestE2ECore(t *testing.T) {
 		}
 		u := url.URL{
 			Scheme: "https",
-			Host:   net.JoinHostPort(cluster.NodeIDs[0], common.MetricsPort.PortString()),
+			Host:   net.JoinHostPort(cluster.NodeIDs[0], allocs.PortMetrics.PortString()),
 			Path:   "/metrics/node",
 		}
 		res, err := cl.Get(u.String())

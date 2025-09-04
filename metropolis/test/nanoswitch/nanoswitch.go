@@ -28,7 +28,7 @@ import (
 	"github.com/insomniacslk/dhcp/dhcpv4/server4"
 	"github.com/vishvananda/netlink"
 
-	common "source.monogon.dev/metropolis/node"
+	"source.monogon.dev/metropolis/node/allocs"
 	"source.monogon.dev/osbase/bringup"
 	"source.monogon.dev/osbase/net/dhcp4c"
 	dhcpcb "source.monogon.dev/osbase/net/dhcp4c/callback"
@@ -128,7 +128,7 @@ func runDHCPServer(link netlink.Link) supervisor.Runnable {
 
 // userspaceProxy listens on port and proxies all TCP connections to the same
 // port on targetIP
-func userspaceProxy(targetIP net.IP, port common.Port) supervisor.Runnable {
+func userspaceProxy(targetIP net.IP, port allocs.Port) supervisor.Runnable {
 	return func(ctx context.Context) error {
 		logger := supervisor.Logger(ctx)
 		tcpListener, err := net.ListenTCP("tcp", &net.TCPAddr{IP: net.IPv4(0, 0, 0, 0), Port: int(port)})
@@ -289,10 +289,10 @@ func root(ctx context.Context) (err error) {
 		logger.Info("No upstream interface detected")
 	}
 	supervisor.Run(ctx, "dhcp-server", runDHCPServer(vmBridgeLink))
-	supervisor.Run(ctx, "proxy-cur1", userspaceProxy(net.IPv4(10, 1, 0, 2), common.CuratorServicePort))
-	supervisor.Run(ctx, "proxy-dbg1", userspaceProxy(net.IPv4(10, 1, 0, 2), common.DebugServicePort))
-	supervisor.Run(ctx, "proxy-k8s-api1", userspaceProxy(net.IPv4(10, 1, 0, 2), common.KubernetesAPIPort))
-	supervisor.Run(ctx, "proxy-k8s-api-wrapped1", userspaceProxy(net.IPv4(10, 1, 0, 2), common.KubernetesAPIWrappedPort))
+	supervisor.Run(ctx, "proxy-cur1", userspaceProxy(net.IPv4(10, 1, 0, 2), allocs.PortCuratorService))
+	supervisor.Run(ctx, "proxy-dbg1", userspaceProxy(net.IPv4(10, 1, 0, 2), allocs.PortDebugService))
+	supervisor.Run(ctx, "proxy-k8s-api1", userspaceProxy(net.IPv4(10, 1, 0, 2), allocs.PortKubernetesAPI))
+	supervisor.Run(ctx, "proxy-k8s-api-wrapped1", userspaceProxy(net.IPv4(10, 1, 0, 2), allocs.PortKubernetesAPIWrapped))
 	supervisor.Run(ctx, "socks", runSOCKSProxy)
 	supervisor.Signal(ctx, supervisor.SignalHealthy)
 	supervisor.Signal(ctx, supervisor.SignalDone)

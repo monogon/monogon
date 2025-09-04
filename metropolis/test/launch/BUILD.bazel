@@ -48,6 +48,7 @@ go_library(
         "//metropolis/cli/metroctl/core",
         "//metropolis/installer/install",
         "//metropolis/node",
+        "//metropolis/node/allocs",
         "//metropolis/node/core/curator/proto/api",
         "//metropolis/node/core/rpc",
         "//metropolis/node/core/rpc/resolver",

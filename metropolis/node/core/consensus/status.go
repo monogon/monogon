@@ -13,7 +13,7 @@ import (
 
 	clientv3 "go.etcd.io/etcd/client/v3"
 
-	"source.monogon.dev/metropolis/node"
+	"source.monogon.dev/metropolis/node/allocs"
 	"source.monogon.dev/metropolis/node/core/consensus/client"
 	"source.monogon.dev/osbase/event"
 	"source.monogon.dev/osbase/pki"
@@ -103,7 +103,7 @@ func (s *Status) AddNode(ctx context.Context, nodeID string, pk ed25519.PublicKe
 
 	var extraNames []string
 	name := nodeID
-	port := int(node.ConsensusPort)
+	port := int(allocs.PortConsensus)
 	for _, opt := range opts {
 		if opt.externalAddress != "" {
 			name = opt.externalAddress

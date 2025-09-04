@@ -13,7 +13,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"source.monogon.dev/metropolis/cli/metroctl/core"
-	common "source.monogon.dev/metropolis/node"
+	"source.monogon.dev/metropolis/node/allocs"
 	"source.monogon.dev/metropolis/proto/api"
 )
 
@@ -76,7 +76,7 @@ A node ID and exporter must be provided. Currently available exporters are:
 		client := http.Client{
 			Transport: transport,
 		}
-		res, err := client.Get(fmt.Sprintf("https://%s/metrics/%s", net.JoinHostPort(n.Status.ExternalAddress, common.MetricsPort.PortString()), args[1]))
+		res, err := client.Get(fmt.Sprintf("https://%s/metrics/%s", net.JoinHostPort(n.Status.ExternalAddress, allocs.PortMetrics.PortString()), args[1]))
 		if err != nil {
 			return fmt.Errorf("metrics HTTP request failed: %w", err)
 		}

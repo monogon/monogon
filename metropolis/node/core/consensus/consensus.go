@@ -33,12 +33,12 @@
 //   | node-foo            |
 //   |---------------------|
 //   | .--------------------.
-//   | | etcd               |<---etcd/TLS--.   (node.ConsensusPort)
+//   | | etcd               |<---etcd/TLS--.   (allocs.PortConsensus)
 //   | '--------------------'              |
 //   |     ^ Domain Socket |               |
 //   |     | etcd/plain    |               |
 //   | .--------------------.              |
-//   | | curator            |<---gRPC/TLS----. (node.CuratorServicePort)
+//   | | curator            |<---gRPC/TLS----. (allocs.PortCuratorService)
 //   | '--------------------'              | |
 //   |     ^ Domain Socket |               | |
 //   |     | gRPC/plain    |               | |

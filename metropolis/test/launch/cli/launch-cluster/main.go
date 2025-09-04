@@ -20,7 +20,7 @@ import (
 
 	"source.monogon.dev/metropolis/cli/flagdefs"
 	metroctl "source.monogon.dev/metropolis/cli/metroctl/core"
-	"source.monogon.dev/metropolis/node"
+	"source.monogon.dev/metropolis/node/allocs"
 	cpb "source.monogon.dev/metropolis/proto/common"
 	mlaunch "source.monogon.dev/metropolis/test/launch"
 )
@@ -183,7 +183,7 @@ func main() {
 	apiserver := cl.Nodes[cl.NodeIDs[0]].ManagementAddress
 	// Wait for the API server to start listening.
 	for {
-		conn, err := cl.DialNode(ctx, net.JoinHostPort(apiserver, node.KubernetesAPIWrappedPort.PortString()))
+		conn, err := cl.DialNode(ctx, net.JoinHostPort(apiserver, allocs.PortKubernetesAPIWrapped.PortString()))
 		if err == nil {
 			conn.Close()
 			break

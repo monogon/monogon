@@ -26,7 +26,7 @@ import (
 	"k8s.io/client-go/tools/clientcmd"
 	configapi "k8s.io/client-go/tools/clientcmd/api"
 
-	common "source.monogon.dev/metropolis/node"
+	"source.monogon.dev/metropolis/node/allocs"
 	"source.monogon.dev/metropolis/node/core/consensus"
 	opki "source.monogon.dev/osbase/pki"
 )
@@ -225,10 +225,10 @@ var (
 	// KubernetesAPIEndpointForWorker points Kubernetes workers to connect to a
 	// locally-running apiproxy, which in turn loadbalances the connection to
 	// controller nodes running in the cluster.
-	KubernetesAPIEndpointForWorker = KubernetesAPIEndpoint(fmt.Sprintf("https://127.0.0.1:%d", common.KubernetesWorkerLocalAPIPort))
+	KubernetesAPIEndpointForWorker = KubernetesAPIEndpoint(fmt.Sprintf("https://127.0.0.1:%d", allocs.PortKubernetesWorkerLocalAPI))
 	// KubernetesAPIEndpointForController points Kubernetes controllers to connect to
 	// the locally-running API server.
-	KubernetesAPIEndpointForController = KubernetesAPIEndpoint(fmt.Sprintf("https://127.0.0.1:%d", common.KubernetesAPIPort))
+	KubernetesAPIEndpointForController = KubernetesAPIEndpoint(fmt.Sprintf("https://127.0.0.1:%d", allocs.PortKubernetesAPI))
 )
 
 // KubeconfigRaw emits a Kubeconfig for a given set of certificates, private key,

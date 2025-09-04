@@ -13,7 +13,7 @@ import (
 
 	"google.golang.org/grpc"
 
-	"source.monogon.dev/metropolis/node"
+	"source.monogon.dev/metropolis/node/allocs"
 	"source.monogon.dev/metropolis/node/core/identity"
 	"source.monogon.dev/metropolis/node/core/rpc"
 	"source.monogon.dev/metropolis/node/core/update"
@@ -54,7 +54,7 @@ func (s *Service) Run(ctx context.Context) error {
 	}
 	logger := supervisor.MustSubLogger(ctx, "rpc")
 	opts := sec.GRPCOptions(logger)
-	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", node.NodeManagementPort))
+	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", allocs.PortNodeManagement))
 	if err != nil {
 		return fmt.Errorf("failed to listen on node management socket socket: %w", err)
 	}

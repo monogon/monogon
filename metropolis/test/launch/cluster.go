@@ -41,6 +41,7 @@ import (
 	"k8s.io/client-go/rest"
 	"k8s.io/utils/ptr"
 
+	"source.monogon.dev/metropolis/node/allocs"
 	ipb "source.monogon.dev/metropolis/node/core/curator/proto/api"
 	apb "source.monogon.dev/metropolis/proto/api"
 	cpb "source.monogon.dev/metropolis/proto/common"
@@ -141,17 +142,17 @@ type NodeRuntime struct {
 }
 
 // NodePorts is the list of ports a fully operational Metropolis node listens on
-var NodePorts = []node.Port{
-	node.ConsensusPort,
+var NodePorts = []allocs.Port{
+	allocs.PortConsensus,
 
-	node.CuratorServicePort,
-	node.DebugServicePort,
+	allocs.PortCuratorService,
+	allocs.PortDebugService,
 
-	node.KubernetesAPIPort,
-	node.KubernetesAPIWrappedPort,
-	node.CuratorServicePort,
-	node.DebuggerPort,
-	node.MetricsPort,
+	allocs.PortKubernetesAPI,
+	allocs.PortKubernetesAPIWrapped,
+	allocs.PortCuratorService,
+	allocs.PortDebugger,
+	allocs.PortMetrics,
 }
 
 // setupRuntime creates the node's QEMU runtime directory, together with all
@@ -579,10 +580,10 @@ const SOCKSPort uint16 = 1080
 // ClusterPorts contains all ports handled by Nanoswitch.
 var ClusterPorts = []uint16{
 	// Forwarded to the first node.
-	uint16(node.CuratorServicePort),
-	uint16(node.DebugServicePort),
-	uint16(node.KubernetesAPIPort),
-	uint16(node.KubernetesAPIWrappedPort),
+	uint16(allocs.PortCuratorService),
+	uint16(allocs.PortDebugService),
+	uint16(allocs.PortKubernetesAPI),
+	uint16(allocs.PortKubernetesAPIWrapped),
 
 	// SOCKS proxy to the switch network
 	SOCKSPort,
@@ -694,7 +695,7 @@ type NodeInCluster struct {
 // information as NodeInCluster.
 func firstConnection(ctx context.Context, socksDialer proxy.Dialer) (*tls.Certificate, *NodeInCluster, error) {
 	// Dial external service.
-	remote := fmt.Sprintf("10.1.0.2:%s", node.CuratorServicePort.PortString())
+	remote := fmt.Sprintf("10.1.0.2:%s", allocs.PortCuratorService.PortString())
 	initCreds, err := rpc.NewEphemeralCredentials(InsecurePrivateKey, rpc.WantInsecure())
 	if err != nil {
 		return nil, nil, fmt.Errorf("NewEphemeralCredentials: %w", err)
@@ -1320,7 +1321,7 @@ func (c *Cluster) GetKubeClientSet() (kubernetes.Interface, *rest.Config, error)
 		panic(err)
 	}
 
-	host := net.JoinHostPort(c.NodeIDs[0], node.KubernetesAPIWrappedPort.PortString())
+	host := net.JoinHostPort(c.NodeIDs[0], allocs.PortKubernetesAPIWrapped.PortString())
 	clientConfig := rest.Config{
 		Host: host,
 		TLSClientConfig: rest.TLSClientConfig{

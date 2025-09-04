@@ -1,7 +1,7 @@
 // Copyright The Monogon Project Authors.
 // SPDX-License-Identifier: Apache-2.0
 
-package node
+package allocs
 
 import "net"
 
@@ -9,5 +9,5 @@ import "net"
 var (
 	// Used by //metropolis/node/kubernetes as the DNS server IP for containers.
 	// Link-local IP space, 77 for ASCII M(onogon), 53 for DNS port.
-	ContainerDNSIP = net.IPv4(169, 254, 77, 53)
+	IPContainerDNS = net.IPv4(169, 254, 77, 53)
 )

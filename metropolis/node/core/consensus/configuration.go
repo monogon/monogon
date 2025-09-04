@@ -15,7 +15,7 @@ import (
 	clientv3 "go.etcd.io/etcd/client/v3"
 	"go.etcd.io/etcd/server/v3/embed"
 
-	"source.monogon.dev/metropolis/node"
+	"source.monogon.dev/metropolis/node/allocs"
 	"source.monogon.dev/metropolis/node/core/localstorage"
 	"source.monogon.dev/osbase/pki"
 )
@@ -90,7 +90,7 @@ type testOverrides struct {
 // over TLS. This requires TLS credentials to be present on disk, and will be
 // disabled for bootstrapping the instance.
 func (c *Config) build(enablePeers bool) *embed.Config {
-	port := int(node.ConsensusPort)
+	port := int(allocs.PortConsensus)
 	if p := c.testOverrides.externalPort; p != 0 {
 		port = p
 	}
@@ -98,7 +98,7 @@ func (c *Config) build(enablePeers bool) *embed.Config {
 	if c.testOverrides.externalAddress != "" {
 		host = c.testOverrides.externalAddress
 	}
-	etcdPort := int(node.MetricsEtcdListenerPort)
+	etcdPort := int(allocs.PortMetricsEtcdListener)
 	if p := c.testOverrides.etcdMetricsPort; p != 0 {
 		etcdPort = p
 	}

@@ -11,7 +11,7 @@ go_library(
     visibility = ["//visibility:public"],
     deps = [
         "//go/logging",
-        "//metropolis/node",
+        "//metropolis/node/allocs",
         "//metropolis/node/core/curator/proto/api",
         "//metropolis/node/core/curator/watcher",
         "//metropolis/proto/common",

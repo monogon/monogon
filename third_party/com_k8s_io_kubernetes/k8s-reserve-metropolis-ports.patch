@@ -15,7 +15,7 @@ index 0ec22c55a54..f890b9c133e 100644
  	"sync"
  	"time"
  
-+	"source.monogon.dev/metropolis/node"
++	"source.monogon.dev/metropolis/node/allocs"
 +
  	corev1 "k8s.io/api/core/v1"
  	"k8s.io/apimachinery/pkg/api/errors"
@@ -26,7 +26,7 @@ index 0ec22c55a54..f890b9c133e 100644
  	}
 +
 +	// pretend that metropolis system ports are in use by an actual service
-+	for _, p := range node.SystemPorts {
++	for _, p := range allocs.SystemPorts {
 +		if err := rebuilt.Allocate(int(p)); err != nil {
 +			return fmt.Errorf("unable to allocate metropolis port: %v", err)
 +		}

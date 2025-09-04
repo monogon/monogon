@@ -11,7 +11,7 @@ go_library(
     visibility = ["//visibility:public"],
     deps = [
         "//go/types/mapsets",
-        "//metropolis/node",
+        "//metropolis/node/allocs",
         "//metropolis/node/core/curator/proto/api",
         "//metropolis/node/core/curator/watcher",
         "//metropolis/node/core/identity",
@@ -32,7 +32,7 @@ go_test(
         "xFakeExporterPath": "$(rlocationpath //metropolis/node/core/metrics/fake_exporter )",
     },
     deps = [
-        "//metropolis/node",
+        "//metropolis/node/allocs",
         "//metropolis/node/core/curator/proto/api",
         "//metropolis/test/util",
         "//osbase/supervisor",

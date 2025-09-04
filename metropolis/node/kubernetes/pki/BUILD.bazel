@@ -6,7 +6,7 @@ go_library(
     importpath = "source.monogon.dev/metropolis/node/kubernetes/pki",
     visibility = ["//metropolis/node:__subpackages__"],
     deps = [
-        "//metropolis/node",
+        "//metropolis/node/allocs",
         "//metropolis/node/core/consensus",
         "//osbase/pki",
         "@io_etcd_go_etcd_client_v3//:client",

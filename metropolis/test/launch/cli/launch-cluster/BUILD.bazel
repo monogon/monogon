@@ -14,7 +14,7 @@ go_library(
     deps = [
         "//metropolis/cli/flagdefs",
         "//metropolis/cli/metroctl/core",
-        "//metropolis/node",
+        "//metropolis/node/allocs",
         "//metropolis/proto/common",
         "//metropolis/test/launch",
         "@io_bazel_rules_go//go/runfiles",

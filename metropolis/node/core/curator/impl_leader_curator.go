@@ -20,6 +20,7 @@ import (
 	tpb "google.golang.org/protobuf/types/known/timestamppb"
 
 	common "source.monogon.dev/metropolis/node"
+	"source.monogon.dev/metropolis/node/allocs"
 	"source.monogon.dev/metropolis/node/core/consensus"
 	ipb "source.monogon.dev/metropolis/node/core/curator/proto/api"
 	"source.monogon.dev/metropolis/node/core/identity"
@@ -601,7 +602,7 @@ func (l *leaderCurator) GetCurrentLeader(_ *ipb.GetCurrentLeaderRequest, srv ipb
 	err = srv.Send(&ipb.GetCurrentLeaderResponse{
 		LeaderNodeId: l.leaderID,
 		LeaderHost:   host,
-		LeaderPort:   int32(common.CuratorServicePort),
+		LeaderPort:   int32(allocs.PortCuratorService),
 		ThisNodeId:   l.leaderID,
 	})
 	if err != nil {

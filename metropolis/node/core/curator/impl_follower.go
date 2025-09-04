@@ -9,7 +9,7 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
-	common "source.monogon.dev/metropolis/node"
+	"source.monogon.dev/metropolis/node/allocs"
 	"source.monogon.dev/metropolis/node/core/consensus/client"
 	cpb "source.monogon.dev/metropolis/node/core/curator/proto/api"
 	"source.monogon.dev/metropolis/node/core/identity"
@@ -73,7 +73,7 @@ func (f *curatorFollower) GetCurrentLeader(_ *cpb.GetCurrentLeaderRequest, srv c
 		err = srv.Send(&cpb.GetCurrentLeaderResponse{
 			LeaderNodeId: lock.NodeId,
 			LeaderHost:   node.status.ExternalAddress,
-			LeaderPort:   int32(common.CuratorServicePort),
+			LeaderPort:   int32(allocs.PortCuratorService),
 			ThisNodeId:   f.followerID,
 		})
 		if err != nil {

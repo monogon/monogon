@@ -35,6 +35,7 @@ go_test(
     },
     deps = [
         "//metropolis/node",
+        "//metropolis/node/allocs",
         "//metropolis/proto/api",
         "//metropolis/proto/common",
         "//metropolis/test/e2e/connectivity",

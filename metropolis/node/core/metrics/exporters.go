@@ -11,7 +11,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 
-	"source.monogon.dev/metropolis/node"
+	"source.monogon.dev/metropolis/node/allocs"
 	"source.monogon.dev/osbase/supervisor"
 )
 
@@ -36,7 +36,7 @@ type Exporter struct {
 	Gatherer prometheus.Gatherer
 	// Port on which an exporter is/will be running to which metrics requests will be
 	// proxied to. Exactly one of Gatherer or Port must be set.
-	Port node.Port
+	Port allocs.Port
 	// Executable to run to start the exporter. If empty, no executable will be
 	// started.
 	Executable string
@@ -59,10 +59,10 @@ var DefaultExporters = []*Exporter{
 	},
 	{
 		Name:       "node",
-		Port:       node.MetricsNodeListenerPort,
+		Port:       allocs.PortMetricsNodeListener,
 		Executable: "/metrics/bin/node_exporter",
 		Arguments: []string{
-			"--web.listen-address=127.0.0.1:" + node.MetricsNodeListenerPort.PortString(),
+			"--web.listen-address=127.0.0.1:" + allocs.PortMetricsNodeListener.PortString(),
 			"--collector.buddyinfo",
 			"--collector.zoneinfo",
 			"--collector.tcpstat",
@@ -77,23 +77,23 @@ var DefaultExporters = []*Exporter{
 	},
 	{
 		Name: "etcd",
-		Port: node.MetricsEtcdListenerPort,
+		Port: allocs.PortMetricsEtcdListener,
 	},
 	{
 		Name: "kubernetes-scheduler",
-		Port: node.MetricsKubeSchedulerListenerPort,
+		Port: allocs.PortMetricsKubeSchedulerListener,
 	},
 	{
 		Name: "kubernetes-controller-manager",
-		Port: node.MetricsKubeControllerManagerListenerPort,
+		Port: allocs.PortMetricsKubeControllerManagerListener,
 	},
 	{
 		Name: "kubernetes-apiserver",
-		Port: node.MetricsKubeAPIServerListenerPort,
+		Port: allocs.PortMetricsKubeAPIServerListener,
 	},
 	{
 		Name: "containerd",
-		Port: node.MetricsContainerdListenerPort,
+		Port: allocs.PortMetricsContainerdListener,
 		Path: "/v1/metrics",
 	},
 }

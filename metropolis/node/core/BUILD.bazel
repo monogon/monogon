@@ -22,7 +22,7 @@ go_library(
     visibility = ["//visibility:private"],
     deps = [
         "//go/logging",
-        "//metropolis/node",
+        "//metropolis/node/allocs",
         "//metropolis/node/core/cluster",
         "//metropolis/node/core/devmgr",
         "//metropolis/node/core/localstorage",

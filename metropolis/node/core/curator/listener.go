@@ -12,7 +12,7 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/keepalive"
 
-	"source.monogon.dev/metropolis/node"
+	"source.monogon.dev/metropolis/node/allocs"
 	"source.monogon.dev/metropolis/node/core/consensus"
 	"source.monogon.dev/metropolis/node/core/consensus/client"
 	cpb "source.monogon.dev/metropolis/node/core/curator/proto/api"
@@ -89,7 +89,7 @@ func (l *listener) run(ctx context.Context) error {
 		PermitWithoutStream: true,
 	}))
 	srv := grpc.NewServer(opts...)
-	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", node.CuratorServicePort))
+	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", allocs.PortCuratorService))
 	if err != nil {
 		return fmt.Errorf("failed to listen on curator socket: %w", err)
 	}

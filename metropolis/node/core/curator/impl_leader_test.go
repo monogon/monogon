@@ -30,7 +30,7 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 	"k8s.io/utils/ptr"
 
-	common "source.monogon.dev/metropolis/node"
+	"source.monogon.dev/metropolis/node/allocs"
 	"source.monogon.dev/metropolis/node/core/consensus"
 	"source.monogon.dev/metropolis/node/core/consensus/client"
 	ipb "source.monogon.dev/metropolis/node/core/curator/proto/api"
@@ -1416,7 +1416,7 @@ func TestGetCurrentLeader(t *testing.T) {
 	if want, got := cl.localNodeID, res.ThisNodeId; want != got {
 		t.Errorf("Wanted local node ID %q, got %q", want, got)
 	}
-	if want, got := int32(common.CuratorServicePort), res.LeaderPort; want != got {
+	if want, got := int32(allocs.PortCuratorService), res.LeaderPort; want != got {
 		t.Errorf("Wanted leader port %d, got %d", want, got)
 	}
 }

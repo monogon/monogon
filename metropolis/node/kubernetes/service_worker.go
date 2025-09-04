@@ -16,7 +16,7 @@ import (
 	"k8s.io/client-go/tools/clientcmd"
 
 	"source.monogon.dev/go/net/tinylb"
-	"source.monogon.dev/metropolis/node"
+	"source.monogon.dev/metropolis/node/allocs"
 	"source.monogon.dev/metropolis/node/core/localstorage"
 	"source.monogon.dev/metropolis/node/core/metrics"
 	"source.monogon.dev/metropolis/node/core/network"
@@ -66,7 +66,7 @@ func (s *Worker) Run(ctx context.Context) error {
 	// available apiservers, and Kubernetes components do not implement client-side
 	// load-balancing.
 	err := supervisor.Run(ctx, "apiproxy", func(ctx context.Context) error {
-		lis, err := net.Listen("tcp", fmt.Sprintf("127.0.0.1:%d", node.KubernetesWorkerLocalAPIPort))
+		lis, err := net.Listen("tcp", fmt.Sprintf("127.0.0.1:%d", allocs.PortKubernetesWorkerLocalAPI))
 		if err != nil {
 			return fmt.Errorf("failed to listen: %w", err)
 		}
@@ -95,7 +95,7 @@ func (s *Worker) Run(ctx context.Context) error {
 		ClusterDomain:      s.c.ClusterDomain,
 		KubeletDirectory:   &s.c.Root.Data.Kubernetes.Kubelet,
 		EphemeralDirectory: &s.c.Root.Ephemeral,
-		ClusterDNS:         []net.IP{node.ContainerDNSIP},
+		ClusterDNS:         []net.IP{allocs.IPContainerDNS},
 	}
 
 	// Gather all required material to send over for certficiate issuance to the
@@ -229,16 +229,16 @@ func (s *Worker) Run(ctx context.Context) error {
 	// //metropolis/node/core/roleserve/worker_kubernetes.go.
 	s.c.Network.DNS.SetHandler("kubernetes", dnsService)
 
-	if err := s.c.Network.AddLoopbackIP(node.ContainerDNSIP); err != nil {
+	if err := s.c.Network.AddLoopbackIP(allocs.IPContainerDNS); err != nil {
 		return fmt.Errorf("failed to add local IP for container DNS: %w", err)
 	}
 	defer func() {
-		if err := s.c.Network.ReleaseLoopbackIP(node.ContainerDNSIP); err != nil {
+		if err := s.c.Network.ReleaseLoopbackIP(allocs.IPContainerDNS); err != nil {
 			supervisor.Logger(ctx).Errorf("Failed to release local IP for container DNS: %v", err)
 		}
 	}()
 	runDNSListener := func(ctx context.Context) error {
-		return s.c.Network.DNS.RunListenerAddr(ctx, net.JoinHostPort(node.ContainerDNSIP.String(), "53"))
+		return s.c.Network.DNS.RunListenerAddr(ctx, net.JoinHostPort(allocs.IPContainerDNS.String(), "53"))
 	}
 
 	kvmDevicePlugin := kvmdevice.Plugin{

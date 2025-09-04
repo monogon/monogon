@@ -20,7 +20,7 @@ import (
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"source.monogon.dev/metropolis/node"
+	"source.monogon.dev/metropolis/node/allocs"
 	"source.monogon.dev/metropolis/node/core/identity"
 	"source.monogon.dev/metropolis/node/kubernetes/pki"
 	"source.monogon.dev/osbase/supervisor"
@@ -73,7 +73,7 @@ func (s *Service) Run(ctx context.Context) error {
 		return err
 	}
 
-	internalAPIServer := net.JoinHostPort("localhost", node.KubernetesAPIPort.PortString())
+	internalAPIServer := net.JoinHostPort("localhost", allocs.PortKubernetesAPI.PortString())
 	standardProxy := httputil.NewSingleHostReverseProxy(&url.URL{
 		Scheme: "https",
 		Host:   internalAPIServer,
@@ -119,7 +119,7 @@ func (s *Service) Run(ctx context.Context) error {
 	clientCAs := x509.NewCertPool()
 	clientCAs.AddCert(s.Node.ClusterCA())
 	server := &http.Server{
-		Addr: ":" + node.KubernetesAPIWrappedPort.PortString(),
+		Addr: ":" + allocs.PortKubernetesAPIWrapped.PortString(),
 		TLSConfig: &tls.Config{
 			MinVersion:   tls.VersionTLS12,
 			NextProtos:   []string{"h2", "http/1.1"},

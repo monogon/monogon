@@ -17,6 +17,7 @@ import (
 	"github.com/vishvananda/netlink"
 
 	"source.monogon.dev/metropolis/node"
+	"source.monogon.dev/metropolis/node/allocs"
 	"source.monogon.dev/metropolis/node/core/network/ipam"
 	"source.monogon.dev/metropolis/node/core/network/workloads"
 	"source.monogon.dev/osbase/event"
@@ -285,7 +286,7 @@ func (s *Service) Run(ctx context.Context) error {
 			&expr.Cmp{
 				Op:       expr.CmpOpEq,
 				Register: 8,
-				Data:     binaryutil.NativeEndian.PutUint32(node.LinkGroupK8sPod),
+				Data:     binaryutil.NativeEndian.PutUint32(allocs.LinkGroupK8sPod),
 			},
 			&expr.Meta{
 				Key:      expr.MetaKeyOIFGROUP,
@@ -295,13 +296,13 @@ func (s *Service) Run(ctx context.Context) error {
 			&expr.Cmp{
 				Op:       expr.CmpOpNeq,
 				Register: 8,
-				Data:     binaryutil.NativeEndian.PutUint32(node.LinkGroupK8sPod),
+				Data:     binaryutil.NativeEndian.PutUint32(allocs.LinkGroupK8sPod),
 			},
 			// Check if outgoing interface is not part of the overlay
 			&expr.Cmp{
 				Op:       expr.CmpOpNeq,
 				Register: 8,
-				Data:     binaryutil.NativeEndian.PutUint32(node.LinkGroupOverlay),
+				Data:     binaryutil.NativeEndian.PutUint32(allocs.LinkGroupOverlay),
 			},
 			&expr.Masq{},
 		},

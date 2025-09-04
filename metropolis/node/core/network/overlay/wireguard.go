@@ -12,7 +12,7 @@ import (
 	"golang.zx2c4.com/wireguard/wgctrl"
 	"golang.zx2c4.com/wireguard/wgctrl/wgtypes"
 
-	common "source.monogon.dev/metropolis/node"
+	"source.monogon.dev/metropolis/node/allocs"
 	ipb "source.monogon.dev/metropolis/node/core/curator/proto/api"
 	"source.monogon.dev/metropolis/node/core/localstorage"
 )
@@ -89,7 +89,7 @@ func (s *localWireguard) setup(clusterNet *net.IPNet) error {
 		}
 	}
 
-	wgInterface := &netlink.Wireguard{LinkAttrs: netlink.LinkAttrs{Name: clusterNetDeviceName, Flags: net.FlagUp, Group: common.LinkGroupOverlay}}
+	wgInterface := &netlink.Wireguard{LinkAttrs: netlink.LinkAttrs{Name: clusterNetDeviceName, Flags: net.FlagUp, Group: allocs.LinkGroupOverlay}}
 	if err := netlink.LinkAdd(wgInterface); err != nil {
 		return fmt.Errorf("when adding network interface: %w", err)
 	}
@@ -100,7 +100,7 @@ func (s *localWireguard) setup(clusterNet *net.IPNet) error {
 	}
 	s.wgClient = wgClient
 
-	listenPort := int(common.WireGuardPort)
+	listenPort := int(allocs.PortWireGuard)
 	if err := s.wgClient.ConfigureDevice(clusterNetDeviceName, wgtypes.Config{
 		PrivateKey: &s.privKey,
 		ListenPort: &listenPort,
@@ -111,7 +111,7 @@ func (s *localWireguard) setup(clusterNet *net.IPNet) error {
 	if err := netlink.RouteAdd(&netlink.Route{
 		Dst:       clusterNet,
 		LinkIndex: wgInterface.Index,
-		Protocol:  netlink.RouteProtocol(common.ProtocolOverlay),
+		Protocol:  netlink.RouteProtocol(allocs.ProtocolOverlay),
 	}); err != nil && !os.IsExist(err) {
 		return fmt.Errorf("when creating cluster route: %w", err)
 	}
@@ -145,7 +145,7 @@ func (s *localWireguard) configurePeers(nodes []*ipb.Node) error {
 			}
 			allowedIPs = append(allowedIPs, *podNet)
 		}
-		endpoint := net.UDPAddr{Port: int(common.WireGuardPort), IP: addressParsed}
+		endpoint := net.UDPAddr{Port: int(allocs.PortWireGuard), IP: addressParsed}
 		configs = append(configs, wgtypes.PeerConfig{
 			PublicKey:         pubkeyParsed,
 			Endpoint:          &endpoint,

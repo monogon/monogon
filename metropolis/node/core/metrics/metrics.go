@@ -12,7 +12,7 @@ import (
 	"net/http"
 	"os/exec"
 
-	"source.monogon.dev/metropolis/node"
+	"source.monogon.dev/metropolis/node/allocs"
 	"source.monogon.dev/metropolis/node/core/identity"
 	"source.monogon.dev/osbase/supervisor"
 )
@@ -29,7 +29,7 @@ import (
 // Each exporter is exposed on a separate path, /metrics/<name>, where <name> is
 // the name of the exporter.
 //
-// The HTTPS listener is bound to node.MetricsPort.
+// The HTTPS listener is bound to allocs.PortMetrics.
 type Service struct {
 	// Credentials used to run the TLS/HTTPS listener and verify incoming
 	// connections.
@@ -67,7 +67,7 @@ func (s *Service) listen() (net.Listener, error) {
 		// anyone/anything with a valid cluster certificate to access them.
 	}
 
-	addr := net.JoinHostPort("", node.MetricsPort.PortString())
+	addr := net.JoinHostPort("", allocs.PortMetrics.PortString())
 	if s.enableDynamicAddr {
 		addr = ""
 	}

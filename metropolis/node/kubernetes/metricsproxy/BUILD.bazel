@@ -6,7 +6,7 @@ go_library(
     importpath = "source.monogon.dev/metropolis/node/kubernetes/metricsproxy",
     visibility = ["//visibility:public"],
     deps = [
-        "//metropolis/node",
+        "//metropolis/node/allocs",
         "//metropolis/node/kubernetes/pki",
         "//osbase/supervisor",
         "@io_k8s_kubernetes//cmd/kubeadm/app/constants",

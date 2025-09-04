@@ -12,7 +12,7 @@ import (
 	"github.com/google/uuid"
 	"google.golang.org/protobuf/encoding/prototext"
 
-	common "source.monogon.dev/metropolis/node"
+	"source.monogon.dev/metropolis/node/allocs"
 	"source.monogon.dev/metropolis/node/core/network"
 	"source.monogon.dev/metropolis/node/core/productinfo"
 	"source.monogon.dev/osbase/event"
@@ -102,7 +102,7 @@ func workerStatusPushLoop(ctx context.Context, chans *workerStatusPushChannels) 
 			if status.RunningCurator == nil && lcp.exists() {
 				supervisor.Logger(ctx).Infof("Got new local curator state: running")
 				status.RunningCurator = &cpb.NodeStatus_RunningCurator{
-					Port: int32(common.CuratorServicePort),
+					Port: int32(allocs.PortCuratorService),
 				}
 				changed = true
 			}

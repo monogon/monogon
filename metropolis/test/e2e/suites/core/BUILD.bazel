@@ -16,7 +16,7 @@ go_test(
         "xTestImagesManifestPath": "$(rlocationpath //metropolis/test/e2e:testimages_manifest )",
     },
     deps = [
-        "//metropolis/node",
+        "//metropolis/node/allocs",
         "//metropolis/node/core/rpc",
         "//metropolis/proto/api",
         "//metropolis/proto/common",

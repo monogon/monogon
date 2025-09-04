@@ -8,7 +8,7 @@ import (
 	"net"
 
 	"source.monogon.dev/go/net/tinylb"
-	"source.monogon.dev/metropolis/node"
+	"source.monogon.dev/metropolis/node/allocs"
 	ipb "source.monogon.dev/metropolis/node/core/curator/proto/api"
 	"source.monogon.dev/metropolis/node/core/curator/watcher"
 	"source.monogon.dev/osbase/event/memory"
@@ -39,7 +39,7 @@ func updateLoadbalancerAPIServers(ctx context.Context, val *memory.Value[tinylb.
 		},
 		OnNewUpdated: func(new *ipb.Node) error {
 			set.Insert(new.Id, &tinylb.SimpleTCPBackend{
-				Remote: net.JoinHostPort(new.Status.ExternalAddress, node.KubernetesAPIPort.PortString()),
+				Remote: net.JoinHostPort(new.Status.ExternalAddress, allocs.PortKubernetesAPI.PortString()),
 			})
 			val.Set(set.Clone())
 			return nil

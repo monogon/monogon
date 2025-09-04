@@ -10,7 +10,7 @@ go_library(
     importpath = "source.monogon.dev/metropolis/test/nanoswitch",
     visibility = ["//visibility:private"],
     deps = [
-        "//metropolis/node",
+        "//metropolis/node/allocs",
         "//osbase/bringup",
         "//osbase/net/dhcp4c",
         "//osbase/net/dhcp4c/callback",

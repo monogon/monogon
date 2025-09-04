@@ -20,7 +20,7 @@ import (
 
 	apb "source.monogon.dev/metropolis/node/core/curator/proto/api"
 
-	"source.monogon.dev/metropolis/node"
+	"source.monogon.dev/metropolis/node/allocs"
 	"source.monogon.dev/metropolis/test/util"
 	"source.monogon.dev/osbase/supervisor"
 	"source.monogon.dev/osbase/test/freeport"
@@ -51,7 +51,7 @@ func fakeExporter(name, value string) *Exporter {
 		panic(err)
 	}
 	defer closer.Close()
-	port := node.Port(p)
+	port := allocs.Port(p)
 
 	return &Exporter{
 		Name:       name,

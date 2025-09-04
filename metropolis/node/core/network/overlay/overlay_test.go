@@ -16,7 +16,7 @@ import (
 	"golang.zx2c4.com/wireguard/wgctrl"
 	"golang.zx2c4.com/wireguard/wgctrl/wgtypes"
 
-	common "source.monogon.dev/metropolis/node"
+	"source.monogon.dev/metropolis/node/allocs"
 	"source.monogon.dev/metropolis/node/core/localstorage"
 	"source.monogon.dev/metropolis/node/core/localstorage/declarative"
 	"source.monogon.dev/metropolis/node/core/network/ipam"
@@ -309,7 +309,7 @@ func TestWireguardIntegration(t *testing.T) {
 	if want, got := key, wgDev.PrivateKey.String(); want != got {
 		t.Errorf("Wireguard key mismatch, wanted %q, got %q", want, got)
 	}
-	if want, got := int(common.WireGuardPort), wgDev.ListenPort; want != got {
+	if want, got := int(allocs.PortWireGuard), wgDev.ListenPort; want != got {
 		t.Errorf("Wireguard port mismatch, wanted %d, got %d", want, got)
 	}
 
@@ -366,7 +366,7 @@ func TestWireguardIntegration(t *testing.T) {
 			if want, got := pkeys[i].PublicKey().String(), wgDev.Peers[i].PublicKey.String(); want != got {
 				t.Errorf("Peer %d should have key %q, got %q", i, want, got)
 			}
-			if want, got := fmt.Sprintf("10.100.%d.1:%s", i, common.WireGuardPort.PortString()), wgDev.Peers[i].Endpoint.String(); want != got {
+			if want, got := fmt.Sprintf("10.100.%d.1:%s", i, allocs.PortWireGuard.PortString()), wgDev.Peers[i].Endpoint.String(); want != got {
 				t.Errorf("Peer %d should have endpoint %q, got %q", i, want, got)
 			}
 			if want, got := 2, len(wgDev.Peers[i].AllowedIPs); want != got {
@@ -409,7 +409,7 @@ func TestWireguardIntegration(t *testing.T) {
 		if want, got := pkeys[0].PublicKey().String(), wgDev.Peers[0].PublicKey.String(); want != got {
 			t.Errorf("Peer 0 should have key %q, got %q", want, got)
 		}
-		if want, got := fmt.Sprintf("10.100.0.3:%s", common.WireGuardPort.PortString()), wgDev.Peers[0].Endpoint.String(); want != got {
+		if want, got := fmt.Sprintf("10.100.0.3:%s", allocs.PortWireGuard.PortString()), wgDev.Peers[0].Endpoint.String(); want != got {
 			t.Errorf("Peer 0 should have endpoint %q, got %q", want, got)
 		}
 		if want, got := 1, len(wgDev.Peers[0].AllowedIPs); want != got {

@@ -8,12 +8,12 @@ import (
 	"fmt"
 	"os/exec"
 
-	"source.monogon.dev/metropolis/node"
+	"source.monogon.dev/metropolis/node/allocs"
 	"source.monogon.dev/metropolis/node/core/network"
 )
 
 // initializeDebugger attaches Delve to ourselves and exposes it on
-// common.DebuggerPort
+// allocs.PortDebugger
 // This is coupled to compilation_mode=dbg because otherwise Delve doesn't have
 // the necessary DWARF debug info
 func initializeDebugger(networkSvc *network.Service) {
@@ -27,7 +27,7 @@ func initializeDebugger(networkSvc *network.Service) {
 		if err != nil {
 			panic(err)
 		}
-		dlvCmd := exec.Command("/dlv", "--headless=true", fmt.Sprintf("--listen=:%v", node.DebuggerPort),
+		dlvCmd := exec.Command("/dlv", "--headless=true", fmt.Sprintf("--listen=:%v", allocs.PortDebugger),
 			"--accept-multiclient", "--only-same-user=false", "attach", "--continue", "1", "/init")
 		if err := dlvCmd.Start(); err != nil {
 			panic(err)

@@ -20,7 +20,7 @@ import (
 	"strconv"
 	"strings"
 
-	"source.monogon.dev/metropolis/node"
+	"source.monogon.dev/metropolis/node/allocs"
 	"source.monogon.dev/osbase/fileargs"
 	"source.monogon.dev/osbase/supervisor"
 )
@@ -53,8 +53,8 @@ func (s *Service) Run(ctx context.Context) error {
 	cmd := exec.CommandContext(ctx,
 		"/time/chrony",
 		"-d",
-		"-i", strconv.Itoa(node.TimeUid),
-		"-g", strconv.Itoa(node.TimeUid),
+		"-i", strconv.Itoa(allocs.UidTime),
+		"-g", strconv.Itoa(allocs.UidTime),
 		"-f", args.ArgPath("chrony.conf", []byte(config)),
 	)
 	cmd.Stdout = supervisor.RawLogger(ctx)

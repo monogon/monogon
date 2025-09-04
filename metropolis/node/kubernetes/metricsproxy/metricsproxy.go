@@ -17,7 +17,7 @@ import (
 
 	"k8s.io/kubernetes/cmd/kubeadm/app/constants"
 
-	"source.monogon.dev/metropolis/node"
+	"source.monogon.dev/metropolis/node/allocs"
 	"source.monogon.dev/metropolis/node/kubernetes/pki"
 	"source.monogon.dev/osbase/supervisor"
 )
@@ -30,9 +30,9 @@ type Service struct {
 type kubernetesExporter struct {
 	Name string
 	// TargetPort on which this exporter is running.
-	TargetPort node.Port
+	TargetPort allocs.Port
 	// TargetPort on which the unauthenticated exporter should run.
-	ListenPort node.Port
+	ListenPort allocs.Port
 	// ServerName used to verify the tls connection.
 	ServerName string
 }
@@ -42,19 +42,19 @@ var services = []*kubernetesExporter{
 	{
 		Name:       "kubernetes-scheduler",
 		TargetPort: constants.KubeSchedulerPort,
-		ListenPort: node.MetricsKubeSchedulerListenerPort,
+		ListenPort: allocs.PortMetricsKubeSchedulerListener,
 		ServerName: "kube-scheduler.local",
 	},
 	{
 		Name:       "kubernetes-controller-manager",
 		TargetPort: constants.KubeControllerManagerPort,
-		ListenPort: node.MetricsKubeControllerManagerListenerPort,
+		ListenPort: allocs.PortMetricsKubeControllerManagerListener,
 		ServerName: "kube-controller-manager.local",
 	},
 	{
 		Name:       "kubernetes-apiserver",
-		TargetPort: node.KubernetesAPIPort,
-		ListenPort: node.MetricsKubeAPIServerListenerPort,
+		TargetPort: allocs.PortKubernetesAPI,
+		ListenPort: allocs.PortMetricsKubeAPIServerListener,
 		ServerName: "kubernetes",
 	},
 }

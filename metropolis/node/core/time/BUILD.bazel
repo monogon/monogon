@@ -6,7 +6,7 @@ go_library(
     importpath = "source.monogon.dev/metropolis/node/core/time",
     visibility = ["//visibility:public"],
     deps = [
-        "//metropolis/node",
+        "//metropolis/node/allocs",
         "//osbase/fileargs",
         "//osbase/supervisor",
     ],

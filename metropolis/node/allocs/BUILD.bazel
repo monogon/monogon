@@ -1,0 +1,17 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "allocs",
+    srcs = [
+        "doc.go",
+        "ids.go",
+        "net_ips.go",
+        "net_protocols.go",
+        "ports.go",
+    ],
+    importpath = "source.monogon.dev/metropolis/node/allocs",
+    visibility = [
+        "//metropolis:__subpackages__",
+        "@io_k8s_kubernetes//pkg/registry:__subpackages__",
+    ],
+)

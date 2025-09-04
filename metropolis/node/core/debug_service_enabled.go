@@ -18,13 +18,13 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
+	"source.monogon.dev/metropolis/node/allocs"
 	"source.monogon.dev/metropolis/node/core/localstorage"
 	"source.monogon.dev/metropolis/node/core/mgmt"
 	"source.monogon.dev/metropolis/node/core/roleserve"
 	"source.monogon.dev/osbase/logtree"
 	"source.monogon.dev/osbase/supervisor"
 
-	common "source.monogon.dev/metropolis/node"
 	apb "source.monogon.dev/metropolis/proto/api"
 )
 
@@ -47,7 +47,7 @@ func runDebugService(ctx context.Context, rs *roleserve.Service, lt *logtree.Log
 	}
 	dbgSrv := grpc.NewServer()
 	apb.RegisterNodeDebugServiceServer(dbgSrv, dbg)
-	dbgLis, err := net.Listen("tcp", fmt.Sprintf(":%d", common.DebugServicePort))
+	dbgLis, err := net.Listen("tcp", fmt.Sprintf(":%d", allocs.PortDebugService))
 	if err != nil {
 		return fmt.Errorf("failed to listen on debug service: %w", err)
 	}

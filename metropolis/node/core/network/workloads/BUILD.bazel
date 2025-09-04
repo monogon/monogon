@@ -6,7 +6,7 @@ go_library(
     importpath = "source.monogon.dev/metropolis/node/core/network/workloads",
     visibility = ["//visibility:public"],
     deps = [
-        "//metropolis/node",
+        "//metropolis/node/allocs",
         "//metropolis/node/core/network/ipam",
         "//metropolis/node/core/network/workloads/spec",
         "//osbase/event",

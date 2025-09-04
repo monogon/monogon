@@ -17,7 +17,7 @@ import (
 	"google.golang.org/grpc/keepalive"
 
 	"source.monogon.dev/go/logging"
-	common "source.monogon.dev/metropolis/node"
+	"source.monogon.dev/metropolis/node/allocs"
 	"source.monogon.dev/metropolis/node/core/curator/watcher"
 
 	apb "source.monogon.dev/metropolis/node/core/curator/proto/api"
@@ -144,13 +144,13 @@ func NodeWithDefaultPort(id string) (*NodeEndpoint, error) {
 	if m, _ := regexp.MatchString(`metropolis-[a-f0-9]+`, id); !m {
 		return nil, fmt.Errorf("invalid node ID")
 	}
-	return NodeByHostPort(id, uint16(common.CuratorServicePort)), nil
+	return NodeByHostPort(id, uint16(allocs.PortCuratorService)), nil
 }
 
 // NodeAtAddressWithDefaultPort returns a NodeEndpoint referencing the default
 // control plane port (the Curator port) of a node at a given address.
 func NodeAtAddressWithDefaultPort(host string) *NodeEndpoint {
-	return NodeByHostPort(host, uint16(common.CuratorServicePort))
+	return NodeByHostPort(host, uint16(allocs.PortCuratorService))
 }
 
 // NodeByHostPort returns a NodeEndpoint for a fully specified host + port pair.

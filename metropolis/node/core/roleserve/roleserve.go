@@ -42,7 +42,7 @@ import (
 	"context"
 	"crypto/ed25519"
 
-	common "source.monogon.dev/metropolis/node"
+	"source.monogon.dev/metropolis/node/allocs"
 	"source.monogon.dev/metropolis/node/core/curator"
 	"source.monogon.dev/metropolis/node/core/identity"
 	"source.monogon.dev/metropolis/node/core/localstorage"
@@ -215,8 +215,8 @@ type BootstrapData struct {
 func (s *Service) ProvideBootstrapData(data *BootstrapData) {
 	// This is the first time we have the node ID, tell the resolver that it's
 	// available on the loopback interface.
-	s.Resolver.AddOverride(data.Node.ID, resolver.NodeByHostPort("127.0.0.1", uint16(common.CuratorServicePort)))
-	s.Resolver.AddEndpoint(resolver.NodeByHostPort("127.0.0.1", uint16(common.CuratorServicePort)))
+	s.Resolver.AddOverride(data.Node.ID, resolver.NodeByHostPort("127.0.0.1", uint16(allocs.PortCuratorService)))
+	s.Resolver.AddEndpoint(resolver.NodeByHostPort("127.0.0.1", uint16(allocs.PortCuratorService)))
 
 	s.bootstrapData.Set(data)
 }
@@ -224,7 +224,7 @@ func (s *Service) ProvideBootstrapData(data *BootstrapData) {
 func (s *Service) ProvideRegisterData(credentials identity.NodeCredentials, directory *cpb.ClusterDirectory) {
 	// This is the first time we have the node ID, tell the resolver that it's
 	// available on the loopback interface.
-	s.Resolver.AddOverride(credentials.ID(), resolver.NodeByHostPort("127.0.0.1", uint16(common.CuratorServicePort)))
+	s.Resolver.AddOverride(credentials.ID(), resolver.NodeByHostPort("127.0.0.1", uint16(allocs.PortCuratorService)))
 	// Also tell the resolver about all the existing nodes in the cluster we just
 	// registered into. The directory passed here was used to issue the initial
 	// Register call, which means at least one of the nodes was running the control
@@ -241,7 +241,7 @@ func (s *Service) ProvideRegisterData(credentials identity.NodeCredentials, dire
 func (s *Service) ProvideJoinData(credentials identity.NodeCredentials, directory *cpb.ClusterDirectory) {
 	// This is the first time we have the node ID, tell the resolver that it's
 	// available on the loopback interface.
-	s.Resolver.AddOverride(credentials.ID(), resolver.NodeByHostPort("127.0.0.1", uint16(common.CuratorServicePort)))
+	s.Resolver.AddOverride(credentials.ID(), resolver.NodeByHostPort("127.0.0.1", uint16(allocs.PortCuratorService)))
 	// Also tell the resolver about all the existing nodes in the cluster we just
 	// joined into. The directory passed here was used to issue the initial
 	// Join call, which means at least one of the nodes was running the control

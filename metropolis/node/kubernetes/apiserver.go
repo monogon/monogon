@@ -18,7 +18,7 @@ import (
 	"k8s.io/kubernetes/plugin/pkg/admission/security/podsecurity"
 	podsecurityadmissionv1 "k8s.io/pod-security-admission/admission/api/v1"
 
-	common "source.monogon.dev/metropolis/node"
+	"source.monogon.dev/metropolis/node/allocs"
 	"source.monogon.dev/metropolis/node/core/localstorage"
 	"source.monogon.dev/metropolis/node/kubernetes/pki"
 	"source.monogon.dev/osbase/fileargs"
@@ -142,7 +142,7 @@ func (s *apiserverService) Run(ctx context.Context) error {
 			pem.EncodeToMemory(&pem.Block{Type: "CERTIFICATE", Bytes: s.idCA})),
 		"--enable-admission-plugins=NodeRestriction",
 		"--enable-aggregator-routing=true",
-		fmt.Sprintf("--secure-port=%d", common.KubernetesAPIPort),
+		fmt.Sprintf("--secure-port=%d", allocs.PortKubernetesAPI),
 		fmt.Sprintf("--etcd-servers=unix:///%s:0", s.EphemeralConsensusDirectory.ClientSocket.FullPath()),
 		args.FileOpt("--kubelet-client-certificate", "kubelet-client-cert.pem",
 			pem.EncodeToMemory(&pem.Block{Type: "CERTIFICATE", Bytes: s.kubeletClientCert})),

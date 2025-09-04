@@ -18,7 +18,7 @@ import (
 	"google.golang.org/grpc/test/bufconn"
 	"google.golang.org/protobuf/testing/protocmp"
 
-	common "source.monogon.dev/metropolis/node"
+	"source.monogon.dev/metropolis/node/allocs"
 	"source.monogon.dev/metropolis/node/core/consensus"
 	"source.monogon.dev/metropolis/node/core/curator"
 	"source.monogon.dev/metropolis/node/core/productinfo"
@@ -182,7 +182,7 @@ func TestWorkerStatusPush(t *testing.T) {
 		{NodeId: nodeID, Status: &cpb.NodeStatus{
 			ExternalAddress: "192.0.2.11",
 			RunningCurator: &cpb.NodeStatus_RunningCurator{
-				Port: int32(common.CuratorServicePort),
+				Port: int32(allocs.PortCuratorService),
 			},
 			Version: productInfo.Version,
 			BootId:  []byte{1, 2, 3},

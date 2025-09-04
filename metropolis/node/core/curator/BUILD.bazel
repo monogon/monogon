@@ -26,6 +26,7 @@ go_library(
     visibility = ["//visibility:public"],
     deps = [
         "//metropolis/node",
+        "//metropolis/node/allocs",
         "//metropolis/node/core/consensus",
         "//metropolis/node/core/consensus/client",
         "//metropolis/node/core/curator/proto/api",
@@ -72,7 +73,7 @@ go_test(
     ],
     embed = [":curator"],
     deps = [
-        "//metropolis/node",
+        "//metropolis/node/allocs",
         "//metropolis/node/core/consensus",
         "//metropolis/node/core/consensus/client",
         "//metropolis/node/core/curator/proto/api",

@@ -19,7 +19,7 @@ import (
 	"k8s.io/kubectl/pkg/scheme"
 
 	"source.monogon.dev/go/logging"
-	"source.monogon.dev/metropolis/node"
+	"source.monogon.dev/metropolis/node/allocs"
 	"source.monogon.dev/osbase/supervisor"
 )
 
@@ -75,7 +75,7 @@ func (c *Service) Run(ctx context.Context) error {
 	eventBroadcaster.StartRecordingToSink(&typedcorev1.EventSinkImpl{Interface: c.Kubernetes.CoreV1().Events("")})
 	recorder := eventBroadcaster.NewRecorder(scheme.Scheme, v1.EventSource{Component: "npc"})
 
-	nft, err := nftctrl.New(recorder, node.LinkGroupK8sPod)
+	nft, err := nftctrl.New(recorder, allocs.LinkGroupK8sPod)
 	if err != nil {
 		return fmt.Errorf("failed to create nftables controller: %w", err)
 	}

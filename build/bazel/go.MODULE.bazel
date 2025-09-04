@@ -293,7 +293,7 @@ OVERRIDES = {
     "k8s.io/kubernetes": {
         "directives": [
             "gazelle:proto disable",
-            "gazelle:resolve go source.monogon.dev/metropolis/node @monogon//metropolis/node",
+            "gazelle:resolve go source.monogon.dev/metropolis/node/allocs @monogon//metropolis/node/allocs",
         ],
         "patches": [
             "//third_party/com_k8s_io_kubernetes:k8s-native-metrics.patch",

@@ -19,7 +19,7 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
-	"source.monogon.dev/metropolis/node"
+	"source.monogon.dev/metropolis/node/allocs"
 	"source.monogon.dev/metropolis/node/core/network/ipam"
 	wlapi "source.monogon.dev/metropolis/node/core/network/workloads/spec"
 	"source.monogon.dev/osbase/event"
@@ -192,7 +192,7 @@ func (s *Service) Attach(ctx context.Context, req *wlapi.AttachRequest) (*wlapi.
 	}
 
 	linkAttrs := netlink.NewLinkAttrs()
-	linkAttrs.Group = node.LinkGroupK8sPod
+	linkAttrs.Group = allocs.LinkGroupK8sPod
 	linkAttrs.Name = intf
 	linkAttrs.HardwareAddr = firstHopMAC
 
@@ -307,7 +307,7 @@ func (s *Service) Detach(ctx context.Context, req *wlapi.DetachRequest) (*wlapi.
 	if err != nil {
 		return nil, status.Errorf(codes.Unavailable, "error getting interface for deletion: %v", err)
 	}
-	if hostIf.Attrs().Group != node.LinkGroupK8sPod {
+	if hostIf.Attrs().Group != allocs.LinkGroupK8sPod {
 		return nil, status.Errorf(codes.InvalidArgument, "refusing to delete interface not belonging to workload, has group %d", hostIf.Attrs().Group)
 	}
 	// Routes and addresses do not need to be cleaned up as Linux already takes

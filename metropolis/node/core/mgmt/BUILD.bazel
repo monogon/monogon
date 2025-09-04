@@ -11,7 +11,7 @@ go_library(
     importpath = "source.monogon.dev/metropolis/node/core/mgmt",
     visibility = ["//visibility:public"],
     deps = [
-        "//metropolis/node",
+        "//metropolis/node/allocs",
         "//metropolis/node/core/identity",
         "//metropolis/node/core/rpc",
         "//metropolis/node/core/update",

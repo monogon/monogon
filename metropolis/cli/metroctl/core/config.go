@@ -24,7 +24,7 @@ import (
 	clientapi "k8s.io/client-go/tools/clientcmd/api"
 
 	"source.monogon.dev/go/logging"
-	"source.monogon.dev/metropolis/node"
+	"source.monogon.dev/metropolis/node/allocs"
 )
 
 const (
@@ -233,7 +233,7 @@ change users.metropolis.exec.command to the required path (or just metroctl if u
 
 	var u url.URL
 	u.Scheme = "https"
-	u.Host = net.JoinHostPort(server, node.KubernetesAPIWrappedPort.PortString())
+	u.Host = net.JoinHostPort(server, allocs.PortKubernetesAPIWrapped.PortString())
 
 	// HACK: the Metropolis node certificates only contain the node ID as a SAN. This
 	// means that we can't use some 'global' identifier as the TLSServerName below

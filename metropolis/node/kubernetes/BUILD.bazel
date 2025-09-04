@@ -21,6 +21,7 @@ go_library(
         "//go/logging",
         "//go/net/tinylb",
         "//metropolis/node",
+        "//metropolis/node/allocs",
         "//metropolis/node/core/consensus",
         "//metropolis/node/core/curator/proto/api",
         "//metropolis/node/core/curator/watcher",

@@ -15,7 +15,7 @@ import (
 	"golang.org/x/net/proxy"
 	"google.golang.org/grpc"
 
-	"source.monogon.dev/metropolis/node"
+	"source.monogon.dev/metropolis/node/allocs"
 	"source.monogon.dev/metropolis/node/core/rpc"
 	"source.monogon.dev/metropolis/node/core/rpc/resolver"
 	"source.monogon.dev/metropolis/proto/api"
@@ -45,7 +45,7 @@ func DialOpts(ctx context.Context, c *ConnectOptions) ([]grpc.DialOption, error)
 		return nil, fmt.Errorf("no cluster endpoints specified")
 	}
 	for _, eps := range c.Endpoints {
-		ep := resolver.NodeByHostPort(eps, uint16(node.CuratorServicePort))
+		ep := resolver.NodeByHostPort(eps, uint16(allocs.PortCuratorService))
 		r.AddEndpoint(ep)
 	}
 	opts = append(opts, grpc.WithResolvers(r))
@@ -76,7 +76,7 @@ func NewNodeClient(ctx context.Context, opkey ed25519.PrivateKey, ocert, ca *x50
 	creds := rpc.NewAuthenticatedCredentials(tlsc, rpc.WantRemoteCluster(ca), rpc.WantRemoteNode(nodeId))
 	dialOpts = append(dialOpts, grpc.WithTransportCredentials(creds))
 
-	endpoint := net.JoinHostPort(nodeAddr, node.NodeManagementPort.PortString())
+	endpoint := net.JoinHostPort(nodeAddr, allocs.PortNodeManagement.PortString())
 	return grpc.NewClient(endpoint, dialOpts...)
 }
 

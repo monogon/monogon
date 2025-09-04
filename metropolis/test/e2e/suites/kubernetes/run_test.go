@@ -32,6 +32,7 @@ import (
 	"k8s.io/utils/ptr"
 
 	common "source.monogon.dev/metropolis/node"
+	"source.monogon.dev/metropolis/node/allocs"
 	apb "source.monogon.dev/metropolis/proto/api"
 	cpb "source.monogon.dev/metropolis/proto/common"
 	"source.monogon.dev/metropolis/test/e2e/connectivity"
@@ -620,7 +621,7 @@ func TestE2EKubernetes(t *testing.T) {
 		}
 		u := url.URL{
 			Scheme: "https",
-			Host:   net.JoinHostPort(cluster.NodeIDs[1], common.MetricsPort.PortString()),
+			Host:   net.JoinHostPort(cluster.NodeIDs[1], allocs.PortMetrics.PortString()),
 			Path:   "/metrics/containerd",
 		}
 		res, err := cl.Get(u.String())

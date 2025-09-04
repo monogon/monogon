@@ -9,19 +9,12 @@ load("//osbase/build/mkverity:def.bzl", "verity_image")
 go_library(
     name = "node",
     srcs = [
-        "ids.go",
         "labels.go",
-        "net_ips.go",
-        "net_protocols.go",
         "net_status.go",
-        "ports.go",
         "validation.go",
     ],
     importpath = "source.monogon.dev/metropolis/node",
-    visibility = [
-        "//metropolis:__subpackages__",
-        "@io_k8s_kubernetes//pkg/registry:__subpackages__",
-    ],
+    visibility = ["//metropolis:__subpackages__"],
     deps = ["//metropolis/proto/common"],
 )
 
