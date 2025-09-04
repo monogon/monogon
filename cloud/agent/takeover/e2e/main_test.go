@@ -27,8 +27,8 @@ import (
 	"source.monogon.dev/cloud/agent/api"
 
 	"source.monogon.dev/osbase/fat32"
-	"source.monogon.dev/osbase/freeport"
 	"source.monogon.dev/osbase/structfs"
+	"source.monogon.dev/osbase/test/freeport"
 )
 
 var (

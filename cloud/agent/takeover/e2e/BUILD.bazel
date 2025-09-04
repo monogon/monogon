@@ -21,8 +21,8 @@ go_test(
     deps = [
         "//cloud/agent/api",
         "//osbase/fat32",
-        "//osbase/freeport",
         "//osbase/structfs",
+        "//osbase/test/freeport",
         "@com_github_pkg_sftp//:sftp",
         "@io_bazel_rules_go//go/runfiles",
         "@org_golang_google_protobuf//proto",

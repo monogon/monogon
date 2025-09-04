@@ -21,7 +21,7 @@ import (
 	"github.com/bazelbuild/rules_go/go/runfiles"
 	"golang.org/x/sys/unix"
 
-	"source.monogon.dev/osbase/freeport"
+	"source.monogon.dev/osbase/test/freeport"
 )
 
 var (

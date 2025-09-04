@@ -14,7 +14,7 @@ go_test(
     deps = [
         "//metropolis/test/launch",
         "//metropolis/test/util",
-        "//osbase/cmd",
+        "//osbase/test/cmd",
         "@io_bazel_rules_go//go/runfiles",
     ],
 )

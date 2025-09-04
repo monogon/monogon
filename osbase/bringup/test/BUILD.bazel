@@ -30,7 +30,7 @@ go_test(
         "xQEMUPath": "$(rlocationpath //build/toolchain/toolchain-bundle:qemu-kvm )",
     },
     deps = [
-        "//osbase/cmd",
+        "//osbase/test/cmd",
         "@io_bazel_rules_go//go/runfiles",
     ],
 )

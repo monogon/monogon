@@ -22,8 +22,8 @@ import (
 
 	"source.monogon.dev/metropolis/node"
 	"source.monogon.dev/metropolis/test/util"
-	"source.monogon.dev/osbase/freeport"
 	"source.monogon.dev/osbase/supervisor"
+	"source.monogon.dev/osbase/test/freeport"
 )
 
 var (

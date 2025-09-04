@@ -18,7 +18,7 @@ import (
 
 	mlaunch "source.monogon.dev/metropolis/test/launch"
 	"source.monogon.dev/metropolis/test/util"
-	"source.monogon.dev/osbase/cmd"
+	"source.monogon.dev/osbase/test/cmd"
 )
 
 var (

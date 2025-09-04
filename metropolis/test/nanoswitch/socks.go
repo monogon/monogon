@@ -8,8 +8,8 @@ import (
 	"fmt"
 	"net"
 
-	"source.monogon.dev/osbase/socksproxy"
 	"source.monogon.dev/osbase/supervisor"
+	"source.monogon.dev/osbase/test/socksproxy"
 )
 
 // SOCKSPort is the port at which nanoswitch listens for SOCKS conenctions.

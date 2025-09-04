@@ -12,7 +12,7 @@ import (
 
 	"github.com/bazelbuild/rules_go/go/runfiles"
 
-	"source.monogon.dev/osbase/cmd"
+	"source.monogon.dev/osbase/test/cmd"
 )
 
 var (

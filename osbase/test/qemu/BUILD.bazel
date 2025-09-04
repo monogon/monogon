@@ -15,7 +15,7 @@ go_library(
         "xQEMUPath": "$(rlocationpath //build/toolchain/toolchain-bundle:qemu-kvm )",
     },
     deps = [
-        "//osbase/freeport",
+        "//osbase/test/freeport",
         "@io_bazel_rules_go//go/runfiles",
         "@org_golang_x_sys//unix",
     ],

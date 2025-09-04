@@ -25,8 +25,8 @@ import (
 	"golang.org/x/sys/unix"
 
 	"source.monogon.dev/osbase/fat32"
-	"source.monogon.dev/osbase/freeport"
 	"source.monogon.dev/osbase/structfs"
+	"source.monogon.dev/osbase/test/freeport"
 )
 
 var (

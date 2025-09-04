@@ -23,8 +23,8 @@ go_test(
     },
     deps = [
         "//osbase/fat32",
-        "//osbase/freeport",
         "//osbase/structfs",
+        "//osbase/test/freeport",
         "@io_bazel_rules_go//go/runfiles",
         "@org_golang_x_crypto//ssh",
         "@org_golang_x_crypto//ssh/agent",

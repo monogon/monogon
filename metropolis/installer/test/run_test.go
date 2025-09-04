@@ -25,10 +25,10 @@ import (
 
 	mctl "source.monogon.dev/metropolis/cli/metroctl/core"
 	"source.monogon.dev/metropolis/installer/install"
-	"source.monogon.dev/osbase/cmd"
 	"source.monogon.dev/osbase/oci"
 	"source.monogon.dev/osbase/oci/osimage"
 	"source.monogon.dev/osbase/structfs"
+	"source.monogon.dev/osbase/test/cmd"
 )
 
 var (

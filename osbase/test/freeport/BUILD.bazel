@@ -3,6 +3,6 @@ load("@io_bazel_rules_go//go:def.bzl", "go_library")
 go_library(
     name = "freeport",
     srcs = ["freeport.go"],
-    importpath = "source.monogon.dev/osbase/freeport",
+    importpath = "source.monogon.dev/osbase/test/freeport",
     visibility = ["//visibility:public"],
 )

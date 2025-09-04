@@ -6,7 +6,7 @@ go_library(
         "protocol.go",
         "socksproxy.go",
     ],
-    importpath = "source.monogon.dev/osbase/socksproxy",
+    importpath = "source.monogon.dev/osbase/test/socksproxy",
     visibility = ["//visibility:public"],
 )
 
