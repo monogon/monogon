@@ -1,0 +1,112 @@
+Add unimplemented function for CRI compat.
+
+diff --git a/internal/cri/server/images/service.go b/internal/cri/server/images/service.go
+index cd1f16694f67..ddfd1c610c52 100644
+--- a/internal/cri/server/images/service.go
++++ b/internal/cri/server/images/service.go
+@@ -51,6 +51,8 @@ type ImagePlatform struct {
+ }
+
+ type CRIImageService struct {
++	runtime.UnimplementedImageServiceServer
++
+ 	// config contains all image configurations.
+ 	config criconfig.ImageConfig
+ 	// images is the lower level image store used for raw storage,
+diff --git a/internal/cri/server/service.go b/internal/cri/server/service.go
+index a028794d9611..69482ec37096 100644
+--- a/internal/cri/server/service.go
++++ b/internal/cri/server/service.go
+@@ -111,6 +111,9 @@ type ImageService interface {
+
+ // criService implements CRIService.
+ type criService struct {
++	runtime.UnimplementedRuntimeServiceServer
++	runtime.UnimplementedImageServiceServer
++
+ 	RuntimeService
+ 	ImageService
+ 	// config contains all configurations.
+diff --git a/internal/cri/instrument/instrumented_service.go b/internal/cri/instrument/instrumented_service.go
+--- a/internal/cri/instrument/instrumented_service.go
++++ b/internal/cri/instrument/instrumented_service.go
+@@ -43,8 +43,11 @@
+ }
+
+ // instrumentedService wraps service with containerd namespace and logs.
+ type instrumentedService struct {
++	runtime.UnimplementedRuntimeServiceServer
++	runtime.UnimplementedImageServiceServer
++
+ 	c criService
+ }
+
+ func NewService(c criService) GRPCServices {
+diff --git a/internal/cri/server/images/image_list_test.go b/internal/cri/server/images/image_list_test.go
+index fd046183f82b..701359d33d6f 100644
+--- a/internal/cri/server/images/image_list_test.go
++++ b/internal/cri/server/images/image_list_test.go
+@@ -79,21 +79,21 @@ func TestListImages(t *testing.T) {
+ 			Id:          "sha256:1123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+ 			RepoTags:    []string{"gcr.io/library/busybox:latest"},
+ 			RepoDigests: []string{"gcr.io/library/busybox@sha256:e6693c20186f837fc393390135d8a598a96a833917917789d63766cab6c59582"},
+-			Size_:       uint64(1000),
++			Size:        uint64(1000),
+ 			Username:    "root",
+ 		},
+ 		{
+ 			Id:          "sha256:2123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+ 			RepoTags:    []string{"gcr.io/library/alpine:latest"},
+ 			RepoDigests: []string{"gcr.io/library/alpine@sha256:e6693c20186f837fc393390135d8a598a96a833917917789d63766cab6c59582"},
+-			Size_:       uint64(2000),
++			Size:        uint64(2000),
+ 			Uid:         &runtime.Int64Value{Value: 1234},
+ 		},
+ 		{
+ 			Id:          "sha256:3123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+ 			RepoTags:    []string{"gcr.io/library/ubuntu:latest"},
+ 			RepoDigests: []string{"gcr.io/library/ubuntu@sha256:e6693c20186f837fc393390135d8a598a96a833917917789d63766cab6c59582"},
+-			Size_:       uint64(3000),
++			Size:        uint64(3000),
+ 			Username:    "nobody",
+ 		},
+ 	}
+diff --git a/internal/cri/server/images/image_status.go b/internal/cri/server/images/image_status.go
+index 4f1ece5b43a7..0b3dc3c21129 100644
+--- a/internal/cri/server/images/image_status.go
++++ b/internal/cri/server/images/image_status.go
+@@ -66,7 +66,7 @@ func toCRIImage(image imagestore.Image) *runtime.Image {
+ 		Id:          image.ID,
+ 		RepoTags:    repoTags,
+ 		RepoDigests: repoDigests,
+-		Size_:       uint64(image.Size),
++		Size:        uint64(image.Size),
+ 		Pinned:      image.Pinned,
+ 	}
+ 	uid, username := getUserFromImage(image.ImageSpec.Config.User)
+diff --git a/internal/cri/server/images/image_status_test.go b/internal/cri/server/images/image_status_test.go
+index 36779130b8b8..cd9268cb92d3 100644
+--- a/internal/cri/server/images/image_status_test.go
++++ b/internal/cri/server/images/image_status_test.go
+@@ -48,7 +48,7 @@ func TestImageStatus(t *testing.T) {
+ 		Id:          testID,
+ 		RepoTags:    []string{"gcr.io/library/busybox:latest"},
+ 		RepoDigests: []string{"gcr.io/library/busybox@sha256:e6693c20186f837fc393390135d8a598a96a833917917789d63766cab6c59582"},
+-		Size_:       uint64(1234),
++		Size:        uint64(1234),
+ 		Username:    "user",
+ 	}
+
+diff --git a/integration/remote/remote_image.go b/integration/remote/remote_image.go
+index 0ae6196732ed..e9f1653149b2 100644
+--- a/integration/remote/remote_image.go
++++ b/integration/remote/remote_image.go
+@@ -107,7 +107,7 @@ func (r *ImageService) ImageStatus(image *runtimeapi.ImageSpec, opts ...grpc.Cal
+ 	}
+
+ 	if resp.Image != nil {
+-		if resp.Image.Id == "" || resp.Image.Size() == 0 {
++		if resp.Image.Id == "" || resp.Image.Size == 0 {
+ 			errorMessage := fmt.Sprintf("Id or size of image %q is not set", image.Image)
+ 			log.L.Errorf("ImageStatus failed: %s", errorMessage)
+ 			return nil, errors.New(errorMessage)

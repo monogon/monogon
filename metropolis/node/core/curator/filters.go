@@ -10,6 +10,7 @@ import (
 
 	"github.com/google/cel-go/cel"
 	celdecls "github.com/google/cel-go/checker/decls"
+	"github.com/google/cel-go/common/decls"
 	celtypes "github.com/google/cel-go/common/types"
 	exprpb "google.golang.org/genproto/googleapis/api/expr/v1alpha1"
 	"google.golang.org/grpc/codes"
@@ -33,6 +34,8 @@ func enumDeclarations(em map[int32]string) cel.EnvOption {
 			},
 		))
 	}
+
+	// nolint:SA1019
 	return cel.Declarations(ds...)
 }
 
@@ -104,9 +107,7 @@ func buildNodeFilter(ctx context.Context, expr string) (nodeFilter, error) {
 	// node-specific CEL environment options.
 	fprg, err := buildFilter(ctx, expr,
 		cel.Types(&apb.Node{}),
-		cel.Declarations(
-			celdecls.NewVar("node", celdecls.NewTypeParamType("metropolis.proto.api.Node")),
-		),
+		cel.VariableDecls(decls.NewVariable("node", celtypes.NewTypeParamType("metropolis.proto.api.Node"))),
 		// There doesn't seem to be an easier way of importing protobuf enums
 		// into CEL environments.
 		enumDeclarations(cpb.NodeState_name),

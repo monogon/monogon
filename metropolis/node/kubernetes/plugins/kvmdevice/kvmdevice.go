@@ -35,7 +35,8 @@ import (
 var Name corev1.ResourceName = "devices.monogon.dev/kvm"
 
 type Plugin struct {
-	*deviceplugin.UnimplementedDevicePluginServer
+	deviceplugin.UnimplementedDevicePluginServer
+	pluginregistration.UnimplementedRegistrationServer
 	KubeletDirectory *localstorage.DataKubernetesKubeletDirectory
 
 	logger logging.Leveled
@@ -86,7 +87,7 @@ func (k *Plugin) Allocate(ctx context.Context, req *deviceplugin.AllocateRequest
 
 	for _, req := range req.ContainerRequests {
 		var devices []*deviceplugin.DeviceSpec
-		for range req.DevicesIDs {
+		for range req.DevicesIds {
 			dev := new(deviceplugin.DeviceSpec)
 			dev.HostPath = "/dev/kvm"
 			dev.ContainerPath = "/dev/kvm"

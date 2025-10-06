@@ -266,6 +266,8 @@ func (s *csiPluginServer) Probe(ctx context.Context, req *csi.ProbeRequest) (*cs
 // in Kubelet which requires it to remove and recreate its gRPC socket for
 // every new registration attempt.
 type pluginRegistrationServer struct {
+	pluginregistration.UnimplementedRegistrationServer
+
 	// regErr has a buffer of 1, so that at least one error can always be
 	// sent into it in a non-blocking way. There is a race if
 	// NotifyRegistrationStatus is called twice with an error as the buffered

@@ -1,4 +1,4 @@
-From 7844c9ec1cdef485731a4858a48b854986387591 Mon Sep 17 00:00:00 2001
+From 5fa4cde761ff1b7cbd0e47966992d07927e06882 Mon Sep 17 00:00:00 2001
 From: Lorenz Brun <lorenz@monogon.tech>
 Date: Wed, 16 Mar 2022 18:10:09 +0100
 Subject: [PATCH] Drop legacy log path
@@ -11,13 +11,13 @@ Subject: [PATCH] Drop legacy log path
  4 files changed, 107 deletions(-)
 
 diff --git a/pkg/kubelet/kubelet.go b/pkg/kubelet/kubelet.go
-index b8bbfece860..e6aa5e8359b 100644
+index 600a006f054..93d1e2735bd 100644
 --- a/pkg/kubelet/kubelet.go
 +++ b/pkg/kubelet/kubelet.go
-@@ -1589,13 +1589,6 @@ func (kl *Kubelet) initializeModules() error {
+@@ -1643,13 +1643,6 @@ func (kl *Kubelet) initializeModules(ctx context.Context) error {
  		return err
  	}
- 
+
 -	// If the container logs directory does not exist, create it.
 -	if _, err := os.Stat(ContainerLogsDir); err != nil {
 -		if err := kl.os.MkdirAll(ContainerLogsDir, 0755); err != nil {
@@ -29,13 +29,13 @@ index b8bbfece860..e6aa5e8359b 100644
  		// On Windows we should not allow other users to read the logs directory
  		// to avoid allowing non-root containers from reading the logs of other containers.
 diff --git a/pkg/kubelet/kuberuntime/kuberuntime_container.go b/pkg/kubelet/kuberuntime/kuberuntime_container.go
-index a154754d285..df87ff82f7d 100644
+index a1d9453f891..b07d3698b9f 100644
 --- a/pkg/kubelet/kuberuntime/kuberuntime_container.go
 +++ b/pkg/kubelet/kuberuntime/kuberuntime_container.go
-@@ -286,25 +286,6 @@ func (m *kubeGenericRuntimeManager) startContainer(ctx context.Context, podSandb
+@@ -296,25 +296,6 @@ func (m *kubeGenericRuntimeManager) startContainer(ctx context.Context, podSandb
  	}
- 	m.recordContainerEvent(pod, container, containerID, v1.EventTypeNormal, events.StartedContainer, "Started container %v", container.Name)
- 
+ 	m.recordContainerEvent(ctx, pod, container, containerID, v1.EventTypeNormal, events.StartedContainer, "Started container %v", container.Name)
+
 -	// Symlink container logs to the legacy container log location for cluster logging
 -	// support.
 -	// TODO(random-liu): Remove this after cluster logging supports CRI container log path.
@@ -50,7 +50,7 @@ index a154754d285..df87ff82f7d 100644
 -	// to create it in the first place. it happens when journald logging driver is used with docker.
 -	if _, err := m.osInterface.Stat(containerLog); !os.IsNotExist(err) {
 -		if err := m.osInterface.Symlink(containerLog, legacySymlink); err != nil {
--			klog.ErrorS(err, "Failed to create legacy symbolic link", "path", legacySymlink,
+-			logger.Error(err, "Failed to create legacy symbolic link", "path", legacySymlink,
 -				"containerID", containerID, "containerLogPath", containerLog)
 -		}
 -	}
@@ -58,10 +58,10 @@ index a154754d285..df87ff82f7d 100644
  	// Step 4: execute the post start hook.
  	if container.Lifecycle != nil && container.Lifecycle.PostStart != nil {
  		kubeContainerID := kubecontainer.ContainerID{
-@@ -1335,23 +1316,6 @@ func (m *kubeGenericRuntimeManager) removeContainerLog(ctx context.Context, cont
+@@ -1360,23 +1341,6 @@ func (m *kubeGenericRuntimeManager) removeContainerLog(ctx context.Context, cont
  		return err
  	}
- 
+
 -	resp, err := m.runtimeService.ContainerStatus(ctx, containerID, false)
 -	if err != nil {
 -		return fmt.Errorf("failed to get container status %q: %v", containerID, err)
@@ -72,7 +72,7 @@ index a154754d285..df87ff82f7d 100644
 -	}
 -	// Remove the legacy container log symlink.
 -	// TODO(random-liu): Remove this after cluster logging supports CRI container log path.
--	labeledInfo := getContainerInfoFromLabels(status.Labels)
+-	labeledInfo := getContainerInfoFromLabels(ctx, status.Labels)
 -	legacySymlink := legacyLogSymlink(containerID, labeledInfo.ContainerName, labeledInfo.PodName,
 -		labeledInfo.PodNamespace)
 -	if err := m.osInterface.Remove(legacySymlink); err != nil && !os.IsNotExist(err) {
@@ -81,9 +81,9 @@ index a154754d285..df87ff82f7d 100644
 -	}
  	return nil
  }
- 
+
 diff --git a/pkg/kubelet/kuberuntime/kuberuntime_gc.go b/pkg/kubelet/kuberuntime/kuberuntime_gc.go
-index 6189b1f07ca..3cd3daa5a6c 100644
+index 2691f64d5c3..d766c618db3 100644
 --- a/pkg/kubelet/kuberuntime/kuberuntime_gc.go
 +++ b/pkg/kubelet/kuberuntime/kuberuntime_gc.go
 @@ -19,7 +19,6 @@ package kuberuntime
@@ -94,7 +94,7 @@ index 6189b1f07ca..3cd3daa5a6c 100644
  	"path/filepath"
  	"sort"
  	"time"
-@@ -347,51 +346,6 @@ func (cgc *containerGC) evictPodLogsDirectories(ctx context.Context, allSourcesR
+@@ -350,51 +349,6 @@ func (cgc *containerGC) evictPodLogsDirectories(ctx context.Context, allSourcesR
  			}
  		}
  	}
@@ -109,11 +109,11 @@ index 6189b1f07ca..3cd3daa5a6c 100644
 -				if err != nil {
 -					// TODO: we should handle container not found (i.e. container was deleted) case differently
 -					// once https://github.com/kubernetes/kubernetes/issues/63336 is resolved
--					klog.InfoS("Error getting ContainerStatus for containerID", "containerID", containerID, "err", err)
+-					logger.Info("Error getting ContainerStatus for containerID", "containerID", containerID, "err", err)
 -				} else {
 -					status := resp.GetStatus()
 -					if status == nil {
--						klog.V(4).InfoS("Container status is nil")
+-						logger.V(4).Info("Container status is nil")
 -						continue
 -					}
 -					if status.State != runtimeapi.ContainerState_CONTAINER_EXITED {
@@ -128,24 +128,24 @@ index 6189b1f07ca..3cd3daa5a6c 100644
 -						// See https://github.com/kubernetes/kubernetes/issues/52172
 -						//
 -						// We only remove unhealthy symlink for dead containers
--						klog.V(5).InfoS("Container is still running, not removing symlink", "containerID", containerID, "path", logSymlink)
+-						logger.V(5).Info("Container is still running, not removing symlink", "containerID", containerID, "path", logSymlink)
 -						continue
 -					}
 -				}
 -			} else {
--				klog.V(4).InfoS("Unable to obtain container ID", "err", err)
+-				logger.V(4).Info("Unable to obtain container ID", "err", err)
 -			}
 -			err := osInterface.Remove(logSymlink)
 -			if err != nil {
--				klog.ErrorS(err, "Failed to remove container log dead symlink", "path", logSymlink)
+-				logger.Error(err, "Failed to remove container log dead symlink", "path", logSymlink)
 -			} else {
--				klog.V(4).InfoS("Removed symlink", "path", logSymlink)
+-				logger.V(4).Info("Removed symlink", "path", logSymlink)
 -			}
 -		}
 -	}
  	return nil
  }
- 
+
 diff --git a/test/e2e_node/log_path_test.go b/test/e2e_node/log_path_test.go
 index a1589e6d91e..179206eb1dd 100644
 --- a/test/e2e_node/log_path_test.go
@@ -179,9 +179,9 @@ index a1589e6d91e..179206eb1dd 100644
 -				err = createAndWaitPod(ctx, makeLogCheckPod(logCheckPodName, logString, expectedlogFile))
 -				framework.ExpectNoError(err, "Failed waiting for pod: %s to enter success state", logCheckPodName)
 -			})
- 
+
  			ginkgo.It("should print log to correct cri log path", func(ctx context.Context) {
- 
--- 
-2.47.0
+
+--
+2.50.1
 

@@ -122,7 +122,7 @@ OVERRIDES = {
             "gazelle:resolve go source.monogon.dev/metropolis/node/kubernetes/containerd/cniproxy @monogon//metropolis/node/kubernetes/containerd/cniproxy",
         ],
         "pre_patches": [
-            "//third_party/com_github_containerd_containerd_v2:add-unimplemented-functions.patch",
+            "//third_party/com_github_containerd_containerd_v2:client-go-0-34-compat.patch",
             "//third_party/com_github_containerd_containerd_v2:cni-adapter.patch",
         ],
     },
@@ -142,7 +142,7 @@ OVERRIDES = {
         ],
     },
     "github.com/google/cel-go": {
-        "build_file_generation": "on",
+        "build_file_generation": "off",
         "directives": [
             "gazelle:go_naming_convention go_default_library",
         ],

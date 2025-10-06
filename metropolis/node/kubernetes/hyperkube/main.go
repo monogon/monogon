@@ -15,6 +15,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"os"
 
@@ -33,7 +34,7 @@ var subcommands = map[string]func() *cobra.Command{
 	"kube-apiserver":          kubeapiserver.NewAPIServerCommand,
 	"kube-controller-manager": kubecontrollermanager.NewControllerManagerCommand,
 	"kube-scheduler":          func() *cobra.Command { return kubescheduler.NewSchedulerCommand() },
-	"kubelet":                 kubelet.NewKubeletCommand,
+	"kubelet":                 func() *cobra.Command { return kubelet.NewKubeletCommand(context.Background()) },
 }
 
 func main() {
