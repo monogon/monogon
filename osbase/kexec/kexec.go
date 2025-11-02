@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 //go:build amd64 || arm64 || riscv64
-// +build amd64 arm64 riscv64
 
 // Package kexec allows executing subsequent kernels from Linux userspace.
 package kexec

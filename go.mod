@@ -112,14 +112,14 @@ require (
 	go.uber.org/multierr v1.11.0
 	go.uber.org/zap v1.27.0
 	go4.org/netipx v0.0.0-20231129151722-fdeea329fbba
-	golang.org/x/crypto v0.42.0
-	golang.org/x/net v0.44.0
+	golang.org/x/crypto v0.43.0
+	golang.org/x/net v0.46.0
 	golang.org/x/sync v0.17.0
-	golang.org/x/sys v0.36.0
-	golang.org/x/term v0.35.0
-	golang.org/x/text v0.29.0
+	golang.org/x/sys v0.37.0
+	golang.org/x/term v0.36.0
+	golang.org/x/text v0.30.0
 	golang.org/x/time v0.12.0
-	golang.org/x/tools v0.37.0
+	golang.org/x/tools v0.38.0
 	golang.zx2c4.com/wireguard/wgctrl v0.0.0-20220208144051-fde48d68ee68
 	google.golang.org/api v0.249.0
 	google.golang.org/genproto/googleapis/api v0.0.0-20250603155806-513f23925822
@@ -407,9 +407,9 @@ require (
 	golang.org/x/arch v0.11.0 // indirect
 	golang.org/x/exp v0.0.0-20241108190413-2d47ceb2692f // indirect
 	golang.org/x/exp/typeparams v0.0.0-20231108232855-2478ac86f678 // indirect
-	golang.org/x/mod v0.28.0 // indirect
+	golang.org/x/mod v0.29.0 // indirect
 	golang.org/x/oauth2 v0.30.0 // indirect
-	golang.org/x/telemetry v0.0.0-20250908211612-aef8a434d053 // indirect
+	golang.org/x/telemetry v0.0.0-20251008203120-078029d740a8 // indirect
 	golang.org/x/tools/go/expect v0.1.1-deprecated // indirect
 	golang.zx2c4.com/wireguard v0.0.0-20220202223031-3b95c81cc178 // indirect
 	google.golang.org/genproto v0.0.0-20250603155806-513f23925822 // indirect

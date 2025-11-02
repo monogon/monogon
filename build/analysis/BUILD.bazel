@@ -138,6 +138,7 @@ NOGO_CONFIG = [
         "printf",
         "copylocks",
         "lostcancel",
+        "buildtag",
     ]),
 
     # Additional custom entries.
