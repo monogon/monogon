@@ -125,6 +125,9 @@ OVERRIDES = {
             "//third_party/com_github_containerd_containerd_v2:client-go-0-34-compat.patch",
             "//third_party/com_github_containerd_containerd_v2:cni-adapter.patch",
         ],
+        "patches": [
+            "//third_party/com_github_containerd_containerd_v2:otelgrpc-compat.patch",
+        ],
     },
     "github.com/containerd/cgroups/v3": {
         "directives": [
