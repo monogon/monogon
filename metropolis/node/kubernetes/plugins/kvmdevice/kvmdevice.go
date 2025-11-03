@@ -150,9 +150,13 @@ func (k *Plugin) Run(ctx context.Context) error {
 		return fmt.Errorf("failed to parse KVM device node: %w", err)
 	}
 
-	err = unix.Mknod("/dev/kvm", 0660, int(kvmDevNode))
+	err = unix.Mknod("/dev/kvm", 0666, int(kvmDevNode))
 	if err != nil && !errors.Is(err, unix.EEXIST) {
 		return fmt.Errorf("failed to create KVM device node: %w", err)
+	}
+	err = unix.Chmod("/dev/kvm", 0666)
+	if err != nil {
+		return fmt.Errorf("failed to set KVM device node permissions: %w", err)
 	}
 
 	// Try to remove socket if an unclean shutdown happened
