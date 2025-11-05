@@ -8,6 +8,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"slices"
 	"strings"
 
 	appsv1 "k8s.io/api/apps/v1"
@@ -140,15 +141,22 @@ func makeSelftestSpec(name string) *batchv1.Job {
 	}
 }
 
+func sliceIf[E any](cond bool, val E) []E {
+	if cond {
+		return []E{val}
+	}
+	return nil
+}
+
 // makeTestStatefulSet generates a StatefulSet spec
-func makeTestStatefulSet(name string, runtimeClass string) *appsv1.StatefulSet {
+func makeTestStatefulSet(name string, runtimeClass string, hostUsers *bool, hasBlock bool) *appsv1.StatefulSet {
 	return &appsv1.StatefulSet{
 		ObjectMeta: metav1.ObjectMeta{Name: name},
 		Spec: appsv1.StatefulSetSpec{
 			Selector: &metav1.LabelSelector{MatchLabels: map[string]string{
 				"name": name,
 			}},
-			VolumeClaimTemplates: []corev1.PersistentVolumeClaim{
+			VolumeClaimTemplates: slices.Concat([]corev1.PersistentVolumeClaim{
 				{
 					ObjectMeta: metav1.ObjectMeta{Name: "vol-default"},
 					Spec: corev1.PersistentVolumeClaimSpec{
@@ -169,7 +177,8 @@ func makeTestStatefulSet(name string, runtimeClass string) *appsv1.StatefulSet {
 						VolumeMode: ptr.To(corev1.PersistentVolumeFilesystem),
 					},
 				},
-				{
+			},
+				sliceIf(hasBlock, corev1.PersistentVolumeClaim{
 					ObjectMeta: metav1.ObjectMeta{Name: "vol-block"},
 					Spec: corev1.PersistentVolumeClaimSpec{
 						AccessModes: []corev1.PersistentVolumeAccessMode{corev1.ReadWriteOnce},
@@ -178,8 +187,8 @@ func makeTestStatefulSet(name string, runtimeClass string) *appsv1.StatefulSet {
 						},
 						VolumeMode: ptr.To(corev1.PersistentVolumeBlock),
 					},
-				},
-			},
+				}),
+			),
 			Template: corev1.PodTemplateSpec{
 				ObjectMeta: metav1.ObjectMeta{
 					Labels: map[string]string{
@@ -192,7 +201,7 @@ func makeTestStatefulSet(name string, runtimeClass string) *appsv1.StatefulSet {
 							Name:            "test",
 							ImagePullPolicy: corev1.PullIfNotPresent,
 							Image:           "test.monogon.internal/persistentvolume:latest",
-							Args:            []string{"-runtimeclass", runtimeClass},
+							Args:            slices.Concat([]string{"-name", name}, sliceIf(hasBlock, "-hasblock")),
 							VolumeMounts: []corev1.VolumeMount{
 								{
 									Name:      "vol-default",
@@ -204,15 +213,14 @@ func makeTestStatefulSet(name string, runtimeClass string) *appsv1.StatefulSet {
 									MountPath: "/vol/readonly",
 								},
 							},
-							VolumeDevices: []corev1.VolumeDevice{
-								{
-									Name:       "vol-block",
-									DevicePath: "/vol/block",
-								},
-							},
+							VolumeDevices: sliceIf(hasBlock, corev1.VolumeDevice{
+								Name:       "vol-block",
+								DevicePath: "/vol/block",
+							}),
 						},
 					},
 					RuntimeClassName: ptr.To(runtimeClass),
+					HostUsers:        hostUsers,
 				},
 			},
 		},

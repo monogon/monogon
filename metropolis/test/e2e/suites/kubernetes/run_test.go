@@ -442,14 +442,26 @@ func TestE2EKubernetes(t *testing.T) {
 		ct.TestPodConnectivityEventual(t, 0, 1, 1235, connectivity.ExpectedReject, 30*time.Second)
 		ct.TestPodConnectivity(t, 0, 1, 1234, connectivity.ExpectedSuccess)
 	})
-	for _, runtimeClass := range []string{"runc", "gvisor"} {
-		statefulSetName := fmt.Sprintf("test-statefulset-%s", runtimeClass)
-		util.TestEventual(t, fmt.Sprintf("StatefulSet with %s tests", runtimeClass), ctx, smallTestTimeout, func(ctx context.Context) error {
-			_, err := clientSet.AppsV1().StatefulSets("default").Create(ctx, makeTestStatefulSet(statefulSetName, runtimeClass), metav1.CreateOptions{})
+	statefulSetCases := []struct {
+		name         string
+		runtimeClass string
+		hostUsers    *bool
+		testResize   bool
+		hasBlock     bool
+	}{
+		{"runc", "runc", nil, true, true},
+		{"gvisor", "gvisor", nil, true, false},
+		{"userns", "runc", ptr.To(false), false, false},
+	}
+	for _, c := range statefulSetCases {
+		statefulSetName := fmt.Sprintf("test-statefulset-%s", c.name)
+		statefulSet := makeTestStatefulSet(statefulSetName, c.runtimeClass, c.hostUsers, c.hasBlock)
+		util.TestEventual(t, fmt.Sprintf("StatefulSet with %s tests", c.name), ctx, smallTestTimeout, func(ctx context.Context) error {
+			_, err := clientSet.AppsV1().StatefulSets("default").Create(ctx, statefulSet, metav1.CreateOptions{})
 			return err
 		})
 		var podName string
-		util.TestEventual(t, fmt.Sprintf("StatefulSet with %s tests successful", runtimeClass), ctx, smallTestTimeout, func(ctx context.Context) error {
+		util.TestEventual(t, fmt.Sprintf("StatefulSet with %s tests successful", c.name), ctx, smallTestTimeout, func(ctx context.Context) error {
 			res, err := clientSet.CoreV1().Pods("default").List(ctx, metav1.ListOptions{LabelSelector: fmt.Sprintf("name=%s", statefulSetName)})
 			if err != nil {
 				return err
@@ -471,38 +483,40 @@ func TestE2EKubernetes(t *testing.T) {
 			}
 			return fmt.Errorf("pod is not ready: %v, log:\n  %s", pod.Status.Phase, strings.Join(lines, "\n  "))
 		})
-		util.TestEventual(t, fmt.Sprintf("StatefulSet with %s request resize", runtimeClass), ctx, smallTestTimeout, func(ctx context.Context) error {
-			for _, templateName := range []string{"vol-default", "vol-readonly", "vol-block"} {
-				name := fmt.Sprintf("%s-%s-0", templateName, statefulSetName)
-				patch := `{"spec": {"resources": {"requests": {"storage": "4Mi"}}}}`
-				_, err := clientSet.CoreV1().PersistentVolumeClaims("default").Patch(ctx, name, types.StrategicMergePatchType, []byte(patch), metav1.PatchOptions{})
+		if c.testResize {
+			util.TestEventual(t, fmt.Sprintf("StatefulSet with %s request resize", c.name), ctx, smallTestTimeout, func(ctx context.Context) error {
+				for _, template := range statefulSet.Spec.VolumeClaimTemplates {
+					name := fmt.Sprintf("%s-%s-0", template.Name, statefulSetName)
+					patch := `{"spec": {"resources": {"requests": {"storage": "4Mi"}}}}`
+					_, err := clientSet.CoreV1().PersistentVolumeClaims("default").Patch(ctx, name, types.StrategicMergePatchType, []byte(patch), metav1.PatchOptions{})
+					if err != nil {
+						return err
+					}
+				}
+				return nil
+			})
+			i := 0
+			util.TestEventual(t, fmt.Sprintf("StatefulSet with %s resize successful", c.name), ctx, smallTestTimeout, func(ctx context.Context) error {
+				// Make a change to the pod to make kubelet look at it and notice that it
+				// should call NodeExpandVolume. If we don't do this, it might take up to
+				// 1 minute for kubelet to notice, which slows down the test.
+				patch := fmt.Sprintf(`{"metadata": {"labels": {"trigger-kubelet-update": "%d"}}}`, i)
+				i += 1
+				_, err := clientSet.CoreV1().Pods("default").Patch(ctx, podName, types.StrategicMergePatchType, []byte(patch), metav1.PatchOptions{})
 				if err != nil {
 					return err
 				}
-			}
-			return nil
-		})
-		i := 0
-		util.TestEventual(t, fmt.Sprintf("StatefulSet with %s resize successful", runtimeClass), ctx, smallTestTimeout, func(ctx context.Context) error {
-			// Make a change to the pod to make kubelet look at it and notice that it
-			// should call NodeExpandVolume. If we don't do this, it might take up to
-			// 1 minute for kubelet to notice, which slows down the test.
-			patch := fmt.Sprintf(`{"metadata": {"labels": {"trigger-kubelet-update": "%d"}}}`, i)
-			i += 1
-			_, err := clientSet.CoreV1().Pods("default").Patch(ctx, podName, types.StrategicMergePatchType, []byte(patch), metav1.PatchOptions{})
-			if err != nil {
-				return err
-			}
 
-			lines, err := getPodLogLines(ctx, clientSet, podName, 50)
-			if err != nil {
-				return fmt.Errorf("could not get logs: %w", err)
-			}
-			if slices.Contains(lines, "[RESIZE-PASSED]") {
-				return nil
-			}
-			return fmt.Errorf("waiting for resize, log:\n  %s", strings.Join(lines, "\n  "))
-		})
+				lines, err := getPodLogLines(ctx, clientSet, podName, 50)
+				if err != nil {
+					return fmt.Errorf("could not get logs: %w", err)
+				}
+				if slices.Contains(lines, "[RESIZE-PASSED]") {
+					return nil
+				}
+				return fmt.Errorf("waiting for resize, log:\n  %s", strings.Join(lines, "\n  "))
+			})
+		}
 	}
 	util.TestEventual(t, "Deployment in user namespace", ctx, largeTestTimeout, func(ctx context.Context) error {
 		deployment := makeTestDeploymentSpec("test-userns-1")
