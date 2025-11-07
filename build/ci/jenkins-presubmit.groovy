@@ -9,6 +9,29 @@ pipeline {
         parallelsAlwaysFailFast()
     }
     stages {
+        stage('Build - Toolchain Bundle') {
+            agent {
+                node {
+                    label ""
+                    customWorkspace '/home/ci/monogon'
+                }
+            }
+            steps {
+                gerritCheck checks: ['jenkins:build_toolchain_bundle': 'RUNNING'], message: "Running on ${env.NODE_NAME}"
+                echo "Gerrit change: ${GERRIT_CHANGE_URL}"
+                sh "git clean -fdx -e '/bazel-*'"
+
+                sh "JENKINS_NODE_COOKIE=dontKillMe nix-build build/toolchain/toolchain-bundle/default.nix"
+            }
+            post {
+                success {
+                    gerritCheck checks: ['jenkins:build_toolchain_bundle': 'SUCCESSFUL']
+                }
+                unsuccessful {
+                    gerritCheck checks: ['jenkins:build_toolchain_bundle': 'FAILED']
+                }
+            }
+        }
         stage('Gazelle') {
             agent {
                 node {
@@ -51,29 +74,6 @@ pipeline {
         }
         stage('Parallel') {
             parallel {
-                stage('Build - Toolchain Bundle') {
-                    agent {
-                        node {
-                            label ""
-                            customWorkspace '/home/ci/monogon'
-                        }
-                    }
-                    steps {
-                        gerritCheck checks: ['jenkins:build_toolchain_bundle': 'RUNNING'], message: "Running on ${env.NODE_NAME}"
-                        echo "Gerrit change: ${GERRIT_CHANGE_URL}"
-                        sh "git clean -fdx -e '/bazel-*'"
-
-                        sh "JENKINS_NODE_COOKIE=dontKillMe nix-build build/toolchain/toolchain-bundle/default.nix"
-                    }
-                    post {
-                        success {
-                            gerritCheck checks: ['jenkins:build_toolchain_bundle': 'SUCCESSFUL']
-                        }
-                        unsuccessful {
-                            gerritCheck checks: ['jenkins:build_toolchain_bundle': 'FAILED']
-                        }
-                    }
-                }
                 stage('Test - Default') {
                     agent {
                         node {
