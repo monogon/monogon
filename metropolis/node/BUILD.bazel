@@ -1,4 +1,6 @@
+load("@aspect_bazel_lib//lib:expand_template.bzl", "expand_template")
 load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_library", "go_test")
+load("@rules_oci//oci:defs.bzl", "oci_push")
 load("//osbase/build/genproductinfo:defs.bzl", "product_info")
 load("//osbase/build/mkerofs:def.bzl", "erofs_image")
 load("//osbase/build/mkoci:def.bzl", "oci_os_image")
@@ -142,6 +144,20 @@ oci_index(
         "//build/platforms:linux_x86_64",
         "//build/platforms:linux_aarch64",
     ],
+)
+
+expand_template(
+    name = "oci_multiarch_stamped",
+    out = "_stamped.tags.txt",
+    stamp_substitutions = {"0.0.0": "{{STABLE_MONOGON_metropolis_version}}"},
+    template = ["0.0.0"],
+)
+
+oci_push(
+    name = "oci_multiarch_push",
+    image = ":oci_multiarch",
+    remote_tags = ":oci_multiarch_stamped",
+    repository = "gcr.io/monogon-infra/monogon",
 )
 
 product_info(
