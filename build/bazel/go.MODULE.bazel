@@ -385,11 +385,17 @@ OVERRIDES = {
         ],
     },
     "gvisor.dev/gvisor": {
+        "directives": [
+            # Make @dev_gvisor_gvisor//runsc_lib visible
+            "gazelle:go_visibility //visibility:public",
+        ],
         "patches": [
             "//third_party/com_gvisor_dev_gvisor:gvisor-fix-syslog.patch",
+            "//third_party/com_gvisor_dev_gvisor:add-debug-functionality-post.patch",
         ],
         "pre_patches": [
             "//third_party/com_gvisor_dev_gvisor:gvisor-containerd-compat.patch",
+            "//third_party/com_gvisor_dev_gvisor:add-debug-functionality.patch",
         ],
     },
     "go.etcd.io/etcd/tests/v3": {

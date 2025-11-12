@@ -1,0 +1,50 @@
+From af24395473164a7666fb1219eeb9e6eef590a58f Mon Sep 17 00:00:00 2001
+From: Tim Windelschmidt <tim@monogon.tech>
+Date: Thu, 20 Nov 2025 15:05:35 +0100
+Subject: [PATCH 2/2] add debug functionality
+
+gVisor apparently abandoned debug builds for the KVM platform completely, as they don't
+build any platform anymore when in debug mode. This commit adds the ptrace and systrap
+platforms to allow our tests to pass.
+---
+ .../platform/platforms/platforms_debug.go     | 28 +++++++++++++++++++
+ 1 file changed, 28 insertions(+)
+ create mode 100644 pkg/sentry/platform/platforms/platforms_debug.go
+
+diff --git a/pkg/sentry/platform/platforms/platforms_debug.go b/pkg/sentry/platform/platforms/platforms_debug.go
+new file mode 100644
+index 000000000..e23e69422
+--- /dev/null
++++ b/pkg/sentry/platform/platforms/platforms_debug.go
+@@ -0,0 +1,28 @@
++// Copyright 2023 The gVisor Authors.
++//
++// Licensed under the Apache License, Version 2.0 (the "License");
++// you may not use this file except in compliance with the License.
++// You may obtain a copy of the License at
++//
++//     http://www.apache.org/licenses/LICENSE-2.0
++//
++// Unless required by applicable law or agreed to in writing, software
++// distributed under the License is distributed on an "AS IS" BASIS,
++// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++// See the License for the specific language governing permissions and
++// limitations under the License.
++
++//go:build linux && debug
++// +build linux,debug
++
++package platforms
++
++import (
++	// Import platforms that runsc might use.
++
++	// The KVM platform is not included because it's incompatible with debug
++	// builds. Unoptimized functions grow the stack too much and fail the nosplit
++	// check.
++	_ "gvisor.dev/gvisor/pkg/sentry/platform/ptrace"
++	_ "gvisor.dev/gvisor/pkg/sentry/platform/systrap"
++)
+--
+2.50.1
+

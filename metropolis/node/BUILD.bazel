@@ -39,6 +39,18 @@ go_binary(
     pure = "off",
 )
 
+go_binary(
+    name = "runsc",
+    embed = ["@dev_gvisor_gvisor//runsc:runsc_lib"],
+    gotags = select({
+        ":debug_build": ["debug"],
+        "//conditions:default": [],
+    }) + [
+        "osusergo",
+        "netgo",
+    ],
+)
+
 erofs_image(
     name = "rootfs",
     files = {
@@ -64,7 +76,7 @@ erofs_image(
         "/kubernetes/bin/kube": "//metropolis/node/kubernetes/hyperkube",
 
         # runsc/gVisor
-        "/containerd/bin/runsc": "@dev_gvisor_gvisor//runsc",
+        "/containerd/bin/runsc": ":runsc",
         "/containerd/bin/containerd-shim-runsc-v1": "@dev_gvisor_gvisor//shim",
 
         # runc

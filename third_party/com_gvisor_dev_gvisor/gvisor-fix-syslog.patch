@@ -1,10 +1,11 @@
-diff -ur dev_gvisor_gvisor.orig/pkg/sentry/kernel/syslog.go dev_gvisor_gvisor/pkg/sentry/kernel/syslog.go
---- dev_gvisor_gvisor.orig/pkg/sentry/kernel/syslog.go	2023-03-22 18:31:40.976045180 +0100
-+++ dev_gvisor_gvisor/pkg/sentry/kernel/syslog.go	2023-03-22 18:40:18.143912568 +0100
-@@ -81,6 +81,11 @@
- 		"Recruiting cron-ies...",
- 		"Verifying that no non-zero bytes made their way into /dev/zero...",
- 		"Accelerating teletypewriter to 9600 baud...",
+diff --git a/pkg/sentry/kernel/syslog.go b/pkg/sentry/kernel/syslog.go
+index 44cb78465..3b728aec3 100644
+--- a/pkg/sentry/kernel/syslog.go
++++ b/pkg/sentry/kernel/syslog.go
+@@ -86,6 +86,11 @@ func (s *syslog) Log() []byte {
+ 		"Asking an AI agent to fix the bugs...",
+ 		"Rewriting the kernel in Rust...",
+ 		"Politicking the oom killer...",
 +		"Supervising the supervisor...",
 +		"Adding more KubernetesWorker nodes...",
 +		"Picking a new name for Metropolis...",
@@ -13,7 +14,7 @@ diff -ur dev_gvisor_gvisor.orig/pkg/sentry/kernel/syslog.go dev_gvisor_gvisor/pk
  	}
  
  	selectMessage := func() string {
-@@ -96,7 +101,7 @@
+@@ -101,7 +106,7 @@ func (s *syslog) Log() []byte {
  
  	const format = "<6>[%11.6f] %s\n"
  
