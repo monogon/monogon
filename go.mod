@@ -51,7 +51,7 @@ require (
 	cloud.google.com/go/storage v1.50.0
 	git.dolansoft.org/dolansoft/k8s-nft-npc v0.0.0-20250227164540-47778d43dcec
 	github.com/adrg/xdg v0.4.0
-	github.com/bazelbuild/rules_go v0.55.1
+	github.com/bazelbuild/rules_go v0.59.0
 	github.com/cavaliergopher/cpio v1.0.1
 	github.com/cenkalti/backoff/v4 v4.3.0
 	github.com/container-storage-interface/spec v1.9.0

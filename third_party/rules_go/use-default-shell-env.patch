@@ -1,0 +1,13 @@
+diff --git a/go/private/rules/binary.bzl b/go/private/rules/binary.bzl
+--- a/go/private/rules/binary.bzl
++++ b/go/private/rules/binary.bzl
+@@ -579,8 +579,9 @@
+             toolchain = None,
+             outputs = [out, ctx.outputs.out_pack],
+             execution_requirements = SUPPORTS_PATH_MAPPING_REQUIREMENT,
+             mnemonic = "GoToolchainBinaryBuild",
++            use_default_shell_env = True,
+         )
+
+     return [DefaultInfo(
+         files = depset([out]),
