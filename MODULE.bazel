@@ -32,7 +32,7 @@ single_version_override(
     patches = [
         "//third_party/gazelle:add-prepatching.patch",
     ],
-    version = "0.44.0",
+    version = "0.47.0",
 )
 
 # rules_rust was split into multiple dependencies. Sadly, this means we have to

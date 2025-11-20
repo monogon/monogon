@@ -8,7 +8,7 @@ buf_proto_lint_test(
     except_rules = [
         "PACKAGE_VERSION_SUFFIX",
     ],
-    protos = [":mkucode_proto"],
+    protos = [":spec_proto"],
     use_rules = [
         "DEFAULT",
         "COMMENTS",
@@ -16,15 +16,15 @@ buf_proto_lint_test(
 )
 
 proto_library(
-    name = "mkucode_proto",
+    name = "spec_proto",
     srcs = ["spec.proto"],
     visibility = ["//visibility:public"],
 )
 
 go_proto_library(
-    name = "mkucode_go_proto",
-    importpath = "source.monogon.dev/osbase/build/mkucode",
-    proto = ":mkucode_proto",
+    name = "spec_go_proto",
+    importpath = "source.monogon.dev/osbase/build/mkucode/spec",
+    proto = ":spec_proto",
     visibility = ["//visibility:public"],
 )
 
@@ -32,12 +32,5 @@ go_library(
     name = "spec",
     embed = [":spec_go_proto"],
     importpath = "source.monogon.dev/osbase/build/mkucode/spec",
-    visibility = ["//visibility:public"],
-)
-
-go_proto_library(
-    name = "spec_go_proto",
-    importpath = "source.monogon.dev/osbase/build/mkucode/spec",
-    proto = ":mkucode_proto",
     visibility = ["//visibility:public"],
 )
