@@ -1,4 +1,4 @@
-load("@io_bazel_rules_go//go:def.bzl", "go_context")
+load("@rules_go//go:def.bzl", "go_context")
 
 # _parse_migrations takes a list of golang-migrate compatible schema files (in
 # the format <timestamp>_some_description_{up,down}.sql) and splits them into
@@ -158,5 +158,5 @@ sqlc_go_library = rule(
             cfg = "exec",
         ),
     },
-    toolchains = ["@io_bazel_rules_go//go:toolchain"],
+    toolchains = ["@rules_go//go:toolchain"],
 )

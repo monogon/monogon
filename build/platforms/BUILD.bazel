@@ -13,7 +13,7 @@ platform(
     ],
     flags = [
         "--@toolchain_cc_mngn//buildmode:static",
-        "--@io_bazel_rules_go//go/config:static",
+        "--@rules_go//go/config:static",
     ],
     visibility = ["//visibility:public"],
 )
@@ -26,7 +26,7 @@ platform(
     ],
     flags = [
         "--@toolchain_cc_mngn//buildmode:static",
-        "--@io_bazel_rules_go//go/config:static",
+        "--@rules_go//go/config:static",
     ],
     visibility = ["//visibility:public"],
 )
@@ -63,6 +63,6 @@ platform(
     },
     flags = [
         "--@toolchain_cc_mngn//buildmode:static",
-        "--@io_bazel_rules_go//go/config:static",
+        "--@rules_go//go/config:static",
     ],
 )

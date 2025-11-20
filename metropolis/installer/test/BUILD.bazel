@@ -1,4 +1,4 @@
-load("@io_bazel_rules_go//go:def.bzl", "go_test")
+load("@rules_go//go:def.bzl", "go_test")
 load("//osbase/build/mkpayload:def.bzl", "efi_unified_kernel_image")
 
 go_test(
@@ -32,7 +32,7 @@ go_test(
         "@com_github_diskfs_go_diskfs//:go-diskfs",
         "@com_github_diskfs_go_diskfs//disk",
         "@com_github_diskfs_go_diskfs//partition/gpt",
-        "@io_bazel_rules_go//go/runfiles",
+        "@rules_go//go/runfiles",
     ],
 )
 

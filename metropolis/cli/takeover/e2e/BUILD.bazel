@@ -1,4 +1,4 @@
-load("@io_bazel_rules_go//go:def.bzl", "go_test")
+load("@rules_go//go:def.bzl", "go_test")
 
 go_test(
     name = "e2e_test",
@@ -25,9 +25,9 @@ go_test(
         "//osbase/fat32",
         "//osbase/structfs",
         "//osbase/test/freeport",
-        "@io_bazel_rules_go//go/runfiles",
         "@org_golang_x_crypto//ssh",
         "@org_golang_x_crypto//ssh/agent",
         "@org_golang_x_sys//unix",
+        "@rules_go//go/runfiles",
     ],
 )

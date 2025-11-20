@@ -22,8 +22,8 @@ test --notest_verbose_timeout_warnings
 build:dbg --compilation_mode=dbg
 
 # Run race config with race detector
-build:race --@io_bazel_rules_go//go/config:race
-build:race --no@io_bazel_rules_go//go/config:pure
+build:race --@rules_go//go/config:race
+build:race --no@rules_go//go/config:pure
 
 # Only download the final result, the intermediate files can stay on the
 # server side.
@@ -38,10 +38,10 @@ build:remote --remote_timeout=360s
 
 # Enable pure by default. Specific go_binary targets which need cgo should set
 # `pure = "off"`.
-build --@io_bazel_rules_go//go/config:pure
+build --@rules_go//go/config:pure
 
 # Force netgo and osusergo
-build --@io_bazel_rules_go//go/config:tags=osusergo,netgo
+build --@rules_go//go/config:tags=osusergo,netgo
 
 # Include platform in output directory name. For each platform we use, a short
 # name should be assigned here, otherwise Bazel uses a hash.
@@ -53,10 +53,10 @@ build --experimental_override_name_platform_in_output_dir=//build/platforms:linu
 build --experimental_override_name_platform_in_output_dir=//build/platforms:uefi_x86_64=uefi-x86_64
 build --experimental_override_name_platform_in_output_dir=//build/platforms:uefi_aarch64=uefi-aarch64
 build --experimental_override_name_platform_in_output_dir=//build/platforms:remote_x86_64=remote-x86_64
-build --experimental_override_name_platform_in_output_dir=@io_bazel_rules_go//go/toolchain:darwin_amd64=go-darwin-amd64
-build --experimental_override_name_platform_in_output_dir=@io_bazel_rules_go//go/toolchain:darwin_arm64=go-darwin-arm64
-build --experimental_override_name_platform_in_output_dir=@io_bazel_rules_go//go/toolchain:windows_amd64=go-windows-amd64
-build --experimental_override_name_platform_in_output_dir=@io_bazel_rules_go//go/toolchain:windows_arm64=go-windows-arm64
+build --experimental_override_name_platform_in_output_dir=@rules_go//go/toolchain:darwin_amd64=go-darwin-amd64
+build --experimental_override_name_platform_in_output_dir=@rules_go//go/toolchain:darwin_arm64=go-darwin-arm64
+build --experimental_override_name_platform_in_output_dir=@rules_go//go/toolchain:windows_amd64=go-windows-amd64
+build --experimental_override_name_platform_in_output_dir=@rules_go//go/toolchain:windows_arm64=go-windows-arm64
 
 # Enable path mapping to improve cache hit rate.
 # Actions in custom rules can opt in with supports-path-mapping.

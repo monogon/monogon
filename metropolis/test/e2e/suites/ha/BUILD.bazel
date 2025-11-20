@@ -1,4 +1,4 @@
-load("@io_bazel_rules_go//go:def.bzl", "go_test")
+load("@rules_go//go:def.bzl", "go_test")
 
 go_test(
     name = "ha_test",
@@ -19,6 +19,6 @@ go_test(
         "//metropolis/test/launch",
         "//metropolis/test/localregistry",
         "//metropolis/test/util",
-        "@io_bazel_rules_go//go/runfiles",
+        "@rules_go//go/runfiles",
     ],
 )

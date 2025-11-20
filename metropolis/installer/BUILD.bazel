@@ -1,4 +1,4 @@
-load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_library")
+load("@rules_go//go:def.bzl", "go_binary", "go_library")
 load("//osbase/build/genproductinfo:defs.bzl", "product_info")
 load("//osbase/build/mkcpio:def.bzl", "node_initramfs")
 load("//osbase/build/mkpayload:def.bzl", "efi_unified_kernel_image")

@@ -1,4 +1,4 @@
-load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+load("@rules_go//go:def.bzl", "go_library", "go_test")
 
 go_library(
     name = "registry",
@@ -34,6 +34,6 @@ go_test(
     deps = [
         "//osbase/oci",
         "@com_github_cenkalti_backoff_v4//:backoff",
-        "@io_bazel_rules_go//go/runfiles",
+        "@rules_go//go/runfiles",
     ],
 )

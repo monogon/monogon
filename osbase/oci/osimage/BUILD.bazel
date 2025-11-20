@@ -1,4 +1,4 @@
-load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+load("@rules_go//go:def.bzl", "go_library", "go_test")
 load("//osbase/build/mkoci:def.bzl", "oci_os_image")
 
 go_library(
@@ -56,6 +56,6 @@ go_test(
         "//osbase/oci/registry",
         "@com_github_cenkalti_backoff_v4//:backoff",
         "@com_github_opencontainers_image_spec//specs-go/v1:specs-go",
-        "@io_bazel_rules_go//go/runfiles",
+        "@rules_go//go/runfiles",
     ],
 )

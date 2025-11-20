@@ -1,4 +1,4 @@
-load("@io_bazel_rules_go//go:def.bzl", "go_test")
+load("@rules_go//go:def.bzl", "go_test")
 
 go_test(
     name = "e2e_test",
@@ -27,10 +27,10 @@ go_test(
         "//osbase/pki",
         "@com_github_cavaliergopher_cpio//:cpio",
         "@com_github_klauspost_compress//zstd",
-        "@io_bazel_rules_go//go/runfiles",
         "@org_golang_google_grpc//:grpc",
         "@org_golang_google_grpc//credentials",
         "@org_golang_google_protobuf//proto",
         "@org_golang_x_sys//unix",
+        "@rules_go//go/runfiles",
     ],
 )

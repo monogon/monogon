@@ -1,6 +1,6 @@
 load("@aspect_bazel_lib//lib:transitions.bzl", "platform_transition_filegroup")
 load("@bazel_skylib//rules:common_settings.bzl", "string_flag")
-load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_library")
+load("@rules_go//go:def.bzl", "go_binary", "go_library")
 load("//build/platforms:def.bzl", "multiplatform_transition_filegroup")
 load(":defs.bzl", "buildkind")
 
@@ -97,7 +97,6 @@ go_library(
         "@com_github_adrg_xdg//:xdg",
         "@com_github_schollz_progressbar_v3//:progressbar",
         "@com_github_spf13_cobra//:cobra",
-        "@io_bazel_rules_go//go/runfiles",
         "@io_k8s_apimachinery//pkg/apis/meta/v1:meta",
         "@io_k8s_client_go//pkg/apis/clientauthentication/v1:clientauthentication",
         "@io_k8s_utils//ptr",
@@ -110,6 +109,7 @@ go_library(
         "@org_golang_x_net//proxy",
         "@org_golang_x_sync//semaphore",
         "@org_golang_x_term//:term",
+        "@rules_go//go/runfiles",
     ],
 )
 
@@ -155,7 +155,7 @@ go_binary(
 
 config_setting(
     name = "race_enabled",
-    flag_values = {"@io_bazel_rules_go//go/config:race": "True"},
+    flag_values = {"@rules_go//go/config:race": "True"},
 )
 
 # This target serves as a test that metroctl can be built for all listed
@@ -166,10 +166,10 @@ multiplatform_transition_filegroup(
     platforms = [
         "//build/platforms:linux_x86_64",
         "//build/platforms:linux_aarch64",
-        "@io_bazel_rules_go//go/toolchain:darwin_amd64",
-        "@io_bazel_rules_go//go/toolchain:darwin_arm64",
-        "@io_bazel_rules_go//go/toolchain:windows_amd64",
-        "@io_bazel_rules_go//go/toolchain:windows_arm64",
+        "@rules_go//go/toolchain:darwin_amd64",
+        "@rules_go//go/toolchain:darwin_arm64",
+        "@rules_go//go/toolchain:windows_amd64",
+        "@rules_go//go/toolchain:windows_arm64",
     ],
     target_compatible_with = select({
         # We can't build this with race enabled because

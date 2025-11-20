@@ -1,4 +1,4 @@
-load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+load("@rules_go//go:def.bzl", "go_library", "go_test")
 load(":def.bzl", "toolchain_library")
 
 toolchain_library(
@@ -6,7 +6,7 @@ toolchain_library(
     importpath = "source.monogon.dev/build/toolbase/gotoolchain",
     visibility = ["//visibility:public"],
     deps = [
-        "@io_bazel_rules_go//go/runfiles:go_default_library",
+        "@rules_go//go/runfiles:go_default_library",
     ],
 )
 

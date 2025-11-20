@@ -1,4 +1,4 @@
-load("@io_bazel_rules_go//go:def.bzl", "go_test")
+load("@rules_go//go:def.bzl", "go_test")
 load(":bringup.bzl", "bringup_test")
 
 bringup_test(variant = "succeeded")
@@ -31,6 +31,6 @@ go_test(
     },
     deps = [
         "//osbase/test/cmd",
-        "@io_bazel_rules_go//go/runfiles",
+        "@rules_go//go/runfiles",
     ],
 )

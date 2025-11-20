@@ -1,4 +1,4 @@
-load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+load("@rules_go//go:def.bzl", "go_library", "go_test")
 
 go_library(
     name = "qcow2",
@@ -17,5 +17,5 @@ go_test(
     x_defs = {
         "xQEMUImgPath": "$(rlocationpath //build/toolchain/toolchain-bundle:qemu-img )",
     },
-    deps = ["@io_bazel_rules_go//go/runfiles"],
+    deps = ["@rules_go//go/runfiles"],
 )

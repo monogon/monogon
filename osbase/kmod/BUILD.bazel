@@ -1,4 +1,4 @@
-load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+load("@rules_go//go:def.bzl", "go_library", "go_test")
 load("//osbase/build/fwprune:def.bzl", "fsspec_linux_firmware")
 load("//osbase/test/ktest:ktest.bzl", "k_test")
 

@@ -1,4 +1,4 @@
-load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+load("@rules_go//go:def.bzl", "go_library", "go_test")
 
 go_library(
     name = "kubernetes",
@@ -42,7 +42,6 @@ go_test(
         "//metropolis/test/launch",
         "//metropolis/test/localregistry",
         "//metropolis/test/util",
-        "@io_bazel_rules_go//go/runfiles",
         "@io_k8s_api//core/v1:core",
         "@io_k8s_api//networking/v1:networking",
         "@io_k8s_apimachinery//pkg/api/errors",
@@ -52,5 +51,6 @@ go_test(
         "@io_k8s_kubernetes//pkg/api/v1/pod",
         "@io_k8s_utils//ptr",
         "@org_golang_google_protobuf//types/known/fieldmaskpb",
+        "@rules_go//go/runfiles",
     ],
 )

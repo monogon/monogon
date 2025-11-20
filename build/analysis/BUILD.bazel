@@ -1,5 +1,5 @@
 load("@bazel_skylib//rules:write_file.bzl", "write_file")
-load("@io_bazel_rules_go//go:def.bzl", "nogo")
+load("@rules_go//go:def.bzl", "nogo")
 load("//build/analysis/staticcheck:def.bzl", ALL_STATICCHECK_ANALYZERS = "ANALYZER_NAMES", filtered_staticcheck_analyzers = "filtered_analyzers")
 load(":def.bzl", "build_nogo_config", "exclude_from_checks", "exclude_from_external")
 

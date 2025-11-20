@@ -1,4 +1,4 @@
-load("@io_bazel_rules_go//go:def.bzl", "go_library")
+load("@rules_go//go:def.bzl", "go_library")
 
 go_library(
     name = "productinfo",
@@ -13,6 +13,6 @@ go_library(
         "//version",
         "//version/spec",
         "@com_github_coreos_go_semver//semver",
-        "@io_bazel_rules_go//go/runfiles",
+        "@rules_go//go/runfiles",
     ],
 )

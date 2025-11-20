@@ -13,7 +13,7 @@ In an empty directory (eg. monogon/foo/bar/model), create:
  - A `BUILD.bazel` file containing:
 
 ```
-load("@io_bazel_rules_go//go:def.bzl", "go_library")
+load("@rules_go//go:def.bzl", "go_library")
 load("//build/sqlc:sqlc.bzl", "sqlc_go_library")
 
 sqlc_go_library(

@@ -1,4 +1,4 @@
-load("@io_bazel_rules_go//go:def.bzl", "GoSource", "go_context")
+load("@rules_go//go:def.bzl", "GoSource", "go_context")
 
 # This implements the toolchain_library rule, which is used to generate a
 # rules_go compatible go_library-style target which contains toolchain.go.in
@@ -63,8 +63,8 @@ toolchain_library = rule(
             default = ":toolchain.go.in",
         ),
         "_go_context_data": attr.label(
-            default = "@io_bazel_rules_go//:go_context_data",
+            default = "@rules_go//:go_context_data",
         ),
     },
-    toolchains = ["@io_bazel_rules_go//go:toolchain"],
+    toolchains = ["@rules_go//go:toolchain"],
 )

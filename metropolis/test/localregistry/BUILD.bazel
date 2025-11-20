@@ -1,4 +1,4 @@
-load("@io_bazel_rules_go//go:def.bzl", "go_library")
+load("@rules_go//go:def.bzl", "go_library")
 
 go_library(
     name = "localregistry",
@@ -9,7 +9,7 @@ go_library(
         "//metropolis/test/localregistry/spec",
         "//osbase/oci",
         "//osbase/oci/registry",
-        "@io_bazel_rules_go//go/runfiles",
         "@org_golang_google_protobuf//encoding/prototext",
+        "@rules_go//go/runfiles",
     ],
 )
