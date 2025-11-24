@@ -6,6 +6,7 @@ package gofmt
 import (
 	"bytes"
 	"os"
+	"strings"
 
 	"github.com/golangci/gofmt/gofmt"
 	"golang.org/x/tools/go/analysis"
@@ -23,6 +24,15 @@ var Analyzer = &analysis.Analyzer{
 			}
 
 			fileName := pass.Fset.PositionFor(f.Pos(), true).Filename
+
+			// Unlike our other analyzers, this one is special.
+			// It operates on the raw file, so we need to skip
+			// non-Go files that would otherwise be a no-op
+			// with an empty AST.
+			if !strings.HasSuffix(fileName, ".go") {
+				continue
+			}
+
 			src, err := os.ReadFile(fileName)
 			if err != nil {
 				return nil, err
